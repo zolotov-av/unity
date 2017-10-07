@@ -352,7 +352,7 @@ public class PlayerScript3 : MonoBehaviour {
 	public void Jump(float v)
 	{
 		jumping = true;
-		rb.AddForce(0f, 800f, 0f, ForceMode.Impulse);
+		rb.AddForce(0f, 230f, 0f, ForceMode.Impulse);
 		//rb.AddForce(0f, 300f, 700f, ForceMode.Impulse);
 		//rb.AddForce(transform.forward * speed, ForceMode.VelocityChange);
 		animator.SetBool("Falling", true);
