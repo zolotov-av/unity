@@ -64,7 +64,9 @@ public class PlayerScript3 : MonoBehaviour {
         }
     }
 	
-	/// sphere cast down just beyond the bottom of the capsule to see if the capsule is colliding round the bottom
+	/**
+	* Проверка стоит ли персонаж на земле
+	*/
 	private void GroundCheck()
 	{
 		const float gap = 0.05f;
@@ -103,37 +105,6 @@ public class PlayerScript3 : MonoBehaviour {
 			}
 		}
 	}
-	
-	/*
-	/// sphere cast down just beyond the bottom of the capsule to see if the capsule is colliding round the bottom
-        //    public float groundCheckDistance = 0.01f; // distance for checking if the controller is grounded ( 0.01f seems to work best for this )
-        //    public float stickToGroundHelperDistance = 0.5f; // stops the character
-        //    public float slowDownRate = 20f; // rate at which the controller comes to a stop when there is no input
-        //    public bool airControl; // can the user control the direction that is being moved in the air
-        //    [Tooltip("set it to 0.1 or more if you get stuck in wall")]
-        //    public float shellOffset; //reduce the radius by that ratio to avoid getting stuck in wall (a value of 0.1f is nice)
-	private void GroundCheck()
-	{
-		m_PreviouslyGrounded = m_IsGrounded;
-		RaycastHit hitInfo;
-		if (Physics.SphereCast(transform.position, m_Capsule.radius * (1.0f - advancedSettings.shellOffset), Vector3.down, out hitInfo,
-							   ((m_Capsule.height/2f) - m_Capsule.radius) + advancedSettings.groundCheckDistance, Physics.AllLayers, QueryTriggerInteraction.Ignore))
-		{
-			m_IsGrounded = true;
-			m_GroundContactNormal = hitInfo.normal;
-		}
-		else
-		{
-			m_IsGrounded = false;
-			m_GroundContactNormal = Vector3.up;
-		}
-		if (!m_PreviouslyGrounded && m_IsGrounded && m_Jumping)
-		{
-			m_Jumping = false;
-		}
-	}
-	*/
-	
 	
 	public void lockCursor(bool state)
 	{
