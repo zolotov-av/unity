@@ -2,15 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Nanosoft;
 
-public class PlayerScript3 : MonoBehaviour {
+namespace Nanosoft
+{
 
+/**
+ * Контроллер управления персонажем в стиле Готики (первой части)
+ */
+public class GothicController: MonoBehaviour
+{
 	public GameObject playerCamera;
 	
     public Text playerDbg;
 	
-	private CameraScript cam;
+	private Nanosoft.CameraScript cam;
 	private Animator animator;
 	private Rigidbody rb;
     
@@ -26,10 +31,10 @@ public class PlayerScript3 : MonoBehaviour {
 	private bool jumping = false;
 	
 	/**
-	* 0 - idle (обычная позиция)
-	* 1 - run (непрерывное движение)
-	* 2 - battle stance (боевая стойка)
-	*/
+	 * 0 - idle (обычная позиция)
+	 * 1 - run (непрерывное движение)
+	 * 2 - battle stance (боевая стойка)
+	 */
 	private int state = 0;
 	
 	private float speed = 0f;
@@ -42,8 +47,6 @@ public class PlayerScript3 : MonoBehaviour {
 	private bool PreviouslyGrounded;
 	private bool IsGrounded;
 	private CapsuleCollider m_Capsule;
-	public GameObject sphereObj;
-	private SphereCollider sphere;
 	private Vector3 moveXZ;
 	
     protected string coord(Vector3 v)
@@ -66,32 +69,12 @@ public class PlayerScript3 : MonoBehaviour {
     }
 	
 	/**
-	* Проверка стоит ли персонаж на земле
-	*/
+	 * Проверка стоит ли персонаж на земле
+	 */
 	private void GroundCheck()
 	{
-		const float gap = 0.05f;
-		
 		PreviouslyGrounded = IsGrounded;
-		RaycastHit hitInfo;
-		
-		float s_radius = m_Capsule.radius - gap;
-		Vector3 s_position = transform.position + Vector3.up * (s_radius + gap);
-		
-		sphere.radius = s_radius; // debuging
-		sphereObj.transform.position = s_position; // debuging
-		
-		if (Physics.SphereCast(s_position, s_radius, Vector3.down, out hitInfo,
-							   2f*gap, Physics.AllLayers, QueryTriggerInteraction.Ignore))
-		{
-			IsGrounded = true;
-			//GroundContactNormal = hitInfo.normal;
-		}
-		else
-		{
-			IsGrounded = false;
-			//GroundContactNormal = Vector3.up;
-		}
+		IsGrounded = ControllerUtils.GroundCheck(transform.position, m_Capsule);
 		
 		if ( PreviouslyGrounded )
 		{
@@ -223,14 +206,19 @@ public class PlayerScript3 : MonoBehaviour {
 		}
 	}
 	
-	// Use this for initialization
-	protected virtual void Start () {
+	protected virtual void Start()
+	{
 		cursorLocked = false;
-		cam = playerCamera.GetComponent<CameraScript>();
+		cam = playerCamera.GetComponent<Nanosoft.CameraScript>();
 		animator = GetComponent<Animator>();
 		rb = GetComponent<Rigidbody>();
 		m_Capsule = GetComponent<CapsuleCollider>();
-		sphere = sphereObj.GetComponent<SphereCollider>();
+		
+		if ( !playerDbg )
+		{
+			var obj = GameObject.FindWithTag("PlayerDebug");
+			if ( obj ) playerDbg = obj.GetComponent<Text>();
+		}
 	}
 	
     protected virtual void FixedUpdate()
@@ -334,4 +322,7 @@ public class PlayerScript3 : MonoBehaviour {
 	{
 		attack = false;
 	}
-}
+	
+} // class GothicController
+
+} // namespace Nanosoft

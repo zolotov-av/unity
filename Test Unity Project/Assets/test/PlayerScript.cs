@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Nanosoft;
 
 public class PlayerScript : MonoBehaviour {
 
-	public GameObject camera;
+	public GameObject playerCamera;
 	
     public Text playerDbg;
 	
@@ -103,7 +104,7 @@ public class PlayerScript : MonoBehaviour {
 	// Use this for initialization
 	protected virtual void Start () {
 		cursorLocked = false;
-		cam = camera.GetComponent<CameraScript>();
+		cam = playerCamera.GetComponent<CameraScript>();
 		animator = GetComponent<Animator>();
 		rb = GetComponent<Rigidbody>();
 	}
