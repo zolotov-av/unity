@@ -21,6 +21,7 @@ public class DumbController: BaseController
 	private CameraScript cam;
 	private Animator animator;
 	private Rigidbody rb;
+	private bool freeCamera = false;
 	
 	private const string rotateCameraXInput = "Mouse X";
 	private const string rotateCameraYInput = "Mouse Y";
@@ -31,7 +32,42 @@ public class DumbController: BaseController
 	
 	public void UpdateOptions(float rotateDelta)
 	{
-		transform.Rotate(Vector3.up * rotateDelta * 3);
+		//transform.Rotate(Vector3.up * rotateDelta * 3);
+		
+		bool wasFree = freeCamera;
+		freeCamera = Input.GetMouseButton(0);
+		if ( freeCamera )
+		{
+			if ( !wasFree ) cam.SetMode(CameraScript.FreeCamera);
+			Quaternion rot = Quaternion.Euler(0, rotateDelta * 3, 0);
+			cam.Rotate(rot);
+		}
+		else
+		{
+			if ( wasFree )
+			{
+				cam.SetMode(CameraScript.FollowCamera);
+				transform.rotation = cam.GetRotation();
+			}
+			transform.Rotate(Vector3.up * rotateDelta * 3);
+			cam.SetRotation(transform.rotation);
+		}
+		
+		
+		//return;
+		
+		/*
+		
+		rotation2 *= rot;
+		if ( freeCamera )
+		{
+			
+		}
+		else
+		{
+			transform.rotation *= rot;
+		}
+		*/
 	}
 	
 	protected void handleMovement()
@@ -46,6 +82,7 @@ public class DumbController: BaseController
 		cam = playerCamera.GetComponent<CameraScript>();
 		animator = GetComponent<Animator>();
 		rb = GetComponent<Rigidbody>();
+		cam.SetRotation(transform.rotation);
 	}
 	
 	protected virtual void FixedUpdate()
@@ -78,7 +115,7 @@ public class DumbController: BaseController
 			
 			if ( Input.GetMouseButtonDown(0) )
 			{
-				animator.SetTrigger("attack");
+				//animator.SetTrigger("attack");
 			}
 			
 			if ( Input.GetKeyDown(KeyCode.Escape) )

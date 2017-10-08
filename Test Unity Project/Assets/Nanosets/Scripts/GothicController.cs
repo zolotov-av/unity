@@ -236,7 +236,7 @@ public class GothicController: MonoBehaviour
 				if ( !jumping )
 				{
 					moveXZ = transform.forward * speedV + transform.right * speedH;
-					if ( Input.GetKeyDown("space") )
+					if ( Input.GetKey("space") )
 					{
 						animator.SetTrigger("Jump");
 					}

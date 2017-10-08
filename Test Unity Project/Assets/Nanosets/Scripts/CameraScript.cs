@@ -13,6 +13,9 @@ namespace Nanosoft
  */
 public class CameraScript: MonoBehaviour {
 
+	public const int FollowCamera = 0;
+	public const int FreeCamera = 1;
+	
     public GameObject target;
     public Text camdbg;
     
@@ -23,11 +26,14 @@ public class CameraScript: MonoBehaviour {
 
     private float camAngle = 0f;
     private float distance = 0f;
+	private Quaternion rotation;
+	private int mode = FollowCamera;
     
     private const float angleSensitivity = 3f;
     private const float minAngle = -40f;
     private const float maxAngle = 80f;
-
+	
+	
     #region Utils
 
     protected string coord(Vector3 v)
@@ -75,6 +81,26 @@ public class CameraScript: MonoBehaviour {
         camAngle -= angleDelta * angleSensitivity;
 		camAngle = ClampAngle(camAngle, minAngle, maxAngle);
 	}
+	
+	public Quaternion GetRotation()
+	{
+		return new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+	}
+	
+	public void SetRotation(Quaternion rot)
+	{
+		rotation.Set(rot.x, rot.y, rot.z, rot.w);
+	}
+	
+	public void SetMode(int m)
+	{
+		mode = m;
+	}
+	
+	public void Rotate(Quaternion rot)
+	{
+		rotation *= rot;
+	}
 
     // Update is called once per frame
     protected virtual void LateUpdate()
@@ -82,8 +108,19 @@ public class CameraScript: MonoBehaviour {
         Vector3 tp = target.transform.position + target.transform.up * height;
 
         float rad = camAngle * Mathf.PI / 180;
-        Vector3 cv = target.transform.up * (Mathf.Sin(rad) * distance);
-        Vector3 sv = target.transform.forward * (-Mathf.Cos(rad) * distance);
+		Vector3 up, forward;
+		if ( mode == FollowCamera )
+		{
+			up = target.transform.up;
+			forward = target.transform.forward;
+		}
+		else
+		{
+			up = rotation * Vector3.up;
+			forward = rotation * Vector3.forward;
+		}
+        Vector3 cv = up * (Mathf.Sin(rad) * distance);
+        Vector3 sv = forward * (-Mathf.Cos(rad) * distance);
         transform.position = tp + cv + sv;
 
         transform.LookAt(tp);
