@@ -18,6 +18,7 @@ public class CameraScript: MonoBehaviour {
 	
     public GameObject target;
     public Text camdbg;
+	public bool singleton = false;
     
     [Header("Camera Settings")]
     public float height = 1.4f;
@@ -33,6 +34,7 @@ public class CameraScript: MonoBehaviour {
     private const float minAngle = -40f;
     private const float maxAngle = 80f;
 	
+	private static GameObject instance;
 	
     #region Utils
 
@@ -61,7 +63,21 @@ public class CameraScript: MonoBehaviour {
     }
 
     #endregion
-
+	
+	void Awake()
+	{
+		if ( singleton )
+		{
+			if ( instance )
+			{
+				Destroy(gameObject);
+				return;
+			}
+			
+			instance = gameObject;
+		}
+	}
+	
     void Start()
 	{
 		distance = startDistance;

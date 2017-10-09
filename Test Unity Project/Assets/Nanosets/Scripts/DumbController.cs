@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Nanosoft;
 
 namespace Nanosoft
 {
@@ -17,6 +16,9 @@ public class DumbController: BaseController
 	
 	public GameObject playerCamera;
 	public float walkSpeed = 2f;
+	public bool singleton = false;
+	
+	private static GameObject instance;
 	
 	private CameraScript cam;
 	private Animator animator;
@@ -75,6 +77,20 @@ public class DumbController: BaseController
 		speed = Input.GetAxis(verticallInput) * walkSpeed;
 		
 		animator.SetBool("walk", speed > 0.01f);
+	}
+	
+	void Awake()
+	{
+		if ( singleton )
+		{
+			if ( instance )
+			{
+				Destroy(gameObject);
+				return;
+			}
+			
+			instance = gameObject;
+		}
 	}
 	
 	protected virtual void Start()
