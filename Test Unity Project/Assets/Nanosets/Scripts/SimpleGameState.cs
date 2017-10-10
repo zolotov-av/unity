@@ -29,6 +29,11 @@ public class SimpleGameState: GameStateBehaviour
 	public GameObject cameraPrefab;
 	
 	/**
+	 * Ссылка на префаб канвы пользовательского интерфейса
+	 */
+	public GameObject canvasPrefab;
+	
+	/**
 	 * Ссылка на персонажа (загруженный экземляр)
 	 */
 	public GameObject player;
@@ -51,6 +56,11 @@ public class SimpleGameState: GameStateBehaviour
 	public CameraScript cameraCtl;
 	
 	/**
+	 * Канва пользовательского интерфейса (загруженный экземляр)
+	 */
+	public GameObject canvas;
+	
+	/**
 	 * Событие инициализации
 	 *
 	 * Пользователь должен переопределить этот метод и реализовать в нём
@@ -68,9 +78,14 @@ public class SimpleGameState: GameStateBehaviour
 		playerCamera = Instantiate(cameraPrefab);
 		playerCamera.name = cameraPrefab.name;
 		
+		// создаем канву
+		canvas = Instantiate(canvasPrefab);
+		canvas.name = canvasPrefab.name;
+		
 		// персонаж и камера не должны удаляться при переключении сцены
 		DontDestroyOnLoad(player);
 		DontDestroyOnLoad(playerCamera);
+		DontDestroyOnLoad(canvas);
 		
 		playerCtl = player.GetComponent<DumbController>();
 		playerCtl.playerCamera = playerCamera;
