@@ -10,7 +10,7 @@ namespace Nanosoft
  */
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
-public class BaseController: MonoBehaviour
+public class PlayerController: MonoBehaviour
 {
 	
 	/**
@@ -46,6 +46,6 @@ public class BaseController: MonoBehaviour
 		}
 	}
 	
-} // class BaseController
+} // class PlayerController
 
 } // namespace Nanosoft

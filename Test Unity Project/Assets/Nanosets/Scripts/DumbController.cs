@@ -11,7 +11,7 @@ namespace Nanosoft
 *
 * Тривиальный контроллер приемущественно для неигровых персонажей
 */
-public class DumbController: BaseController
+public class DumbController: PlayerController
 {
 	
 	public GameObject playerCamera;
