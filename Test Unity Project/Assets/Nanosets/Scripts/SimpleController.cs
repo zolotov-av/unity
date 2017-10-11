@@ -59,6 +59,11 @@ public class SimpleController: PlayerController
 	private bool rotatePlayer = false;
 	
 	/**
+	 * Текущая скорость вращения камеры/персонажа (градус/сек)
+	 */
+	private float rotationSpeed = 0f;
+	
+	/**
 	 * Режим бега
 	 *
 	 * В этом режиме персонаж всё время бежит вперед, даже если игрок
@@ -82,30 +87,8 @@ public class SimpleController: PlayerController
 	private const string rotateCameraYInput = "Mouse Y";
 	private const string horizontalInput = "Horizontal";
 	private const string verticallInput = "Vertical";
-	
-	public void UpdateOptions(float rotateDelta)
-	{
-		//transform.Rotate(Vector3.up * rotateDelta * 3);
-		
-		bool wasFree = freeCamera;
-		freeCamera = Input.GetMouseButton(0);
-		if ( freeCamera )
-		{
-			if ( !wasFree ) cameraCtl.SetMode(CameraScript.FreeCamera);
-			Quaternion rot = Quaternion.Euler(0, rotateDelta * 3, 0);
-			cameraCtl.Rotate(rot);
-		}
-		else
-		{
-			if ( wasFree )
-			{
-				cameraCtl.SetMode(CameraScript.FollowCamera);
-				transform.rotation = cameraCtl.GetRotation();
-			}
-			transform.Rotate(Vector3.up * rotateDelta * 3);
-			cameraCtl.SetRotation(transform.rotation);
-		}
-	}
+	private const float rotateSensitivity = 300f;
+	private const float maxRotationSpeed = 360f;
 	
 	/**
 	 * Обработка ввода движения
@@ -150,32 +133,58 @@ public class SimpleController: PlayerController
 		animator.SetBool("walk", velocity > 0.01f);
 	}
 	
-	void Start()
+	/**
+	 * Обработка вращения персонажа/камеры
+	 */
+	protected void handleRotation()
 	{
-		cameraCtl = playerCamera.GetComponent<CameraScript>();
-		cameraCtl.SetRotation(transform.rotation);
+		var angleDelta = cursorLocked ? Input.GetAxis(rotateCameraYInput) : 0f;
+		var distanceDelta = Input.GetAxis("Camera Distance");
+		cameraCtl.UpdateOptions(distanceDelta, angleDelta);
 		
-		animator = GetComponent<Animator>();
-		rb = GetComponent<Rigidbody>();
-	}
-	
-	void FixedUpdate()
-	{
 		if ( cursorLocked )
 		{
-			var rotateDelta = Input.GetAxis(rotateCameraXInput);
-			var angleDelta = Input.GetAxis(rotateCameraYInput);
-			var distanceDelta = Input.GetAxis("Camera Distance");
-
-			UpdateOptions(rotateDelta);
-			cameraCtl.UpdateOptions(distanceDelta, angleDelta);
+			var rotateDelta = Input.GetAxis(rotateCameraXInput) * rotateSensitivity;
+			rotationSpeed = Mathf.Clamp(rotateDelta, -maxRotationSpeed, maxRotationSpeed);
+		}
+		else
+		{
+			rotationSpeed = 0f;
 		}
 		
-		Vector3 move = transform.TransformDirection(localVelocity);
-		rb.MovePosition(transform.position + move * Time.deltaTime);
+		if ( cursorLocked )
+		{
+			// TODO
+			// 
+			// реализовать плавное возвращение в режим следования
+			// либо персонаж должен плавно развернуться по направлению камеры,
+			// либо камера должна плавно развернуться по направлению персонажа
+			
+			bool wasFree = freeCamera;
+			freeCamera = Input.GetMouseButton(0);
+			if ( freeCamera )
+			{
+				if ( !wasFree )
+				{
+					cameraCtl.SetMode(CameraScript.FreeCamera);
+					cameraCtl.SetRotation(transform.rotation);
+				}
+			}
+			else
+			{
+				if ( wasFree )
+				{
+					cameraCtl.SetMode(CameraScript.FollowCamera);
+					transform.rotation = cameraCtl.GetRotation();
+				}
+			}
+		}
 	}
 	
-	void Update()
+	/**
+	 * Обработка ввода
+	 */
+	protected void handleInput()
 	{
 		// нажали левую кнопку мыши
 		if ( Input.GetMouseButtonDown(0) )
@@ -229,7 +238,41 @@ public class SimpleController: PlayerController
 			lockCursor(false);
 		}
 		
+		handleRotation();
 		handleMovement();
+	}
+	
+	void Start()
+	{
+		cameraCtl = playerCamera.GetComponent<CameraScript>();
+		cameraCtl.SetRotation(transform.rotation);
+		
+		animator = GetComponent<Animator>();
+		rb = GetComponent<Rigidbody>();
+	}
+	
+	void FixedUpdate()
+	{
+		if ( rotateCamera )
+		{
+			Quaternion rot = Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
+			cameraCtl.Rotate(rot);
+		}
+		
+		if ( rotatePlayer )
+		{
+			//Quaternion rot = Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
+			//transform.rotation *= rot;
+			transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
+		}
+		
+		Vector3 move = transform.TransformDirection(localVelocity);
+		rb.MovePosition(transform.position + move * Time.deltaTime);
+	}
+	
+	void Update()
+	{
+		handleInput();
 	}
 
 } // class SimpleController
