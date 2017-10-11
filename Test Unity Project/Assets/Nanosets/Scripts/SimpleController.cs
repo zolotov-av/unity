@@ -7,11 +7,13 @@ namespace Nanosoft
 {
 
 /**
-* Тупой контроллер управления персонажем
-*
-* Тривиальный контроллер приемущественно для неигровых персонажей
-*/
-public class DumbController: PlayerController
+ * Простой контроллер управления персонажем
+ *
+ * Данный контроллер содержит минимум функций, минимум анимаций и позволит
+ * управлять почти любой моделью персонажа. Для анимации персонажа вам
+ * потребуется всего 3-4 анимации (стоит, бежит, атака, падение)
+ */
+public class SimpleController: PlayerController
 {
 	
 	public GameObject playerCamera;
@@ -141,6 +143,6 @@ public class DumbController: PlayerController
 		}
 	}
 
-} // class DumbController
+} // class SimpleController
 
 } // namespace Nanosoft

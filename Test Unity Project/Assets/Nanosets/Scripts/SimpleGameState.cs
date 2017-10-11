@@ -41,7 +41,7 @@ public class SimpleGameState: GameStateBehaviour
 	/**
 	 * Ссылка на контроллер персонажа
 	 */
-	public DumbController playerCtl;
+	public SimpleController playerCtl;
 	
 	/**
 	 * Ссылка на камеру
@@ -87,7 +87,7 @@ public class SimpleGameState: GameStateBehaviour
 		DontDestroyOnLoad(playerCamera);
 		DontDestroyOnLoad(canvas);
 		
-		playerCtl = player.GetComponent<DumbController>();
+		playerCtl = player.GetComponent<SimpleController>();
 		playerCtl.playerCamera = playerCamera;
 		
 		cameraCtl = playerCamera.GetComponent<CameraScript>();

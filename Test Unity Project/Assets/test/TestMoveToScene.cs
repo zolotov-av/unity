@@ -40,7 +40,7 @@ public class TestMoveToScene: MonoBehaviour
 	/**
 	 * контроллер персонажа
 	 */
-	private DumbController controller;
+	private SimpleController controller;
 	
 	/**
 	 * Обработчик триггера, тут мы сохраняем ссылку на персонажа (и нужные ему
@@ -55,7 +55,7 @@ public class TestMoveToScene: MonoBehaviour
 		
 		// получим ссылку на скрипт, за одно проверим, это наш персожан
 		// или что-то другое врезалось в триггер?
-		controller = player.GetComponent<DumbController>();
+		controller = player.GetComponent<SimpleController>();
 		if ( !controller )
 		{
 			// у объекта нет нужного нам контроллера, значит это скорее
