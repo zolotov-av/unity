@@ -37,29 +37,84 @@ public class GothicController: PlayerController
 	private string horizontalInput = "Horizontal";
 	private string verticallInput = "Vertical";
 	
-	private bool run = false; // непрерывное движение
-	private bool attack = false; // производиться атака
-	private bool running = false; // бег
+	/**
+	 * Режим бега
+	 *
+	 * В этом режиме персонаж всё время бежит вперед, даже если игрок
+	 * не нажимает клавиши движения
+	 */
+	private bool run = false;
+	
+	/**
+	 * Режим ускорения
+	 *
+	 * В обычном режиме (sprint=false) персонаж бегает/ходит со скоростью
+	 * заданной параметром normalSpeed, в режиме ускорения (sprint=true)
+	 * персонаж бежит со скоростью заданной параметром sprintSpeed
+	 */
+	private bool sprint = false;
+	
+	/**
+	 * Состояние атаки
+	 */
+	private bool attack = false;
+	
+	/**
+	 * Состояние прыжка
+	 */
 	private bool jumping = false;
 	
 	/**
-	 * 0 - idle (обычная позиция)
-	 * 1 - run (непрерывное движение)
-	 * 2 - battle stance (боевая стойка)
+	 * Состояние падения
+	 */
+	private bool falling = false;
+	
+	/**
+	 * 0 - normal (обычная позиция)
+	 * 1 - battle stance (боевая стойка)
 	 */
 	private int state = 0;
+	public const int normalState = 0;
+	public const int battleState = 1;
 	
-	private float speed = 0f;
-	private float speedH = 0f;
-	private float speedV = 0f;
+	/**
+	 * Текущая скорость персонажа (с которой персонаж движется в данный момент)
+	 */
+	private float velocity = 0f;
 	
-	private float walkSpeed = 2f;
-	private float runSpeed = 5f;
+	/**
+	 * Вектор скорости персонажа в локальных координатах
+	 */
+	private Vector3 localVelocity;
 	
-	private bool PreviouslyGrounded;
-	private bool IsGrounded;
-	private CapsuleCollider m_Capsule;
+	/**
+	 * Вектор движения персонажа в локальных координатах
+	 *
+	 * В этой переменной фиксируется скорость (localVelocity) персонажа
+	 * в момент падения или прыжка. Пока персонаж прыгает или падает, игрок
+	 * не может изменить ни направление ни скорость.
+	 */
 	private Vector3 moveXZ;
+	
+	/**
+	 * Скрость обычного бега/ходьбы
+	 */
+	public float normalSpeed = 3f;
+	
+	/**
+	 * Скрость быстрого бега
+	 */
+	public float sprintSpeed = 5f;
+	
+	/**
+	 * Флаг стоит ли персонаж на земле или падает/прыгает
+	 */
+	private bool IsGrounded;
+	
+	/**
+	 * Ссылка на коллайдер (капсула)
+	 */
+	private CapsuleCollider m_Capsule;
 	
 	protected string coord(Vector3 v)
 	{
@@ -73,7 +128,7 @@ public class GothicController: PlayerController
 			playerDbg.text = "v22\n" +
 				"PlayerPos: " + coord(transform.position) + "\n" +
 				"Run: " + (run ? "on" : "off") + "\n" +
-				"Speed: " +  string.Format("{0:0.00}", speed) + "\n" +
+				"Velocity: " +  string.Format("{0:0.00}", velocity) + "\n" +
 				"State: " + state.ToString() + "\n" +
 				"IsGrounded: " + (IsGrounded ? "yes" : "no");
 		}
@@ -84,26 +139,26 @@ public class GothicController: PlayerController
 	 */
 	private void GroundCheck()
 	{
-		PreviouslyGrounded = IsGrounded;
+		bool PreviouslyGrounded = IsGrounded;
 		IsGrounded = ControllerUtils.GroundCheck(transform.position, m_Capsule);
 		
 		if ( PreviouslyGrounded )
 		{
-			if ( !IsGrounded ) animator.SetBool("Falling", true);
+			if ( !IsGrounded )
+			{
+				falling = true;
+				animator.SetBool("Falling", true);
+			}
 		}
 		else
 		{
 			if ( IsGrounded )
 			{
-				animator.SetBool("Falling", false);
+				falling = false;
 				jumping = false;
+				animator.SetBool("Falling", false);
 			}
 		}
-	}
-	
-	public void UpdateOptions(float rotateDelta)
-	{
-		transform.Rotate(Vector3.up * rotateDelta * 3);
 	}
 	
 	/**
@@ -111,49 +166,62 @@ public class GothicController: PlayerController
 	 */
 	protected void handleMovement()
 	{
+		// включение режима ускорения
+		sprint = Input.GetKey("left shift");
+		
+		// включение/выключение режима непрерывного бега
 		if ( Input.GetButtonDown("Run") )
 		{
 			run = ! run;
 		}
 		
-		speedH = Input.GetAxis(horizontalInput);
-		speedV = Input.GetAxis(verticallInput);
-		speed = Mathf.Sqrt(speedH*speedH + speedV*speedV);
+		// прочитаем ввод направления движения
+		var inputV = Input.GetAxis(verticallInput);
+		var inputH = Input.GetAxis(horizontalInput);
 		
-		if ( speed > 1f )
+		// нормализуем длину вектора, чтобы он был не больше заданной скорости
+		var speed = sprint ? sprintSpeed : normalSpeed;
+		var length = Mathf.Sqrt( inputH * inputH + inputV * inputV );
+		if ( length > 0.01f )
 		{
-			speedH /= speed;
-			speedV /= speed;
-			speed = 1f;
-		}
-		
-		if ( speed > 0.01f )
-		{
+			velocity = speed * Mathf.Clamp(length, 0f, 1f);
+			var scale = velocity / length;
+			localVelocity.x = inputH * scale;
+			localVelocity.y = 0f;
+			localVelocity.z = inputV * scale;
+			
+			// если игрок нажал клавиши движения, то сбрасываем режим бега
 			run = false;
-		}
-		
-		if ( run )
-		{
-			speed = speedV = 1f;
-			speedH = 0f;
-		}
-		
-		if ( running )
-		{
-			speed *= runSpeed;
-			speedH *= runSpeed;
-			speedV *= runSpeed;
 		}
 		else
 		{
-			speed *= walkSpeed;
-			speedH *= walkSpeed;
-			speedV *= walkSpeed;
+			if ( run )
+			{
+				velocity = speed;
+				localVelocity.x = 0f;
+				localVelocity.y = 0f;
+				localVelocity.z = speed;
+			}
+			else
+			{
+				velocity = 0f;
+				localVelocity.x = 0f;
+				localVelocity.y = 0f;
+				localVelocity.z = 0f;
+			}
 		}
 		
-		animator.SetFloat("speed", speed);
-		animator.SetFloat("speedH", speedH);
-		animator.SetFloat("speedV", speedV);
+		//
+		if ( !falling && !jumping )
+		{
+			if ( Input.GetKey("space") )
+			{
+				jumping = true;
+				animator.SetTrigger("Jump");
+			}
+		}
+		
+		animator.SetFloat("speed", velocity);
 	}
 	
 	/**
@@ -161,43 +229,148 @@ public class GothicController: PlayerController
 	 */
 	protected void handleBattle()
 	{
-		if ( ! attack )
+		// если прошлая атакая еще не закончилась или если мы падаем,
+		// то мы не можем начать новую атаку
+		if ( attack || falling )
 		{
-			animator.SetFloat("speed", 0f);
-			animator.SetFloat("speedH", 0f);
-			animator.SetFloat("speedV", 0f);
-			run = false;
+			return;
+		}
+		
+		velocity = 0f;
+		localVelocity.x = 0f;
+		localVelocity.y = 0f;
+		localVelocity.z = 0f;
+		
+		if ( Input.GetKey("w") )
+		{
+			animator.SetTrigger("ForwardAttack");
+			attack = true;
+			return;
+		}
+		
+		if ( Input.GetKey("s") )
+		{
+			animator.SetTrigger("RollBackward");
+			attack = true;
+			return;
+		}
+		
+		if ( Input.GetKey("q") )
+		{
+			animator.SetTrigger("RollLeft");
+			attack = true;
+			return;
+		}
+		
+		if ( Input.GetKey("e") )
+		{
+			animator.SetTrigger("RollRight");
+			attack = true;
+			return;
+		}
+		
+		if ( Input.GetKey("a") )
+		{
+			animator.SetTrigger("LeftAttack");
+			attack = true;
+			return;
+		}
+		
+		if ( Input.GetKey("d") )
+		{
+			animator.SetTrigger("RightAttack");
+			attack = true;
+			return;
+		}
+	}
+	
+	/**
+	 * Обработка вращения персонажа/камеры
+	 */
+	protected void handleRotation()
+	{
+		if ( cursorLocked )
+		{
+			var rotateDelta = Input.GetAxis(rotateCameraXInput);
+			var angleDelta = Input.GetAxis(rotateCameraYInput);
+			var distanceDelta = Input.GetAxis("Camera Distance");
 			
-			if ( Input.GetKey("w") )
+			transform.Rotate(Vector3.up * rotateDelta * 3);
+			cam.UpdateOptions(distanceDelta, angleDelta);
+			cam.rotation = transform.rotation;
+		}
+	}
+	
+	/**
+	 * Обработка ввода
+	 */
+	protected void handleInput()
+	{
+		// Нажатие Escape возвращает нас в режим UI (пользовательского
+		// интерфейса). При этом, в любом состоянии (на случай если что-то
+		// заглючит) при нажатии Escape также все параметры сбрасываются
+		// в некоторое начальное состояние, дальнейшая обработка ввода
+		// прерывается до тех пор пока пользователь снова явно не захватит
+		// курсор левой кнопкой мыши
+		if ( Input.GetKeyDown(KeyCode.Escape) )
+		{
+			lockCursor(false);
+			state = normalState;
+			
+			// прерываем вращение камеры
+			cam.UpdateOptions(0f, 0f);
+			return;
+		}
+		
+		if ( ! cursorLocked )
+		{
+			// если курсор не захвачен, то захват активируется нажатием левой
+			// кнопки мыши
+			if ( Input.GetMouseButtonDown(0) )
 			{
-				animator.SetTrigger("ForwardAttack");
-				attack = true;
+				lockCursor(true);
+				state = normalState;
+				handleRotation();
+				handleMovement();
+				return;
 			}
-			else if ( Input.GetKey("s") )
+			else
 			{
-				animator.SetTrigger("RollBackward");
-				attack = true;
+				// если курсор не захвачен весь прочий ввод игнорируется
+				return;
 			}
-			else if ( Input.GetKey("q") )
+		}
+		
+		if ( state == normalState )
+		{
+			if ( Input.GetMouseButtonDown(0) )
 			{
-				animator.SetTrigger("RollLeft");
-				attack = true;
+				run = false;
+				state = battleState;
+				handleRotation();
+				handleBattle();
+				return;
 			}
-			else if ( Input.GetKey("e") )
+			
+			handleRotation();
+			handleMovement();
+			return;
+		}
+		
+		if ( state == battleState )
+		{
+			if ( Input.GetMouseButtonUp(0) )
 			{
-				animator.SetTrigger("RollRight");
-				attack = true;
+				state = normalState;
+				run = false;
+				handleRotation();
+				handleMovement();
+				return;
 			}
-			else if ( Input.GetKey("a") )
-			{
-				animator.SetTrigger("LeftAttack");
-				attack = true;
-			}
-			else if ( Input.GetKey("d") )
-			{
-				animator.SetTrigger("RightAttack");
-				attack = true;
-			}
+			
+			handleRotation();
+			handleBattle();
+			return;
 		}
 	}
 	
@@ -220,82 +393,24 @@ public class GothicController: PlayerController
 	
 	void FixedUpdate()
 	{
-		if ( cursorLocked )
+		GroundCheck();
+		
+		if ( !falling && !jumping )
 		{
-			var rotateDelta = Input.GetAxis(rotateCameraXInput);
-			var angleDelta = Input.GetAxis(rotateCameraYInput);
-			var distanceDelta = Input.GetAxis("Camera Distance");
-			
-			UpdateOptions(rotateDelta);
-			cam.UpdateOptions(distanceDelta, angleDelta);
-			if ( state == 0 )
-			{
-				if ( !jumping )
-				{
-					moveXZ = transform.forward * speedV + transform.right * speedH;
-					if ( Input.GetKey("space") )
-					{
-						animator.SetTrigger("Jump");
-					}
-				}
-				rb.MovePosition(transform.position + moveXZ * Time.deltaTime);
-			}
+			moveXZ = transform.TransformDirection(localVelocity);
 		}
 		
-		GroundCheck();
+		rb.MovePosition(transform.position + moveXZ * Time.deltaTime);
 	}
 	
 	void Update ()
 	{
-		if ( ! cursorLocked )
-		{
-			if ( Input.GetMouseButtonDown(0) )
-			{
-				lockCursor(true);
-			}
-		}
-		else
-		{
-			if ( state == 2 )
-			{
-				handleBattle();
-				if ( Input.GetMouseButtonUp(0) )
-				{
-					state = 0;
-				}
-			}
-			else
-			{
-				handleMovement();
-				if ( Input.GetMouseButtonDown(0) )
-				{
-					state = 2;
-				}
-			}
-			
-			if ( Input.GetKeyDown("1") )
-			{
-				animator.SetTrigger("Greet01");
-			}
-			
-			if ( Input.GetKeyDown("2") )
-			{
-				animator.SetTrigger("Action1");
-			}
-			
-			running = Input.GetKey("left shift");
-			
-			if ( Input.GetKeyDown(KeyCode.Escape) )
-			{
-				lockCursor(false);
-			}
-		}
+		handleInput();
 		
-		cam.rotation = transform.rotation;
 		animator.SetInteger("state", state);
 	}
 	
-	protected virtual void LateUpdate()
+	void LateUpdate()
 	{
 		DbgUpdate();
 	}
@@ -307,11 +422,8 @@ public class GothicController: PlayerController
 	
 	public void Jump(float v)
 	{
-		jumping = true;
 		rb.AddForce(0f, 230f, 0f, ForceMode.Impulse);
-		//rb.AddForce(0f, 300f, 700f, ForceMode.Impulse);
-		//rb.AddForce(transform.forward * speed, ForceMode.VelocityChange);
-		animator.SetBool("Falling", true);
+		//rb.AddForce(0f, 800f, 0f, ForceMode.Impulse);
 	}
 	
 	public void EndAttack(float v)
