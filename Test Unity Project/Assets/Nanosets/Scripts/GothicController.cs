@@ -32,10 +32,10 @@ public class GothicController: PlayerController
 	 */
 	private Rigidbody rb;
 	
-	private string rotateCameraXInput = "Mouse X";
-	private string rotateCameraYInput = "Mouse Y";
-	private string horizontalInput = "Horizontal";
-	private string verticallInput = "Vertical";
+	private const string rotateCameraXInput = "Mouse X";
+	private const string rotateCameraYInput = "Mouse Y";
+	private const string horizontalInput = "Horizontal";
+	private const string verticallInput = "Vertical";
 	
 	/**
 	 * Режим бега
