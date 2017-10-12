@@ -12,14 +12,28 @@ namespace Nanosoft
 public class GothicController: PlayerController
 {
 	
-    public Text playerDbg;
+	/**
+	 * Текстовый блок в UI в который выводиться отладочная информация
+	 */
+	public Text playerDbg;
 	
+	/**
+	 * Ссылка на контроллер камеры
+	 */
 	private CameraScript cam;
+	
+	/**
+	 * Ссылка на аниматор персонажа
+	 */
 	private Animator animator;
+	
+	/**
+	 * Ссылка на Rigidbody (твердое тело)
+	 */
 	private Rigidbody rb;
-    
+	
 	private string rotateCameraXInput = "Mouse X";
-    private string rotateCameraYInput = "Mouse Y";
+	private string rotateCameraYInput = "Mouse Y";
 	private string horizontalInput = "Horizontal";
 	private string verticallInput = "Vertical";
 	
@@ -47,25 +61,24 @@ public class GothicController: PlayerController
 	private CapsuleCollider m_Capsule;
 	private Vector3 moveXZ;
 	
-    protected string coord(Vector3 v)
-    {
-        return ((int)v.x).ToString() + ", " + ((int)v.y).ToString() + ", " + ((int)v.z).ToString();
-    }
+	protected string coord(Vector3 v)
+	{
+		return ((int)v.x).ToString() + ", " + ((int)v.y).ToString() + ", " + ((int)v.z).ToString();
+	}
 	
-    protected void DbgUpdate()
-    {
-        if (playerDbg)
-        {
-            playerDbg.text = "v22\n" +
+	protected void DbgUpdate()
+	{
+		if (playerDbg)
+		{
+			playerDbg.text = "v22\n" +
 				"PlayerPos: " + coord(transform.position) + "\n" +
 				"Run: " + (run ? "on" : "off") + "\n" +
 				"Speed: " +  string.Format("{0:0.00}", speed) + "\n" +
 				"State: " + state.ToString() + "\n" +
 				"IsGrounded: " + (IsGrounded ? "yes" : "no");
+		}
+	}
 
-        }
-    }
-	
 	/**
 	 * Проверка стоит ли персонаж на земле
 	 */
@@ -93,6 +106,9 @@ public class GothicController: PlayerController
 		transform.Rotate(Vector3.up * rotateDelta * 3);
 	}
 	
+	/**
+	 * Обработка ввода движения
+	 */
 	protected void handleMovement()
 	{
 		if ( Input.GetButtonDown("Run") )
@@ -140,6 +156,9 @@ public class GothicController: PlayerController
 		animator.SetFloat("speedV", speedV);
 	}
 	
+	/**
+	 * Обработка ввода в режиме битвы
+	 */
 	protected void handleBattle()
 	{
 		if ( ! attack )
@@ -182,12 +201,12 @@ public class GothicController: PlayerController
 		}
 	}
 	
-	protected virtual void Start()
+	void Start()
 	{
 		cursorLocked = false;
 		cam = playerCamera.GetComponent<CameraScript>();
 		cam.rotation = transform.rotation;
-
+		
 		animator = GetComponent<Animator>();
 		rb = GetComponent<Rigidbody>();
 		m_Capsule = GetComponent<CapsuleCollider>();
@@ -199,7 +218,7 @@ public class GothicController: PlayerController
 		}
 	}
 	
-    protected virtual void FixedUpdate()
+	void FixedUpdate()
 	{
 		if ( cursorLocked )
 		{
@@ -221,14 +240,12 @@ public class GothicController: PlayerController
 				}
 				rb.MovePosition(transform.position + moveXZ * Time.deltaTime);
 			}
-			
 		}
 		
 		GroundCheck();
 	}
 	
-	// Update is called once per frame
-	protected virtual void Update ()
+	void Update ()
 	{
 		if ( ! cursorLocked )
 		{
@@ -276,7 +293,7 @@ public class GothicController: PlayerController
 		
 		cam.rotation = transform.rotation;
 		animator.SetInteger("state", state);
-    }
+	}
 	
 	protected virtual void LateUpdate()
 	{
