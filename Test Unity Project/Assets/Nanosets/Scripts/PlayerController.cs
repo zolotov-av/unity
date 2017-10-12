@@ -15,6 +15,13 @@ public class PlayerController: MonoBehaviour
 {
 	
 	/**
+	 * Ссылка на камеру
+	 *
+	 * Камера должна управляться скриптом CameraScript
+	 */
+	public GameObject playerCamera;
+	
+	/**
 	 * Тег для телепортации
 	 *
 	 * Данный тег задает объект на место которого должен переместиться персонаж.

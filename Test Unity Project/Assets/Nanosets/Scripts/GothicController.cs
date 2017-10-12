@@ -9,18 +9,16 @@ namespace Nanosoft
 /**
  * Контроллер управления персонажем в стиле Готики (первой части)
  */
-public class GothicController: MonoBehaviour
+public class GothicController: PlayerController
 {
-	public GameObject playerCamera;
 	
     public Text playerDbg;
 	
-	private Nanosoft.CameraScript cam;
+	private CameraScript cam;
 	private Animator animator;
 	private Rigidbody rb;
     
-	private bool cursorLocked;
-    private string rotateCameraXInput = "Mouse X";
+	private string rotateCameraXInput = "Mouse X";
     private string rotateCameraYInput = "Mouse Y";
 	private string horizontalInput = "Horizontal";
 	private string verticallInput = "Vertical";
@@ -86,28 +84,6 @@ public class GothicController: MonoBehaviour
 			{
 				animator.SetBool("Falling", false);
 				jumping = false;
-			}
-		}
-	}
-	
-	public void lockCursor(bool state)
-	{
-		if ( state )
-		{
-			if ( ! cursorLocked )
-			{
-				Cursor.visible = false;
-				Cursor.lockState = CursorLockMode.Locked;
-				cursorLocked = true;
-			}
-		}
-		else
-		{
-			if ( cursorLocked )
-			{
-				Cursor.visible = true;
-				Cursor.lockState = CursorLockMode.None;
-				cursorLocked = false;
 			}
 		}
 	}
@@ -209,7 +185,7 @@ public class GothicController: MonoBehaviour
 	protected virtual void Start()
 	{
 		cursorLocked = false;
-		cam = playerCamera.GetComponent<Nanosoft.CameraScript>();
+		cam = playerCamera.GetComponent<CameraScript>();
 		cam.rotation = transform.rotation;
 
 		animator = GetComponent<Animator>();

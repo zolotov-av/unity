@@ -17,13 +17,6 @@ public class SimpleController: PlayerController
 {
 	
 	/**
-	 * Ссылка на камеру
-	 *
-	 * Камера должна управляться скриптом CameraScript
-	 */
-	public GameObject playerCamera;
-	
-	/**
 	 * Ссылка на контроллер камеры
 	 */
 	private CameraScript cameraCtl;
