@@ -166,16 +166,14 @@ public class SimpleController: PlayerController
 			{
 				if ( !wasFree )
 				{
-					cameraCtl.SetMode(CameraScript.FreeCamera);
-					cameraCtl.SetRotation(transform.rotation);
+					cameraCtl.rotation = transform.rotation;
 				}
 			}
 			else
 			{
 				if ( wasFree )
 				{
-					cameraCtl.SetMode(CameraScript.FollowCamera);
-					transform.rotation = cameraCtl.GetRotation();
+					transform.rotation = cameraCtl.rotation;
 				}
 			}
 		}
@@ -245,7 +243,7 @@ public class SimpleController: PlayerController
 	void Start()
 	{
 		cameraCtl = playerCamera.GetComponent<CameraScript>();
-		cameraCtl.SetRotation(transform.rotation);
+		cameraCtl.rotation = transform.rotation;
 		
 		animator = GetComponent<Animator>();
 		rb = GetComponent<Rigidbody>();
@@ -264,6 +262,7 @@ public class SimpleController: PlayerController
 			//Quaternion rot = Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
 			//transform.rotation *= rot;
 			transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
+			cameraCtl.rotation = transform.rotation;
 		}
 		
 		Vector3 move = transform.TransformDirection(localVelocity);

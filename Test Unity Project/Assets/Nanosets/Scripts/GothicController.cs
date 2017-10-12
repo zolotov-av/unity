@@ -210,6 +210,8 @@ public class GothicController: MonoBehaviour
 	{
 		cursorLocked = false;
 		cam = playerCamera.GetComponent<Nanosoft.CameraScript>();
+		cam.rotation = transform.rotation;
+
 		animator = GetComponent<Animator>();
 		rb = GetComponent<Rigidbody>();
 		m_Capsule = GetComponent<CapsuleCollider>();
@@ -296,6 +298,7 @@ public class GothicController: MonoBehaviour
 			}
 		}
 		
+		cam.rotation = transform.rotation;
 		animator.SetInteger("state", state);
     }
 	
