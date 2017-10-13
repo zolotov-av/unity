@@ -73,6 +73,8 @@ public class SimpleGameState: GameStateBehaviour
 		// создаем персонажа
 		player = Instantiate(playerPrefab);
 		player.name = playerPrefab.name;
+		player.transform.position = gameObject.transform.position;
+		player.transform.rotation = gameObject.transform.rotation;
 		
 		// создаем камеру
 		playerCamera = Instantiate(cameraPrefab);
