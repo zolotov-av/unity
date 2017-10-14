@@ -47,6 +47,11 @@ public class CameraScript: MonoBehaviour
 	public float startAngle = 20f;
 	
 	/**
+	 * Максимальное расстояние от персонажа до камеры
+	 */
+	public float maxDistance = 10f;
+	
+	/**
 	 * Угол наклона камеры (тангаж)
 	 */
 	private float camAngle = 0f;
@@ -130,7 +135,7 @@ public class CameraScript: MonoBehaviour
 	public void UpdateOptions(float distanceDelta, float angleDelta)
 	{
 		distance -= distanceDelta;
-		distance = Mathf.Clamp(distance, 1f, 5f);
+		distance = Mathf.Clamp(distance, 1f, maxDistance);
 		
 		camAngleSpeed = Mathf.Clamp(angleDelta * angleSensitivity, -maxAngleSpeed, maxAngleSpeed);
 	}
