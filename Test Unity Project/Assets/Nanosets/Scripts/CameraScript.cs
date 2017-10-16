@@ -103,7 +103,8 @@ public class CameraScript: MonoBehaviour
 	{
 		if (camdbg)
 		{
-			camdbg.text = "Nanosoft.Camera v22\n" +
+			camdbg.text = "Debug info, " + 
+				"Camera v22\n" +
 				"CamPos: " + coord(transform.position) + "\n" +
 				"TargetPos: " + coord(target.transform.position) + "\n" +
 				"distance: " + string.Format("{0:0.00}", distance) + "\n" +
