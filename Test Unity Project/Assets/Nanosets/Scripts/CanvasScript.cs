@@ -69,8 +69,8 @@ public class CanvasScript: MonoBehaviour
 	
 	public static void ShowAction(IAction action)
 	{
-		instance.actionPanel.SetActive(true);
 		instance.actionMessage.text = action.GetActionMessage();
+		instance.actionPanel.SetActive(true);
 	}
 	
 	public static void HideAction()
