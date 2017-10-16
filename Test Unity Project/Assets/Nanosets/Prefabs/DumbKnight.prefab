@@ -854,6 +854,7 @@ GameObject:
   - component: {fileID: 114314326746376282}
   - component: {fileID: 114557321370560296}
   - component: {fileID: 82505591366703894}
+  - component: {fileID: 114624550132100136}
   m_Layer: 0
   m_Name: DumbKnight
   m_TagString: Player
@@ -1175,7 +1176,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1606910567096544}
-  m_LocalRotation: {x: 0.7402964, y: 0.67038023, z: -0.040843923, w: 0.029720496}
+  m_LocalRotation: {x: 0.7402965, y: 0.6703803, z: -0.040843926, w: 0.029720498}
   m_LocalPosition: {x: -0.3996879, y: 1.3137013, z: -0.008871467}
   m_LocalScale: {x: 0.99999994, y: 1, z: 1}
   m_Children: []
@@ -1792,6 +1793,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ace1d5a57a3921469193c7db101a088, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114624550132100136
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1958066833911488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb17821c8d70bf746a62163485b7ae44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!136 &136017863268881902

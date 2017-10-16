@@ -102,6 +102,8 @@ MonoBehaviour:
   height: 1.4
   startDistance: 3
   startAngle: 20
+  maxDistance: 10
+  rotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!124 &124310162853789888
 Behaviour:
   m_ObjectHideFlags: 1
