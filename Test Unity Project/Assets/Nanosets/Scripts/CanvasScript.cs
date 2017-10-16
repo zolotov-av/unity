@@ -23,6 +23,11 @@ public class CanvasScript: MonoBehaviour
 	private Text actionMessage;
 	private Text lootMessage;
 	
+	/**
+	 * Флаг диалогового режима
+	 */
+	private bool inDialog = false;
+	
 	public static CanvasScript instance;
 	
 	void Awake()
@@ -56,15 +61,39 @@ public class CanvasScript: MonoBehaviour
 		message.text = "Hello world";
 	}
 	
+	/**
+	 * Обработка ввода
+	 */
+	protected void handleInput()
+	{
+		if ( Input.GetKey(KeyCode.Escape) )
+		{
+			CloseDialog();
+			return;
+		}
+	}
+	
+	void Update()
+	{
+		if ( inDialog ) handleInput();
+	}
+	
 	public static void ShowMessage(string msg)
 	{
 		instance.message.text = msg;
 		instance.dialogPanel.SetActive(true);
+		instance.inDialog = true;
 	}
 	
 	public static void HideMessage()
 	{
-		instance.dialogPanel.SetActive(false);
+		instance.CloseDialog();
+	}
+	
+	public void CloseDialog()
+	{
+		dialogPanel.SetActive(false);
+		inDialog = false;
 	}
 	
 	public static void ShowAction(IAction action)
