@@ -19,9 +19,9 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4107339849526038}
-  - component: {fileID: 114078796980067804}
+  - component: {fileID: 114166182306410208}
   m_Layer: 0
-  m_Name: TaichiGameState
+  m_Name: AdvancedGameState
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33,14 +33,14 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1298761242215392}
-  m_LocalRotation: {x: -0, y: 0.799491, z: -0, w: 0.6006781}
-  m_LocalPosition: {x: -124.5, y: 4.41, z: -167.52}
+  m_LocalRotation: {x: -0, y: 0.5658513, z: -0, w: 0.82450736}
+  m_LocalPosition: {x: -124.13, y: 4.72, z: -166.08}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114078796980067804
+  m_LocalEulerAnglesHint: {x: 0, y: 68.923004, z: 0}
+--- !u!114 &114166182306410208
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1298761242215392}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ace36dbd73a2ef4bb93be3f10b5abd5, type: 3}
+  m_Script: {fileID: 11500000, guid: ca22f8a311ec8c64383d01f016ad11b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 1055605507848618, guid: ff38b1a029ce47848b7161510dfba7f3,
@@ -57,8 +57,12 @@ MonoBehaviour:
     type: 2}
   canvasPrefab: {fileID: 1077671943608822, guid: d9f66f2f63784c94097d21c8779906a1,
     type: 2}
+  questManagerPrefab: {fileID: 1278513239072596, guid: 90b369721ab8ded488e95d37a00f2064,
+    type: 2}
   player: {fileID: 0}
   playerCtl: {fileID: 0}
   playerCamera: {fileID: 0}
   cameraCtl: {fileID: 0}
   canvas: {fileID: 0}
+  questManagerObject: {fileID: 0}
+  questManager: {fileID: 0}

@@ -14,14 +14,26 @@ namespace Nanosoft
 public class CanvasScript: MonoBehaviour
 {
 	
+	/**
+	 * Ссылка на менеджер квестов
+	 */
+	[HideInInspector]
+	public QuestManager questManager;
+	
 	private GameObject dialogPanel;
 	private GameObject actorPanel;
 	private GameObject actionPanel;
 	private GameObject lootPanel;
+	private GameObject questPanel;
 	private Text message;
 	private Text actor;
 	private Text actionMessage;
 	private Text lootMessage;
+	
+	/**
+	 * Ссылка на скрипт управляющий списком квестов
+	 */
+	private QuestList questList;
 	
 	/**
 	 * Флаг диалогового режима
@@ -58,6 +70,11 @@ public class CanvasScript: MonoBehaviour
 		lootPanel.SetActive(false);
 		lootMessage = lootPanel.transform.Find("LootMessage").gameObject.GetComponent<Text>();
 		
+		questPanel = transform.Find("QuestPanel").gameObject;
+		questPanel.SetActive(false);
+		questList = questPanel.transform.Find("QuestList").gameObject.GetComponent<QuestList>();
+		questList.questManager = questManager;
+		
 		message.text = "Hello world";
 	}
 	
@@ -76,6 +93,23 @@ public class CanvasScript: MonoBehaviour
 	void Update()
 	{
 		if ( inDialog ) handleInput();
+		
+		if ( Input.GetKeyDown(KeyCode.L) )
+		{
+			if ( questPanel.active ) HideQuestList();
+			else ShowQuestList();
+		}
+	}
+	
+	public void ShowQuestList()
+	{
+		questList.Refresh();
+		questPanel.SetActive(true);
+	}
+	
+	public void HideQuestList()
+	{
+		questPanel.SetActive(false);
 	}
 	
 	public static void ShowMessage(string msg)

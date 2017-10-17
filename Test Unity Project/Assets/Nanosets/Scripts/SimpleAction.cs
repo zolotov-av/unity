@@ -29,7 +29,7 @@ public class SimpleAction: MonoBehaviour, IAction
 	 */
 	public void OnTriggerEnter(Collider other)
 	{
-		Debug.Log("SimpleAction.OnTriggerEnter()\n");
+		Debug.Log(gameObject.name + "[SimpleAction].OnTriggerEnter()\n");
 		if ( !empty )
 		{
 			var pb = other.gameObject.GetComponent<PlayerBehaviour>();
