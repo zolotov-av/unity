@@ -52,6 +52,7 @@ public class CanvasScript: MonoBehaviour
 	
 	void Start()
 	{
+		Debug.Log("CanvasScript.Start()");
 		dialogPanel = transform.Find("DialogPanel").gameObject;
 		dialogPanel.SetActive(false);
 		
@@ -103,6 +104,7 @@ public class CanvasScript: MonoBehaviour
 	
 	public void ShowQuestList()
 	{
+		Debug.Log("questManager.quests.count = " + questManager.quests.Length);
 		questList.Refresh();
 		questPanel.SetActive(true);
 	}
