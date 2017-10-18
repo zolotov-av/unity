@@ -18,36 +18,64 @@ public class DialogWindow: MonoBehaviour
 	 */
 	public GameObject replyPrefab;
 	
-	private GameObject avatarPanel;
-	private GameObject actorPanel;
-	private GameObject messagePanel;
-	private GameObject repliesPanel;
-	
-	public Text messageText;
-	public Image avatarPhoto;
-	public Text avatarName;
-	
-	private DialogItem dialog;
-	
-	private int replyCapacity;
-	private int count;
+	/**
+	 * Ссылка на панель с аватаркой персонажа
+	 */
+	public GameObject avatarPanel;
 	
 	/**
-	 * Ссылки на элементы
+	 * Ссылка на панель с именем персонажа
+	 */
+	public GameObject actorPanel;
+	
+	/**
+	 * Ссылка панель с сообщением
+	 */
+	public GameObject messagePanel;
+	
+	/**
+	 * Ссылка на панель с вариантами ответов/действий
+	 */
+	public GameObject repliesPanel;
+	
+	/**
+	 * Ссылка на объект Text для диалогового сообщения
+	 */
+	public Text messageText;
+	
+	/**
+	 * Ссылка на объект Image для аватарки персонажа
+	 */
+	public Image avatarPhoto;
+	
+	/**
+	 * Ссылка на объект Text для имени персонажа
+	 */
+	public Text avatarName;
+	
+	/**
+	 * Число вариантов ответов
+	 */
+	private int replyCount;
+	
+	/**
+	 * Максимальное число вариантов ответов
+	 */
+	private int replyCapacity;
+	
+	/**
+	 * Ссылки на элементы для вариантов ответов
 	 */
 	private GameObject[] items;
 	
 	void Awake()
 	{
-		avatarPanel = transform.Find("AvatarPanel").gameObject;
-		
-		actorPanel = avatarPanel.transform.Find("ActorPanel").gameObject;
+		gameObject.SetActive(false);
 		actorPanel.SetActive(false);
-		messagePanel = transform.Find("MessagePanel").gameObject;
-		repliesPanel = messagePanel.transform.Find("Replies").gameObject;
+		repliesPanel.SetActive(false);
 		
 		replyCapacity = 3;
-		count = 0;
+		replyCount = 0;
 		items = new GameObject[replyCapacity];
 		Transform t = repliesPanel.transform;
 		for(int i = 0; i < replyCapacity; i++)
@@ -58,6 +86,9 @@ public class DialogWindow: MonoBehaviour
 		}
 	}
 	
+	/**
+	 * Отобразить сообщение в диалоговом окне
+	 */
 	public void ShowMessage(string message)
 	{
 		messageText.text = message;
@@ -66,9 +97,11 @@ public class DialogWindow: MonoBehaviour
 		gameObject.SetActive(true);
 	}
 	
-	public void ShowDialog(DialogItem d)
+	/**
+	 * Отобразить диалог
+	 */
+	public void ShowDialog(DialogItem dialog)
 	{
-		dialog = d;
 		messageText.text = dialog.message;
 		
 		// TODO resize and scrolling
@@ -81,32 +114,31 @@ public class DialogWindow: MonoBehaviour
 			obj.transform.Find("Text").gameObject.GetComponent<Text>().text = replies[i];
 			obj.SetActive(true);
 		}
-		for(int i = len; i < count; i++)
+		for(int i = len; i < replyCount; i++)
 		{
 			items[i].SetActive(false);
 		}
-		count = len;
-		
-		if ( count > 0 )
-		{
-			repliesPanel.SetActive(true);
-		}
-		else
-		{
-			repliesPanel.SetActive(false);
-		}
+		replyCount = len;
 		
 		avatarPhoto.sprite = dialog.avatarSprite;
 		avatarName.text = dialog.avatarName;
 		avatarPanel.SetActive(true);
 		actorPanel.SetActive(true);
-		
+		repliesPanel.SetActive( replyCount > 0 );
 		gameObject.SetActive(true);
 		
-		if ( count > 0 )
+		if ( replyCount > 0 )
 		{
 			items[0].GetComponent<Button>().Select();
 		}
+	}
+	
+	/**
+	 * Закрыть диалоговое окно
+	 */
+	public void CloseDialog()
+	{
+		gameObject.SetActive(false);
 	}
 	
 } // class DialogWindow

@@ -9,7 +9,7 @@ namespace Nanosoft
 /**
  * Скрипт для управления канвой
  *
- * Заставляет камеру следить за указанным объектом
+ * Управляет всеми окнами пользовательского интерфейса
  */
 public class CanvasScript: MonoBehaviour
 {
@@ -20,7 +20,6 @@ public class CanvasScript: MonoBehaviour
 	[HideInInspector]
 	public QuestManager questManager;
 	
-	private GameObject dialogPanel;
 	private GameObject actionPanel;
 	private GameObject lootPanel;
 	private GameObject questPanel;
@@ -36,7 +35,7 @@ public class CanvasScript: MonoBehaviour
 	/**
 	 * Ссылка на скрипт управляющий диалоговым окном
 	 */
-	private DialogWindow dialogWindow;
+	public DialogWindow dialogWindow;
 	
 	/**
 	 * Флаг диалогового режима
@@ -58,9 +57,6 @@ public class CanvasScript: MonoBehaviour
 	void Start()
 	{
 		Debug.Log("CanvasScript.Start()");
-		dialogPanel = transform.Find("DialogPanel").gameObject;
-		dialogPanel.SetActive(false);
-		dialogWindow = dialogPanel.GetComponent<DialogWindow>();
 		
 		GameObject actionGroup = transform.Find("ActionGroup").gameObject;
 		
@@ -76,8 +72,6 @@ public class CanvasScript: MonoBehaviour
 		questPanel.SetActive(false);
 		questList = questPanel.transform.Find("QuestList").gameObject.GetComponent<QuestList>();
 		questList.questManager = questManager;
-		
-		//message.text = "Hello world";
 	}
 	
 	/**
@@ -118,13 +112,7 @@ public class CanvasScript: MonoBehaviour
 	public static void ShowMessage(string msg)
 	{
 		instance.dialogWindow.ShowMessage(msg);
-		//instance.dialogPanel.SetActive(true);
 		instance.inDialog = true;
-	}
-	
-	public static void HideMessage()
-	{
-		instance.CloseDialog();
 	}
 	
 	public static void ShowDialog(DialogItem dialog)
@@ -136,9 +124,8 @@ public class CanvasScript: MonoBehaviour
 	
 	public void CloseDialog()
 	{
+		dialogWindow.CloseDialog();
 		actionPanel.SetActive(actionActive);
-		dialogPanel.SetActive(false);
-		inDialog = false;
 	}
 	
 	public static void ShowAction(IAction action)
