@@ -304,7 +304,7 @@ public class GothicController: PlayerController
 	/**
 	 * Обработка ввода
 	 */
-	protected void handleInput()
+	public override void handleInput()
 	{
 		// Нажатие Escape возвращает нас в режим UI (пользовательского
 		// интерфейса). При этом, в любом состоянии (на случай если что-то

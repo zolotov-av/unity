@@ -122,6 +122,14 @@ public class AdvancedGameState: GameStateBehaviour
 		playerCtl.TeleportPlayer();
 	}
 	
+	void Update()
+	{
+		if ( !canvasCtl.inDialog )
+		{
+			playerCtl.handleInput();
+		}
+	}
+	
 } // class AdvancedGameState
 
 } // namespace Nanosoft

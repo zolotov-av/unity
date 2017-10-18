@@ -27,6 +27,11 @@ public class SimpleController: PlayerController
 	public float speed = 2f;
 	
 	/**
+	 * Разрешить обработку ввода
+	 */
+	public bool enableInput = true;
+	
+	/**
 	 * Текущая скорость персонажа (с которой персонаж движется в данный момент)
 	 */
 	private float velocity = 0f;
@@ -175,7 +180,7 @@ public class SimpleController: PlayerController
 	/**
 	 * Обработка ввода
 	 */
-	protected void handleInput()
+	public override void handleInput()
 	{
 		// нажали левую кнопку мыши
 		if ( Input.GetMouseButtonDown(0) )
@@ -264,7 +269,7 @@ public class SimpleController: PlayerController
 	
 	void Update()
 	{
-		handleInput();
+		if ( enableInput ) handleInput();
 	}
 
 } // class SimpleController

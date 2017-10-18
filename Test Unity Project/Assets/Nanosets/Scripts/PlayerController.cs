@@ -62,6 +62,13 @@ public class PlayerController: MonoBehaviour
 	}
 	
 	/**
+	 * Обработка ввода
+	 */
+	public virtual void handleInput()
+	{
+	}
+	
+	/**
 	 * Установить метку телепортации
 	 *
 	 * После переключения сцены персонаж будет телепортирован на указанное

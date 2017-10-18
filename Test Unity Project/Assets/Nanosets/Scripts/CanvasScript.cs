@@ -44,7 +44,8 @@ public class CanvasScript: MonoBehaviour
 	/**
 	 * Флаг диалогового режима
 	 */
-	private bool inDialog = false;
+	[HideInInspector]
+	public bool inDialog = false;
 	
 	private bool actionActive = false;
 	
@@ -114,6 +115,7 @@ public class CanvasScript: MonoBehaviour
 	{
 		dialogWindow.CloseDialog();
 		actionPanel.SetActive(actionActive);
+		inDialog = false;
 	}
 	
 	public static void ShowAction(IAction action)
