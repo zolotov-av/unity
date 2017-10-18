@@ -39,8 +39,9 @@ GameObject:
   - component: {fileID: 222229569095173248}
   - component: {fileID: 114091847656917080}
   - component: {fileID: 114711042626548564}
+  - component: {fileID: 114133570860579378}
   m_Layer: 5
-  m_Name: QuestPanel
+  m_Name: QuestWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -489,10 +490,10 @@ GameObject:
   - component: {fileID: 224366114923020796}
   - component: {fileID: 222903096211410940}
   - component: {fileID: 114486611470711344}
-  - component: {fileID: 114771397834035390}
   - component: {fileID: 114028797524825416}
+  - component: {fileID: 114771397834035390}
   m_Layer: 5
-  m_Name: DialogPanel
+  m_Name: DialogWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -689,6 +690,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 2
   m_VerticalFit: 2
+--- !u!114 &114133570860579378
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1067503659285678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1768a457f704b814582b50fcf387eb48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  questList: {fileID: 114456852342571202}
 --- !u!114 &114134279900943684
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1272,6 +1285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   questManager: {fileID: 0}
   dialogWindow: {fileID: 114771397834035390}
+  questWindow: {fileID: 114133570860579378}
 --- !u!114 &114635049920738112
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2070,9 +2084,9 @@ RectTransform:
   m_Father: {fileID: 224987455689561470}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 80, y: -45}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 80, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!224 &224276382153648764
@@ -2088,10 +2102,10 @@ RectTransform:
   m_Father: {fileID: 224604082684810366}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 95.5, y: -20}
-  m_SizeDelta: {x: 0, y: 30}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 95.5, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224298539070697534
 RectTransform:
@@ -2301,8 +2315,8 @@ RectTransform:
   m_Father: {fileID: 224987455689561470}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 80, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
@@ -2396,10 +2410,10 @@ RectTransform:
   m_Father: {fileID: 224267276624008162}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 90, y: -20}
-  m_SizeDelta: {x: 0, y: 30}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 90, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224917041301484286
 RectTransform:

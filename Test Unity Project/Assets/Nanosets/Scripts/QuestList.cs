@@ -35,11 +35,13 @@ public class QuestList: MonoBehaviour
 	/**
 	 * Ссылка на менеджер квестов
 	 */
+	[HideInInspector]
 	public QuestManager questManager;
 	
 	void Awake()
 	{
 		Debug.Log("QuestList.Awake()");
+		
 		capacity = 6;
 		count = 0;
 		items = new GameObject[capacity];
@@ -55,6 +57,7 @@ public class QuestList: MonoBehaviour
 	void Start()
 	{
 		Debug.Log("QuestList.Start()");
+		Refresh();
 	}
 	
 	/**
@@ -62,6 +65,8 @@ public class QuestList: MonoBehaviour
 	 */
 	public void Refresh()
 	{
+		if ( questManager == null ) return;
+		
 		// TODO resize and scrolling
 		Quest[] quests = questManager.quests;
 		int len = quests.Length;

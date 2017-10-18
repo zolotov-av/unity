@@ -22,7 +22,6 @@ public class CanvasScript: MonoBehaviour
 	
 	private GameObject actionPanel;
 	private GameObject lootPanel;
-	private GameObject questPanel;
 	private Text message;
 	private Text actionMessage;
 	private Text lootMessage;
@@ -36,6 +35,11 @@ public class CanvasScript: MonoBehaviour
 	 * Ссылка на скрипт управляющий диалоговым окном
 	 */
 	public DialogWindow dialogWindow;
+	
+	/**
+	 * Ссылка на скрипт управляющий окном списка квестов
+	 */
+	public QuestWindow questWindow;
 	
 	/**
 	 * Флаг диалогового режима
@@ -68,10 +72,7 @@ public class CanvasScript: MonoBehaviour
 		lootPanel.SetActive(false);
 		lootMessage = lootPanel.transform.Find("LootMessage").gameObject.GetComponent<Text>();
 		
-		questPanel = transform.Find("QuestPanel").gameObject;
-		questPanel.SetActive(false);
-		questList = questPanel.transform.Find("QuestList").gameObject.GetComponent<QuestList>();
-		questList.questManager = questManager;
+		questWindow.SetQuestManager(questManager);
 	}
 	
 	/**
@@ -92,21 +93,8 @@ public class CanvasScript: MonoBehaviour
 		
 		if ( Input.GetKeyDown(KeyCode.L) )
 		{
-			if ( questPanel.active ) HideQuestList();
-			else ShowQuestList();
+			questWindow.ToggleWindow();
 		}
-	}
-	
-	public void ShowQuestList()
-	{
-		Debug.Log("questManager.quests.count = " + questManager.quests.Length);
-		questList.Refresh();
-		questPanel.SetActive(true);
-	}
-	
-	public void HideQuestList()
-	{
-		questPanel.SetActive(false);
 	}
 	
 	public static void ShowMessage(string msg)

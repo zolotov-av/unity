@@ -29,9 +29,9 @@ public class AdvancedGameState: GameStateBehaviour
 	public GameObject canvasPrefab;
 	
 	/**
-	 * Ссылка на префаб менеджера квестов
+	 * Ссылка на менеджер квестов
 	 */
-	public GameObject questManagerPrefab;
+	public QuestManager questManager;
 	
 	/**
 	 * Ссылка на персонажа (загруженный экземляр)
@@ -72,18 +72,6 @@ public class AdvancedGameState: GameStateBehaviour
 	public CanvasScript canvasCtl;
 	
 	/**
-	 * Ссылка на объект с менеджером квестов
-	 */
-	[HideInInspector]
-	public GameObject questManagerObject;
-	
-	/**
-	 * Ссылка на менеджер квестов
-	 */
-	[HideInInspector]
-	public QuestManager questManager;
-	
-	/**
 	 * Событие инициализации
 	 *
 	 * Пользователь должен переопределить этот метод и реализовать в нём
@@ -104,10 +92,6 @@ public class AdvancedGameState: GameStateBehaviour
 		canvas = Instantiate(canvasPrefab);
 		canvas.name = canvasPrefab.name;
 		
-		// создаем менеджер квестов
-		questManagerObject = Instantiate(questManagerPrefab, t);
-		questManagerObject.name = questManagerPrefab.name;
-		
 		// персонаж и камера не должны удаляться при переключении сцены
 		DontDestroyOnLoad(player);
 		DontDestroyOnLoad(playerCamera);
@@ -119,8 +103,7 @@ public class AdvancedGameState: GameStateBehaviour
 		cameraCtl = playerCamera.GetComponent<CameraScript>();
 		cameraCtl.target = player;
 		
-		questManager = questManagerObject.GetComponent<QuestManager>();
-		
+		Debug.Log("GameState init canvas");
 		canvasCtl = canvas.GetComponent<CanvasScript>();
 		canvasCtl.questManager = questManager;
 	}
