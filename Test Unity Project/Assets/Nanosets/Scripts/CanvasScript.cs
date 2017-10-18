@@ -21,12 +21,10 @@ public class CanvasScript: MonoBehaviour
 	public QuestManager questManager;
 	
 	private GameObject dialogPanel;
-	private GameObject actorPanel;
 	private GameObject actionPanel;
 	private GameObject lootPanel;
 	private GameObject questPanel;
 	private Text message;
-	private Text actor;
 	private Text actionMessage;
 	private Text lootMessage;
 	
@@ -36,9 +34,16 @@ public class CanvasScript: MonoBehaviour
 	private QuestList questList;
 	
 	/**
+	 * Ссылка на скрипт управляющий диалоговым окном
+	 */
+	private DialogWindow dialogWindow;
+	
+	/**
 	 * Флаг диалогового режима
 	 */
 	private bool inDialog = false;
+	
+	private bool actionActive = false;
 	
 	public static CanvasScript instance;
 	
@@ -55,11 +60,7 @@ public class CanvasScript: MonoBehaviour
 		Debug.Log("CanvasScript.Start()");
 		dialogPanel = transform.Find("DialogPanel").gameObject;
 		dialogPanel.SetActive(false);
-		
-		actorPanel = dialogPanel.transform.Find("ActorPanel").gameObject;
-		actorPanel.SetActive(false);
-		actor = actorPanel.transform.Find("Actor").gameObject.GetComponent<Text>();
-		message = dialogPanel.transform.Find("Message").gameObject.GetComponent<Text>();
+		dialogWindow = dialogPanel.GetComponent<DialogWindow>();
 		
 		GameObject actionGroup = transform.Find("ActionGroup").gameObject;
 		
@@ -76,7 +77,7 @@ public class CanvasScript: MonoBehaviour
 		questList = questPanel.transform.Find("QuestList").gameObject.GetComponent<QuestList>();
 		questList.questManager = questManager;
 		
-		message.text = "Hello world";
+		//message.text = "Hello world";
 	}
 	
 	/**
@@ -116,8 +117,8 @@ public class CanvasScript: MonoBehaviour
 	
 	public static void ShowMessage(string msg)
 	{
-		instance.message.text = msg;
-		instance.dialogPanel.SetActive(true);
+		instance.dialogWindow.ShowMessage(msg);
+		//instance.dialogPanel.SetActive(true);
 		instance.inDialog = true;
 	}
 	
@@ -126,20 +127,30 @@ public class CanvasScript: MonoBehaviour
 		instance.CloseDialog();
 	}
 	
+	public static void ShowDialog(DialogItem dialog)
+	{
+		instance.dialogWindow.ShowDialog(dialog);
+		instance.inDialog = true;
+		instance.actionPanel.SetActive(false);
+	}
+	
 	public void CloseDialog()
 	{
+		actionPanel.SetActive(actionActive);
 		dialogPanel.SetActive(false);
 		inDialog = false;
 	}
 	
 	public static void ShowAction(IAction action)
 	{
+		instance.actionActive = true;
 		instance.actionMessage.text = action.GetActionMessage();
 		instance.actionPanel.SetActive(true);
 	}
 	
 	public static void HideAction()
 	{
+		instance.actionActive = false;
 		instance.actionPanel.SetActive(false);
 	}
 	
