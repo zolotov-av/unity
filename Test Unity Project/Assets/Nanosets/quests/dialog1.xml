@@ -1,0 +1,29 @@
+<dialog-bundle>
+ <bundle-name>Dialog 1</bundle-name>
+ <items>
+  
+  <dialog-item>
+   <message>Не часто сюда попадаю путники...</message>
+   <actions>
+    
+    <dialog-action type="1">
+     <reply>Что это за остров?</reply>
+	 <next-dialog>
+	  <message>Наш остров находиться далеко от материка.</message>
+	  <actions>
+	   <dialog-action type="0">
+	    <reply>[теперь точно надо идти]</reply>
+	   </dialog-action>
+	  </actions>
+	 </next-dialog>
+	</dialog-action>
+	
+    <dialog-action type="0">
+     <reply>[мне надо идти]</reply>
+	</dialog-action>
+	
+   </actions>
+  </dialog-item>
+  
+ </items>
+</dialog-bundle>

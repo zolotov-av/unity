@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using UnityEngine;
 
 namespace Nanosoft
@@ -8,18 +9,19 @@ namespace Nanosoft
 /**
  * Класс описывающий вариант ответа/действия в диалоге
  */
-[System.Serializable]
 public class DialogAction
 {
 	
 	/**
 	 * Текст ответа
 	 */
+	[XmlElement("reply")]
 	public string reply;
 	
 	/**
 	 * Тип действия
 	 */
+	[XmlAttribute("type")]
 	public int actionType;
 	
 	/**
@@ -35,6 +37,7 @@ public class DialogAction
 	/**
 	 * Ссылка на следующий диалог
 	 */
+	[XmlElement("next-dialog")]
 	public DialogItem nextDialog;
 	
 	/**

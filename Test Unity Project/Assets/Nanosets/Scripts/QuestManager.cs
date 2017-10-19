@@ -36,8 +36,9 @@ public class QuestManager: MonoBehaviour
 	/**
 	 * Начать диалог
 	 */
-	public static void StartDialog(DialogItem dialog)
+	public static void StartDialog(string avatarName, Sprite avatarPhoto, DialogItem dialog)
 	{
+		CanvasScript.SetAvatar(avatarName, avatarPhoto);
 		CanvasScript.ShowDialog(dialog);
 	}
 	

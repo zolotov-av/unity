@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using UnityEngine;
 
 namespace Nanosoft
@@ -8,7 +9,6 @@ namespace Nanosoft
 /**
  * Класс описывающий элемент диалога
  */
-[System.Serializable]
 public class DialogItem
 {
 	
@@ -20,17 +20,21 @@ public class DialogItem
 	/**
 	 * Имя персонажа
 	 */
+	[XmlElement("avatar-name")]
 	public string avatarName;
 	
 	/**
 	 * Текстовое сообщение которое говорит NPC
 	 */
+	[XmlElement("message")]
 	[TextArea(3,10)]
 	public string message;
 	
 	/**
 	 * Варианты ответов для игрока
 	 */
+	[XmlArray("actions")]
+    [XmlArrayItem("dialog-action")]
 	public DialogAction[] replies;
 	
 } // DialogItem

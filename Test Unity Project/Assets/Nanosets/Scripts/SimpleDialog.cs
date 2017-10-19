@@ -8,9 +8,37 @@ namespace Nanosoft
 public class SimpleDialog: MonoBehaviour, IAction
 {
 	
+	/**
+	 * Ссылка на спрайт лица персонажа
+	 */
+	public Sprite avatarSprite;
+	
+	/**
+	 * Имя персонажа
+	 */
+	public string avatarName;
+	
 	public string actionMessage = "";
 	
+	[HideInInspector]
 	public DialogItem dialog;
+	
+	public TextAsset dialogAsset;
+	
+	[HideInInspector]
+	public DialogBundle bundle;
+	
+	void Start()
+	{
+		Debug.Log("SimpleDialog.Start() load bundle");
+		bundle = DialogBundle.Load(dialogAsset);
+		Debug.Log("bundle.name = " + bundle.name + ", dialog count: " + bundle.items.Length);
+		
+		if ( bundle.items.Length > 0 )
+		{
+			dialog = bundle.items[0];
+		}
+	}
 	
 	public PlayerController GetPlayer(Collider other)
 	{
@@ -52,7 +80,7 @@ public class SimpleDialog: MonoBehaviour, IAction
 	public void RunAction(PlayerBehaviour pb)
 	{
 		Debug.Log("SimpleAction.RunAction()");
-		QuestManager.StartDialog(dialog);
+		QuestManager.StartDialog(avatarName, avatarSprite, dialog);
 	}
 	
 } // class SimpleAction

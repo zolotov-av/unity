@@ -104,6 +104,11 @@ public class CanvasScript: MonoBehaviour
 		instance.inDialog = true;
 	}
 	
+	public static void SetAvatar(string avatarName, Sprite avatarPhoto)
+	{
+		instance.dialogWindow.SetAvatar(avatarName, avatarPhoto);
+	}
+	
 	public static void ShowDialog(DialogItem dialog)
 	{
 		instance.dialogWindow.ShowDialog(dialog);

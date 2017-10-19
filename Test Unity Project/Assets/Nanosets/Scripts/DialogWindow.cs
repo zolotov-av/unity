@@ -97,6 +97,14 @@ public class DialogWindow: MonoBehaviour
 		gameObject.SetActive(true);
 	}
 	
+	public void SetAvatar(string name, Sprite photo)
+	{
+		avatarName.text = name;
+		avatarPhoto.sprite = photo;
+		avatarPanel.SetActive(true);
+		actorPanel.SetActive(true);
+	}
+	
 	/**
 	 * Отобразить диалог
 	 */
@@ -123,10 +131,6 @@ public class DialogWindow: MonoBehaviour
 		}
 		replyCount = len;
 		
-		avatarPhoto.sprite = dialog.avatarSprite;
-		avatarName.text = dialog.avatarName;
-		avatarPanel.SetActive(true);
-		actorPanel.SetActive(true);
 		repliesPanel.SetActive( replyCount > 0 );
 		gameObject.SetActive(true);
 		
