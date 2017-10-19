@@ -30,10 +30,8 @@ public class DialogItem
 	
 	/**
 	 * Варианты ответов для игрока
-	 *
-	 * TODO заменить на класс DialogAction
 	 */
-	public string[] replies;
+	public DialogAction[] replies;
 	
 } // DialogItem
 

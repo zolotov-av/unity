@@ -52,7 +52,7 @@ public class SimpleDialog: MonoBehaviour, IAction
 	public void RunAction(PlayerBehaviour pb)
 	{
 		Debug.Log("SimpleAction.RunAction()");
-		CanvasScript.ShowDialog(dialog);
+		QuestManager.StartDialog(dialog);
 	}
 	
 } // class SimpleAction

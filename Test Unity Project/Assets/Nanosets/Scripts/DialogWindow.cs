@@ -105,13 +105,16 @@ public class DialogWindow: MonoBehaviour
 		messageText.text = dialog.message;
 		
 		// TODO resize and scrolling
-		string[] replies = dialog.replies;
+		DialogAction[] replies = dialog.replies;
 		int len = replies.Length;
 		if ( len > replyCapacity ) len = replyCapacity;
 		for(int i = 0; i < len; i++)
 		{
 			var obj = items[i];
-			obj.transform.Find("Text").gameObject.GetComponent<Text>().text = replies[i];
+			obj.transform.Find("Text").gameObject.GetComponent<Text>().text = replies[i].reply;
+			var btnClick = obj.GetComponent<Button>().onClick;
+			btnClick.RemoveAllListeners();
+			btnClick.AddListener( replies[i].RunReply );
 			obj.SetActive(true);
 		}
 		for(int i = len; i < replyCount; i++)
