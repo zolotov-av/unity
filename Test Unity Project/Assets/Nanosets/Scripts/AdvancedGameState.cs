@@ -104,6 +104,7 @@ public class AdvancedGameState: GameStateBehaviour
 		
 		playerCtl = player.GetComponent<PlayerController>();
 		playerCtl.playerCamera = playerCamera;
+		playerCtl.Grab(this);
 		
 		cameraCtl = playerCamera.GetComponent<CameraScript>();
 		cameraCtl.target = player;

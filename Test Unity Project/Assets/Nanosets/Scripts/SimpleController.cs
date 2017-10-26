@@ -238,6 +238,16 @@ public class SimpleController: PlayerController
 		handleMovement();
 	}
 	
+	/**
+	 * Захват управления
+	 *
+	 * GameState вызывает эту функцию, когда берет контроллер под своё
+	 */
+	public override void Grab(GameStateBehaviour gs)
+	{
+		enableInput = false;
+	}
+	
 	void Start()
 	{
 		cameraCtl = playerCamera.GetComponent<CameraScript>();

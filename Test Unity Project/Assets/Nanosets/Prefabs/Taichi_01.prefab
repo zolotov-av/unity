@@ -3835,7 +3835,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 0}
   speed: 4
-  enableInput: 0
+  enableInput: 1
 --- !u!114 &114177560123269958
 MonoBehaviour:
   m_ObjectHideFlags: 1

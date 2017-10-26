@@ -69,6 +69,24 @@ public class PlayerController: MonoBehaviour
 	}
 	
 	/**
+	 * Захват управления
+	 *
+	 * GameState вызывает эту функцию, когда берет контроллер под своё
+	 */
+	public virtual void Grab(GameStateBehaviour gs)
+	{
+	}
+	
+	/**
+	 * Освобождение управления
+	 *
+	 * GameState вызывает эту функцию, когда освобождает контроллер
+	 */
+	public virtual void Release()
+	{
+	}
+	
+	/**
 	 * Установить метку телепортации
 	 *
 	 * После переключения сцены персонаж будет телепортирован на указанное
