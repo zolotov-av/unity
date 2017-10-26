@@ -71,7 +71,7 @@ public class PlayerController: MonoBehaviour
 	/**
 	 * Захват управления
 	 *
-	 * GameState вызывает эту функцию, когда берет контроллер под своё
+	 * GameState вызывает эту функцию, когда берет управление контроллером
 	 */
 	public virtual void Grab(GameStateBehaviour gs)
 	{
