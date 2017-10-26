@@ -72,6 +72,11 @@ public class AdvancedGameState: GameStateBehaviour
 	public CanvasScript canvasCtl;
 	
 	/**
+	 * Ссылка на объект держащий AudioListener
+	 */
+	private Transform audioListener;
+	
+	/**
 	 * Событие инициализации
 	 *
 	 * Пользователь должен переопределить этот метод и реализовать в нём
@@ -106,6 +111,10 @@ public class AdvancedGameState: GameStateBehaviour
 		Debug.Log("GameState init canvas");
 		canvasCtl = canvas.GetComponent<CanvasScript>();
 		canvasCtl.questManager = questManager;
+		
+		// присоединяем AudioListener к персонажу
+		audioListener = transform.Find("AudioListener");
+		if ( audioListener ) audioListener.SetParent(player.transform, false);
 	}
 	
 	/**

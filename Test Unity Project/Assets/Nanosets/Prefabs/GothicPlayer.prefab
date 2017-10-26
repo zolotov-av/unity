@@ -1355,10 +1355,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4343810903130760}
   - component: {fileID: 95901594477588640}
-  - component: {fileID: 114600027725290222}
-  - component: {fileID: 81595877663149860}
   - component: {fileID: 136382877646433738}
   - component: {fileID: 54338754345837414}
+  - component: {fileID: 114600027725290222}
   m_Layer: 8
   m_Name: GothicPlayer
   m_TagString: Player
@@ -3805,13 +3804,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 1
---- !u!81 &81595877663149860
-AudioListener:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1746307644647320}
-  m_Enabled: 1
 --- !u!95 &95901594477588640
 Animator:
   serializedVersion: 3
