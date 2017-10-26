@@ -92,6 +92,6 @@ public class CameraFollow: MonoBehaviour
 		transform.LookAt(tp);
 	}
 	
-} // class CameraScript
+} // class CameraFollow
 
 } // namespace Nanosoft
