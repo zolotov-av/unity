@@ -70,7 +70,11 @@ public class TestRotation: MonoBehaviour
 		
 		if ( enableRotation )
 		{
-			transform.rotation = Quaternion.RotateTowards(transform.rotation, target.rotation, maxSpeed *  Time.deltaTime);
+			transform.rotation = Quaternion.RotateTowards(
+				transform.rotation,         // откуда вращаем
+				target.rotation,            // куда вращаем
+				maxSpeed * Time.deltaTime   // ограничение скорости
+				);
 		}
 	}
 	
