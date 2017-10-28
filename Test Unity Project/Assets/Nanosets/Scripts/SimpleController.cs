@@ -79,8 +79,6 @@ public class SimpleController: PlayerController
 	 */
 	private Rigidbody rb;
 	
-	private bool freeCamera = false;
-	
 	private const string rotateCameraXInput = "Mouse X";
 	private const string rotateCameraYInput = "Mouse Y";
 	private const string horizontalInput = "Horizontal";
@@ -148,32 +146,6 @@ public class SimpleController: PlayerController
 		else
 		{
 			rotationSpeed = 0f;
-		}
-		
-		if ( cursorLocked )
-		{
-			// TODO
-			// 
-			// реализовать плавное возвращение в режим следования
-			// либо персонаж должен плавно развернуться по направлению камеры,
-			// либо камера должна плавно развернуться по направлению персонажа
-			
-			bool wasFree = freeCamera;
-			freeCamera = Input.GetMouseButton(0);
-			if ( freeCamera )
-			{
-				if ( !wasFree )
-				{
-					cameraCtl.rotation = transform.rotation;
-				}
-			}
-			else
-			{
-				if ( wasFree )
-				{
-					transform.rotation = cameraCtl.rotation;
-				}
-			}
 		}
 	}
 	
@@ -259,18 +231,12 @@ public class SimpleController: PlayerController
 	
 	void FixedUpdate()
 	{
-		if ( rotateCamera )
-		{
-			Quaternion rot = Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
-			cameraCtl.Rotate(rot);
-		}
+		Quaternion rot = Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
+		cameraCtl.Rotate(rot);
 		
 		if ( rotatePlayer )
 		{
-			//Quaternion rot = Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
-			//transform.rotation *= rot;
-			transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime);
-			cameraCtl.rotation = transform.rotation;
+			transform.rotation = Quaternion.RotateTowards(transform.rotation, cameraCtl.rotation, maxRotationSpeed * Time.deltaTime);
 		}
 		
 		Vector3 move = transform.TransformDirection(localVelocity);
