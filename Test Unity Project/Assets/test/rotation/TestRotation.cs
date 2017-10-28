@@ -14,7 +14,7 @@ public class TestRotation: MonoBehaviour
 	/**
 	 * Максимальная скорость вращения (градус/сек)
 	 */
-	public float speed = 30f;
+	public float maxSpeed = 30f;
 	
 	/**
 	 * Включить вращение
@@ -70,7 +70,7 @@ public class TestRotation: MonoBehaviour
 		
 		if ( enableRotation )
 		{
-			transform.rotation = Quaternion.RotateTowards(transform.rotation, target.rotation, 31f *  Time.deltaTime);
+			transform.rotation = Quaternion.RotateTowards(transform.rotation, target.rotation, maxSpeed *  Time.deltaTime);
 		}
 	}
 	
