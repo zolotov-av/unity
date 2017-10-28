@@ -17,9 +17,30 @@ public class SimpleController: PlayerController
 {
 	
 	/**
+	 * Тип управления персонажем
+	 */
+	public enum ControlType
+	{
+		/**
+		 * Персонаж разворачивается в указанную сторону и бежит прямо
+		 */
+		FreeRunning,
+		
+		/**
+		 * Персонаж пятиться нажать назад
+		 */
+		Strafe
+	}
+	
+	/**
 	 * Ссылка на контроллер камеры
 	 */
 	private CameraScript cameraCtl;
+	
+	/**
+	 * Тип управления
+	 */
+	public ControlType controlType = ControlType.FreeRunning;
 	
 	/**
 	 * Скорость движения персонажа (с которой персонаж может двигаться)
@@ -210,6 +231,42 @@ public class SimpleController: PlayerController
 		handleMovement();
 	}
 	
+	protected void handleStrafeMovement()
+	{
+		Vector3 move = transform.TransformDirection(localVelocity);
+		
+		if ( rotatePlayer )
+		{
+			rb.rotation = Quaternion.RotateTowards(transform.rotation, cameraCtl.rotation, maxRotationSpeed * Time.deltaTime);
+		}
+		
+		if ( velocity > 0f )
+		{
+			rb.position = transform.position + move * Time.deltaTime;
+		}
+	}
+	
+	protected void handleFreeMovement()
+	{
+		Vector3 move = cameraCtl.rotation * localVelocity;
+		
+		if ( velocity > 0f )
+		{
+			Quaternion q = Quaternion.LookRotation(move, Vector3.up);
+			
+			transform.rotation = Quaternion.RotateTowards(transform.rotation, q, maxRotationSpeed * Time.deltaTime);
+			
+			rb.position = transform.position + transform.forward * velocity * Time.deltaTime;
+		}
+		else
+		{
+			if ( rotatePlayer )
+			{
+				rb.rotation = Quaternion.RotateTowards(transform.rotation, cameraCtl.rotation, maxRotationSpeed * Time.deltaTime);
+			}
+		}
+	}
+	
 	/**
 	 * Захват управления
 	 *
@@ -234,13 +291,14 @@ public class SimpleController: PlayerController
 		Quaternion rot = Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
 		cameraCtl.Rotate(rot);
 		
-		if ( rotatePlayer )
+		if ( controlType == ControlType.Strafe )
 		{
-			transform.rotation = Quaternion.RotateTowards(transform.rotation, cameraCtl.rotation, maxRotationSpeed * Time.deltaTime);
+			handleStrafeMovement();
 		}
-		
-		Vector3 move = transform.TransformDirection(localVelocity);
-		rb.MovePosition(transform.position + move * Time.deltaTime);
+		else
+		{
+			handleFreeMovement();
+		}
 	}
 	
 	void Update()
