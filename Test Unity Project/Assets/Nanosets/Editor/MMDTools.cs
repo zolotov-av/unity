@@ -3,6 +3,9 @@ using UnityEditor;
 using System.IO;
 using System.Xml.Serialization;
 
+namespace Nanosoft
+{
+
 public class MMDTools
 {
 	
@@ -71,10 +74,17 @@ public class MMDTools
 		int count = mats.Length;
 		Debug.Log("MMDTools.FixMMD(): model loaded, mat count: " + count);
 		
-		Shader shader = Shader.Find("Toon/Toon MMD");
-		if ( shader == null )
+		Shader frontShader = Shader.Find("Toon/MMD Front");
+		if ( frontShader == null )
 		{
-			Debug.Log("shader not found");
+			Debug.LogError("shader not found [Toon/MMD Front]");
+			return;
+		}
+		
+		Shader bothShader = Shader.Find("Toon/MMD Both");
+		if ( bothShader == null )
+		{
+			Debug.LogError("shader not found [Toon/MMD Both]");
 			return;
 		}
 		
@@ -94,8 +104,14 @@ public class MMDTools
 				continue;
 			}
 			
-			m.shader = shader;
+			m.shader = (mat.isDrawBothFaces != 0) ? bothShader : frontShader;
+			m.renderQueue = -1;
 			m.SetColor("_Color", Color.white);
+			m.SetColor("_Diffuse", mat.diffuse.color4);
+			m.SetColor("_Specular", mat.specular.color3);
+			m.SetColor("_Ambient", mat.ambient.color3);
+			//m.SetColor("_EdgeColor", mat.edgeColor.color4);
+			//m.SetFloat("_Shiness", mat.shiness);
 			
 			Texture2D t = AssetDatabase.LoadAssetAtPath(prefix + texName, typeof(Texture2D)) as Texture2D;
 			status = t != null ? "  ok  " : " fail ";
@@ -106,7 +122,7 @@ public class MMDTools
 			}
 			else
 			{
-				m.SetTexture("_SphereAddTex", t);
+				m.SetTexture("_SphereTex", t);
 			}
 		}
 	}
@@ -190,4 +206,49 @@ public class MMDMaterial
 	
 	[XmlElement("additionalTextureID")]
 	public int spTexId;
+	
+	[XmlElement("diffuse")]
+	public MMDColor diffuse;
+	
+	[XmlElement("specular")]
+	public MMDColor specular;
+	
+	[XmlElement("ambient")]
+	public MMDColor ambient;
+	
+	[XmlElement("edgeColor")]
+	public MMDColor edgeColor;
+	
+	[XmlElement("shiness")]
+	public float shiness;
+	
+	[XmlElement("isDrawBothFaces")]
+	public int isDrawBothFaces;
 }
+
+public class MMDColor
+{
+	[XmlElement("r")]
+	public float r = 0.0f;
+	
+	[XmlElement("g")]
+	public float g = 0.0f;
+	
+	[XmlElement("b")]
+	public float b = 0.0f;
+	
+	[XmlElement("a")]
+	public float a = 1.0f;
+	
+	public Color color3
+	{
+		get { return new Color(r, g, b, 1.0f); }
+	}
+	
+	public Color color4
+	{
+		get { return new Color(r, g, b, a); }
+	}
+}
+
+} // namespace Nanosoft
