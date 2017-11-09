@@ -1,51 +1,56 @@
 
-float4 _Color;
+half4 _Color;
+
 sampler2D _MainTex;
-float	_ShadowThreshold;
-float4	_ShadowColor;
-float	_ShadowSharpness;
-float	_Shininess;
+sampler2D _SphereTex;
+
+half _LightFactor;
+
+half _LightAtten;
+half _DarkAtten;
+half _LightClamp;
+half _DarkClamp;
 
 struct ToonSurfaceOutput
 {
 	half3 Albedo;
 	half3 Normal;
 	half3 Emission;
-	half3 Gloss;
-	half Specular;
+	//half Specular;
+	//half3 Gloss;
 	half Alpha;
 	half4 Color;
 };
 
 struct Input
 {
-	float2 uv_MainTex;
+	half2 uv_MainTex;
 };
 
 void surf(Input IN, inout ToonSurfaceOutput o)
 {
-	half4 c		= tex2D(_MainTex, IN.uv_MainTex) * _Color;
+	// texture color
+	half4 ct = tex2D(_MainTex, IN.uv_MainTex) * _Color;
 	
-	o.Albedo = 0.0;
-	o.Emission = 0.0;
-	o.Gloss = 0.0;
-	o.Specular = 0.0;
-	o.Color = c;
-	o.Alpha = c.a;
+	// sphere reflection color
+	half3 vn = normalize(mul(UNITY_MATRIX_V, half4(o.Normal, 0.0h)).xyz);
+	half4 cs = tex2D(_SphereTex, vn.xy * 0.5h + 0.5h);
+	
+	o.Color = ct + cs;
+	o.Alpha = ct.a;
 }
 
 /**
  * Lighting for forward side
  */
-half4 LightingToonForward(ToonSurfaceOutput s, half3 lightDir, half atten)
+half4 LightingToonFront(ToonSurfaceOutput s, half3 lightDir, half atten)
 {
-	half lightStrength = dot(lightDir, s.Normal) * 0.5 + 0.5;
-	half shadowRate = abs(max(-1, (min(lightStrength, _ShadowThreshold) - _ShadowThreshold) * _ShadowSharpness)) * _ShadowColor.a;
+	half factor = (dot(lightDir, s.Normal) - _DarkClamp) / (_LightClamp - _DarkClamp);
 	
-	half4 lightColor = s.Color * _LightColor0 * (atten * _Shininess);
+	half4 lightColor = s.Color * _LightColor0 * (atten * _LightAtten * _LightFactor);
+	half4 darkColor = s.Color * _LightColor0 * (atten * _DarkAtten * _LightFactor);
 	
-	half4 color = lerp(lightColor, _ShadowColor, shadowRate);
-	
+	half4 color = lerp(darkColor, lightColor, saturate(factor));
 	color.a = s.Alpha;
 	return color;
 }
@@ -53,15 +58,14 @@ half4 LightingToonForward(ToonSurfaceOutput s, half3 lightDir, half atten)
 /**
  * Lighting for backward side
  */
-half4 LightingToonBackward(ToonSurfaceOutput s, half3 lightDir, half atten)
+half4 LightingToonBack(ToonSurfaceOutput s, half3 lightDir, half atten)
 {
-	half lightStrength = dot(lightDir, s.Normal) * (-0.5) + 0.5;
-	half shadowRate = abs(max(-1, (min(lightStrength, _ShadowThreshold) - _ShadowThreshold) * _ShadowSharpness)) * _ShadowColor.a;
+	half factor = (-dot(lightDir, s.Normal) - _DarkClamp) / (_LightClamp - _DarkClamp);
 	
-	half4 lightColor = s.Color * _LightColor0 * (atten * _Shininess);
+	half4 lightColor = s.Color * _LightColor0 * (atten * _LightAtten * _LightFactor);
+	half4 darkColor = s.Color * _LightColor0 * (atten * _DarkAtten * _LightFactor);
 	
-	half4 color = lerp(lightColor, _ShadowColor, shadowRate);
-	
+	half4 color = lerp(darkColor, lightColor, saturate(factor));
 	color.a = s.Alpha;
 	return color;
 }
