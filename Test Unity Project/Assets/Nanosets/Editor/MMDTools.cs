@@ -57,15 +57,6 @@ public class MMDTools
 		//return null;
 	}
 	
-	[MenuItem("Assets/Test MMD")]
-	private static void TestMMD()
-	{
-		MMDModel model = LoadSelectedModel();
-		if ( model == null ) return;
-		
-		Debug.Log("MMDTools: ok");
-	}
-	
 	/**
 	 * Проверить текстуры
 	 */
@@ -175,6 +166,40 @@ public class MMDTools
 			//m.SetColor("_EdgeColor", mat.edgeColor.color4);
 			//m.SetFloat("_Shiness", mat.shiness);
 			
+			if ( mat.mainTexId < 0 )
+			{
+				m.SetTexture("_MainTex", null);
+			}
+			else
+			{
+				MMDTexture mainTex = model.TextureById(mat.mainTexId);
+				if ( mainTex == null )
+				{
+					Debug.LogError("MMDTools: Mat[" + mat.name + "] wrong main texture id");
+				}
+				else if ( mainTex.texture != null )
+				{
+					m.SetTexture("_MainTex", mainTex.texture);
+				}
+			}
+			
+			if ( mat.toonTexId < 0 )
+			{
+				m.SetTexture("_ToonTex", null);
+			}
+			else
+			{
+				MMDTexture toonTex = model.TextureById(mat.toonTexId);
+				if ( toonTex == null )
+				{
+					Debug.LogError("MMDTools: Mat[" + mat.name + "] wrong toon texture id");
+				}
+				else if ( toonTex.texture != null )
+				{
+					m.SetTexture("_ToonTex", toonTex.texture);
+				}
+			}
+			
 			if ( mat.spTexId < 0 )
 			{
 				m.SetTexture("_SphereTex", null);
@@ -185,7 +210,6 @@ public class MMDTools
 				if ( spTex == null )
 				{
 					Debug.LogError("MMDTools: Mat[" + mat.name + "] wrong sphere texture id");
-					continue;
 				}
 				else if ( spTex.texture != null )
 				{
@@ -197,7 +221,6 @@ public class MMDTools
 		return true;
 	}
 	
-	[MenuItem("Tools/Fix MMD materials")]
 	[MenuItem("Assets/Fix MMD materials")]
 	public static void MenuFixMaterials()
 	{
@@ -218,7 +241,7 @@ public class MMDTools
 	}
 	
 	[MenuItem("Assets/Reset MMD materials")]
-	protected static void ResetMaterials()
+	protected static void MenuResetMaterials()
 	{
 		MMDModel model = LoadSelectedModel();
 		if ( model == null )
@@ -231,7 +254,6 @@ public class MMDTools
 		
 		MMDMaterial[] mats = model.materialList;
 		int count = mats.Length;
-		Debug.Log("MMDTools.FixMMD(): model loaded, mat count: " + count);
 		
 		string matPrefix = prefix + "Materials/";
 		
@@ -240,18 +262,17 @@ public class MMDTools
 			MMDMaterial mat = mats[i];
 			
 			Material m = AssetDatabase.LoadAssetAtPath(matPrefix + mat.name + ".mat", typeof(Material)) as Material;
-			string status = m != null ? "  ok  " : " fail ";
 			
 			if ( m == null )
 			{
-				Debug.Log("Mat[" + i.ToString() + "] " + mat.name + " ["  + status + "]");
+				Debug.LogError("MMDTools: Mat[" + mat.name + "] not found, reimport .FBX first");
 				continue;
 			}
 			
+			m.SetColor("_Color", Color.white);
+			m.SetFloat("_LightFactor", 1f);
 			m.SetFloat("_LightAtten", 1f);
 			m.SetFloat("_DarkAtten", 0f);
-			m.SetFloat("_LightFactor", 1f);
-			m.SetColor("_Color", Color.white);
 		}
 	}
 }
@@ -291,6 +312,7 @@ public class MMDModel
 
 public class MMDTexture
 {
+	
 	[XmlElement("fileName")]
 	public string fileName;
 	
@@ -299,12 +321,20 @@ public class MMDTexture
 	
 	[XmlIgnoreAttribute]
 	public Texture2D texture = null;
-}
+	
+} // class MMDTexture
 
 public class MMDMaterial
 {
+	
 	[XmlElement("materialName")]
 	public string name;
+	
+	[XmlElement("textureID")]
+	public int mainTexId;
+	
+	[XmlElement("toonTextureID")]
+	public int toonTexId;
 	
 	[XmlElement("additionalTextureID")]
 	public int spTexId;
@@ -326,10 +356,12 @@ public class MMDMaterial
 	
 	[XmlElement("isDrawBothFaces")]
 	public int isDrawBothFaces;
-}
+	
+} // class MMDMaterial
 
 public class MMDColor
 {
+	
 	[XmlElement("r")]
 	public float r = 0.0f;
 	
@@ -351,6 +383,7 @@ public class MMDColor
 	{
 		get { return new Color(r, g, b, a); }
 	}
-}
+	
+} // class MMDColor
 
 } // namespace Nanosoft
