@@ -126,6 +126,15 @@ public class CameraScript: MonoBehaviour
 		distance = startDistance;
 		camAngle = startAngle;
 		
+		if ( target != null )
+		{
+			rotation = target.transform.rotation;
+		}
+		else
+		{
+			rotation = Quaternion.identity;
+		}
+		
 		if ( !camdbg )
 		{
 			var obj = GameObject.FindWithTag("CameraDebug");
