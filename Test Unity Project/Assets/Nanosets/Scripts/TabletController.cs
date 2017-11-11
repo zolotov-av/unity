@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 namespace Nanosoft
@@ -40,6 +42,8 @@ public class TabletController: GameStateBehaviour
 	 */
 	protected GameObject player;
 	
+	private NavMeshAgent playerNav;
+	
 	/**
 	 * Ссылка на камеру
 	 *
@@ -70,6 +74,11 @@ public class TabletController: GameStateBehaviour
 	 * Ссылка на объект держащий AudioListener
 	 */
 	private Transform audioListener;
+	
+	/**
+	 * Ссылка на объект указывающий цель движения по клику
+	 */
+	private Transform targetPoint;
 	
 	/**
 	 * Тип ввода - мобильный (сенсорный экран) или ПК (клавиатура и мышка)
@@ -106,6 +115,8 @@ public class TabletController: GameStateBehaviour
 	 */
 	private bool rotatePlayer = false;
 	
+	private bool syncCamera = false;
+	
 	/**
 	 * Текущая скорость вращения камеры/персонажа (градус/сек)
 	 */
@@ -137,12 +148,17 @@ public class TabletController: GameStateBehaviour
 	 */
 	private Rigidbody rb;
 	
+	private RectTransform hRotateBox;
+	private TouchTracker hRotateTracker;
+	private TouchTracker vRotateTracker;
+	
 	private const string rotateCameraXInput = "Mouse X";
 	private const string rotateCameraYInput = "Mouse Y";
 	private const string horizontalInput = "Horizontal";
 	private const string verticallInput = "Vertical";
 	private const float rotateSensitivity = 300f;
 	private const float maxRotationSpeed = 360f;
+	private const float syncRotationSpeed = 30f;
 	
 	/**
 	 * Установить персонажа
@@ -152,6 +168,8 @@ public class TabletController: GameStateBehaviour
 		player = obj;
 		animator = obj.GetComponent<Animator>();
 		rb = obj.GetComponent<Rigidbody>();
+		playerNav = obj.GetComponent<NavMeshAgent>();
+		playerNav.enabled = true;
 		
 		// присоединяем AudioListener к персонажу
 		if ( audioListener ) audioListener.SetParent(player.transform, false);
@@ -211,6 +229,11 @@ public class TabletController: GameStateBehaviour
 		
 		audioListener = transform.Find("AudioListener");
 		
+		targetPoint = transform.Find("TargetPoint");
+		targetPoint.SetParent(null, true);
+		targetPoint.gameObject.SetActive(false);
+		DontDestroyOnLoad(targetPoint.gameObject);
+		
 		SetPlayer(player);
 		
 		cameraCtl = playerCamera.GetComponent<CameraScript>();
@@ -220,6 +243,12 @@ public class TabletController: GameStateBehaviour
 		canvasCtl = canvas.GetComponent<CanvasScript>();
 		canvasCtl.questManager = questManager;
 		
+		hRotateBox = canvas.transform.Find("hRotateBox") as RectTransform;
+		hRotateTracker = new TouchTracker();
+		hRotateTracker.rt = hRotateBox;
+		
+		vRotateTracker = new TouchTracker();
+		vRotateTracker.rt = canvas.transform.Find("vRotateBox") as RectTransform;
 	}
 	
 	/**
@@ -370,12 +399,68 @@ public class TabletController: GameStateBehaviour
 		if ( Input.GetKeyDown(KeyCode.Escape) )
 		{
 			Application.Quit();
+			return;
 		}
+		
+		hRotateTracker.HandleTouch();
+		vRotateTracker.HandleTouch();
+		
+		var rotateDelta = -hRotateTracker.deltaPosition.x;
+		rotationSpeed = rotateDelta;//Mathf.Clamp(rotateDelta, -maxRotationSpeed, maxRotationSpeed);
+		
+		var angleDelta = vRotateTracker.deltaPosition.y;
+		var distanceDelta = 0f;//Input.GetAxis("Camera Distance");
+		cameraCtl.UpdateOptionsRaw(distanceDelta, angleDelta);
+		/*
+		if ( Input.GetMouseButtonDown(0) )
+		{
+			Camera c = playerCamera.GetComponent<Camera>();
+			Ray ray = c.ScreenPointToRay(Input.mousePosition);
+			RaycastHit hit;
+			if ( Physics.Raycast(ray, out hit, 1000, 1 << 9, QueryTriggerInteraction.Ignore) )
+			{
+				targetPoint.position = hit.point;
+				targetPoint.gameObject.SetActive(true);
+				playerNav.SetDestination(hit.point);
+			}
+		}
+		*/
+		int count = Input.touchCount;
+		for(int i = 0; i < count; i++)
+		{
+			var touch = Input.GetTouch(i);
+			if ( touch.phase == TouchPhase.Began )
+			{
+				if ( hRotateTracker.TouchIsFree(touch) && vRotateTracker.TouchIsFree(touch) )
+				{
+					Camera c = playerCamera.GetComponent<Camera>();
+					Ray ray = c.ScreenPointToRay(touch.position);
+					RaycastHit hit;
+					if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) )
+					{
+						targetPoint.position = hit.point;
+						targetPoint.gameObject.SetActive(true);
+						playerNav.SetDestination(hit.point);
+					}
+					break;
+				}
+			}
+		}
+		
+		syncCamera = playerNav.velocity.magnitude > 0.05f;
+		animator.SetBool("walk", playerNav.velocity.magnitude > 0.01f);
 	}
 	
 	void FixedUpdate()
 	{
-		cameraCtl.rotation *= Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
+		if ( syncCamera )
+		{
+			cameraCtl.rotation = Quaternion.RotateTowards(cameraCtl.rotation, player.transform.rotation, syncRotationSpeed * Time.deltaTime);
+		}
+		else
+		{
+			cameraCtl.rotation *= Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
+		}
 		
 		if ( velocity > 0f )
 		{

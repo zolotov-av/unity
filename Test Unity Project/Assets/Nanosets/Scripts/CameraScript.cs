@@ -150,6 +150,14 @@ public class CameraScript: MonoBehaviour
 		camAngleSpeed = Mathf.Clamp(angleDelta * angleSensitivity, -maxAngleSpeed, maxAngleSpeed);
 	}
 	
+	public void UpdateOptionsRaw(float distanceDelta, float angleDelta)
+	{
+		distance -= distanceDelta;
+		distance = Mathf.Clamp(distance, 1f, maxDistance);
+		
+		camAngleSpeed = Mathf.Clamp(angleDelta, -maxAngleSpeed, maxAngleSpeed);
+	}
+	
 	public void Rotate(Quaternion rot)
 	{
 		rotation *= rot;
