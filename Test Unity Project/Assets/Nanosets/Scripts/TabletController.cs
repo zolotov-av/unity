@@ -164,11 +164,6 @@ public class TabletController: GameStateBehaviour
 	public float startAngle = 20f;
 	
 	/**
-	 * Максимальное расстояние от персонажа до камеры
-	 */
-	public float maxDistance = 10f;
-	
-	/**
 	 * Угол наклона камеры (тангаж)
 	 */
 	private float camAngle = 0f;
@@ -177,6 +172,18 @@ public class TabletController: GameStateBehaviour
 	 * Скорость изменения угла наклона камеры (тангажа)
 	 */
 	private float camAngleSpeed = 0f;
+	
+	[Header("Limit Settings")]
+	
+	/**
+	 * Минимальное расстояние от персонажа до камеры
+	 */
+	public float minDistance = 1f;
+	
+	/**
+	 * Максимальное расстояние от персонажа до камеры
+	 */
+	public float maxDistance = 10f;
 	
 	/**
 	 * Дистанция камеры (расстояние от персонажа до камеры)
@@ -216,7 +223,7 @@ public class TabletController: GameStateBehaviour
 	private const float maxRotationSpeed = 360f;
 	private const float syncRotationSpeed = 30f;
 	private const float angleSensitivity = 300f;
-	private const float minAngle = -40f;
+	private const float minAngle = -10f;
 	private const float maxAngle = 80f;
 	private const float maxAngleSpeed = 360f;
 	
@@ -292,7 +299,6 @@ public class TabletController: GameStateBehaviour
 		camAngle = startAngle;
 		pCamera = Instantiate(cameraPrefab);
 		pCamera.name = cameraPrefab.name;
-		//rotation = Quaternion.identity;
 		
 		// создаем канву
 		canvas = Instantiate(canvasPrefab);
@@ -335,22 +341,6 @@ public class TabletController: GameStateBehaviour
 	protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 	{
 		Debug.Log("TabletController.OnSceneLoaded(" + scene.name + ")");
-	}
-	
-	public void UpdateOptions(float distanceDelta, float angleDelta)
-	{
-		distance -= distanceDelta;
-		distance = Mathf.Clamp(distance, 1f, maxDistance);
-		
-		camAngleSpeed = Mathf.Clamp(angleDelta * angleSensitivity, -maxAngleSpeed, maxAngleSpeed);
-	}
-	
-	public void UpdateOptionsRaw(float distanceDelta, float angleDelta)
-	{
-		distance -= distanceDelta;
-		distance = Mathf.Clamp(distance, 1f, maxDistance);
-		
-		camAngleSpeed = Mathf.Clamp(angleDelta, -maxAngleSpeed, maxAngleSpeed);
 	}
 	
 	/**
@@ -403,7 +393,9 @@ public class TabletController: GameStateBehaviour
 	{
 		var angleDelta = cursorLocked ? Input.GetAxis(rotateCameraYInput) : 0f;
 		var distanceDelta = Input.GetAxis("Camera Distance");
-		UpdateOptions(distanceDelta, angleDelta);
+		
+		camAngleSpeed = Mathf.Clamp(angleDelta * angleSensitivity, -maxAngleSpeed, maxAngleSpeed);
+		distance = Mathf.Clamp(distance - distanceDelta, minDistance, maxDistance);
 		
 		if ( cursorLocked )
 		{
@@ -498,9 +490,13 @@ public class TabletController: GameStateBehaviour
 		var rotateDelta = -hRotateTracker.deltaPosition.x;
 		rotationSpeed = rotateDelta;//Mathf.Clamp(rotateDelta, -maxRotationSpeed, maxRotationSpeed);
 		
-		var angleDelta = vRotateTracker.deltaPosition.y;
-		var distanceDelta = 0f;//Input.GetAxis("Camera Distance");
-		UpdateOptionsRaw(distanceDelta, angleDelta);
+		//var distanceDelta = 0f;//Input.GetAxis("Camera Distance");
+		
+		//distance -= distanceDelta;
+		//distance = Mathf.Clamp(distance, 1f, maxDistance);
+		
+		camAngleSpeed = Mathf.Clamp(vRotateTracker.deltaPosition.y, -maxAngleSpeed, maxAngleSpeed);
+		
 		/*
 		if ( Input.GetMouseButtonDown(0) )
 		{
