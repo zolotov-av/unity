@@ -46,17 +46,8 @@ public class TabletController: GameStateBehaviour
 	
 	/**
 	 * Ссылка на камеру
-	 *
-	 * Камера конструируется динамически, без использования префаба
 	 */
-	[HideInInspector]
-	public GameObject playerCamera;
-	
-	/**
-	 * Ссылка на контроллер камеры
-	 */
-	[HideInInspector]
-	public CameraScript cameraCtl;
+	protected GameObject pCamera;
 	
 	/**
 	 * Канва пользовательского интерфейса (загруженный экземляр)
@@ -79,6 +70,8 @@ public class TabletController: GameStateBehaviour
 	 * Ссылка на объект указывающий цель движения по клику
 	 */
 	private Transform targetPoint;
+	
+	[Header("Player Settings")]
 	
 	/**
 	 * Тип ввода - мобильный (сенсорный экран) или ПК (клавиатура и мышка)
@@ -148,6 +141,69 @@ public class TabletController: GameStateBehaviour
 	 */
 	private Rigidbody rb;
 	
+	[Header("Camera Settings")]
+	
+	/**
+	 * Высота полета камеры
+	 *
+	 * Начало координат в модели персонажа обычно находиться в ногах. Этот
+	 * параметр нужен чтобы камера не валялась на земле и смотрела на тело
+	 * персонажа, а не на его ноги. Задает вертикальное смещение куда будет
+	 * смотреть камера, например на уровне грудной клетки или плечь персонажа.
+	 */
+	public float height = 1.4f;
+	
+	/**
+	 * Начальное расстояние от персонажа до камеры
+	 */
+	public float startDistance = 3f;
+	
+	/**
+	 * Начальный угол наклона камеры (тангаж - наклон в сторону земли/неба)
+	 */
+	public float startAngle = 20f;
+	
+	/**
+	 * Максимальное расстояние от персонажа до камеры
+	 */
+	public float maxDistance = 10f;
+	
+	/**
+	 * Угол наклона камеры (тангаж)
+	 */
+	private float camAngle = 0f;
+	
+	/**
+	 * Скорость изменения угла наклона камеры (тангажа)
+	 */
+	private float camAngleSpeed = 0f;
+	
+	/**
+	 * Дистанция камеры (расстояние от персонажа до камеры)
+	 */
+	private float distance = 0f;
+	
+	/**
+	 * Ориентация камеры относительно цели
+	 *
+	 * Параметр rotation задает направление куда смотрит персонаж (реальное,
+	 * в случае следящего режима, или виртуальное, в случае режима свободного
+	 * вращения камеры). Реальное положение и направление камеры рассчитывается
+	 * автоматически в LateUpdate(), с учетом дистанции и тангажа (наклона
+	 * в строну земли/неба).
+	 *
+	 * В следящем режиме камеры rotation = target.transform.rotation, т.е.
+	 * указывает направление куда смотрит персонаж, а сама камера находиться за
+	 * спиной персонажа и смотрит примерно в то же самое направление с
+	 * поправкой на тангаж (наклон в строну земли или неба).
+	 *
+	 * В режиме свободного вращения камеры rotation задает виртуальное
+	 * направление перснонажа, куда бы он смотрел, если был бы повернут также.
+	 * Этот режим позволяет смотреть на персонажа с любой стороны.
+	 */
+	[HideInInspector]
+	public Quaternion rotation;
+	
 	private RectTransform hRotateBox;
 	private TouchTracker hRotateTracker;
 	private TouchTracker vRotateTracker;
@@ -159,6 +215,17 @@ public class TabletController: GameStateBehaviour
 	private const float rotateSensitivity = 300f;
 	private const float maxRotationSpeed = 360f;
 	private const float syncRotationSpeed = 30f;
+	private const float angleSensitivity = 300f;
+	private const float minAngle = -40f;
+	private const float maxAngle = 80f;
+	private const float maxAngleSpeed = 360f;
+	
+	public static float ClampAngle(float angle, float min, float max)
+	{
+		while (angle > 360) angle -= 360;
+		while (angle < -360) angle += 360;
+		return Mathf.Clamp(angle, min, max);
+	}
 	
 	/**
 	 * Установить персонажа
@@ -170,9 +237,15 @@ public class TabletController: GameStateBehaviour
 		rb = obj.GetComponent<Rigidbody>();
 		playerNav = obj.GetComponent<NavMeshAgent>();
 		playerNav.enabled = true;
+		rotation = player.transform.rotation;
 		
 		// присоединяем AudioListener к персонажу
 		if ( audioListener ) audioListener.SetParent(player.transform, false);
+	}
+	
+	public void SetCamera(GameObject obj)
+	{
+		pCamera = obj;
 	}
 	
 	/**
@@ -215,8 +288,11 @@ public class TabletController: GameStateBehaviour
 		player.name = playerPrefab.name;
 		
 		// создаем камеру
-		playerCamera = Instantiate(cameraPrefab);
-		playerCamera.name = cameraPrefab.name;
+		distance = startDistance;
+		camAngle = startAngle;
+		pCamera = Instantiate(cameraPrefab);
+		pCamera.name = cameraPrefab.name;
+		//rotation = Quaternion.identity;
 		
 		// создаем канву
 		canvas = Instantiate(canvasPrefab);
@@ -224,7 +300,7 @@ public class TabletController: GameStateBehaviour
 		
 		// персонаж и камера не должны удаляться при переключении сцены
 		DontDestroyOnLoad(player);
-		DontDestroyOnLoad(playerCamera);
+		DontDestroyOnLoad(pCamera);
 		DontDestroyOnLoad(canvas);
 		
 		audioListener = transform.Find("AudioListener");
@@ -235,9 +311,7 @@ public class TabletController: GameStateBehaviour
 		DontDestroyOnLoad(targetPoint.gameObject);
 		
 		SetPlayer(player);
-		
-		cameraCtl = playerCamera.GetComponent<CameraScript>();
-		cameraCtl.target = player;
+		SetCamera(pCamera);
 		
 		Debug.Log("GameState init canvas");
 		canvasCtl = canvas.GetComponent<CanvasScript>();
@@ -261,6 +335,22 @@ public class TabletController: GameStateBehaviour
 	protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 	{
 		Debug.Log("TabletController.OnSceneLoaded(" + scene.name + ")");
+	}
+	
+	public void UpdateOptions(float distanceDelta, float angleDelta)
+	{
+		distance -= distanceDelta;
+		distance = Mathf.Clamp(distance, 1f, maxDistance);
+		
+		camAngleSpeed = Mathf.Clamp(angleDelta * angleSensitivity, -maxAngleSpeed, maxAngleSpeed);
+	}
+	
+	public void UpdateOptionsRaw(float distanceDelta, float angleDelta)
+	{
+		distance -= distanceDelta;
+		distance = Mathf.Clamp(distance, 1f, maxDistance);
+		
+		camAngleSpeed = Mathf.Clamp(angleDelta, -maxAngleSpeed, maxAngleSpeed);
 	}
 	
 	/**
@@ -313,7 +403,7 @@ public class TabletController: GameStateBehaviour
 	{
 		var angleDelta = cursorLocked ? Input.GetAxis(rotateCameraYInput) : 0f;
 		var distanceDelta = Input.GetAxis("Camera Distance");
-		cameraCtl.UpdateOptions(distanceDelta, angleDelta);
+		UpdateOptions(distanceDelta, angleDelta);
 		
 		if ( cursorLocked )
 		{
@@ -410,11 +500,11 @@ public class TabletController: GameStateBehaviour
 		
 		var angleDelta = vRotateTracker.deltaPosition.y;
 		var distanceDelta = 0f;//Input.GetAxis("Camera Distance");
-		cameraCtl.UpdateOptionsRaw(distanceDelta, angleDelta);
+		UpdateOptionsRaw(distanceDelta, angleDelta);
 		/*
 		if ( Input.GetMouseButtonDown(0) )
 		{
-			Camera c = playerCamera.GetComponent<Camera>();
+			Camera c = pCamera.GetComponent<Camera>();
 			Ray ray = c.ScreenPointToRay(Input.mousePosition);
 			RaycastHit hit;
 			if ( Physics.Raycast(ray, out hit, 1000, 1 << 9, QueryTriggerInteraction.Ignore) )
@@ -433,7 +523,7 @@ public class TabletController: GameStateBehaviour
 			{
 				if ( hRotateTracker.TouchIsFree(touch) && vRotateTracker.TouchIsFree(touch) )
 				{
-					Camera c = playerCamera.GetComponent<Camera>();
+					Camera c = pCamera.GetComponent<Camera>();
 					Ray ray = c.ScreenPointToRay(touch.position);
 					RaycastHit hit;
 					if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) )
@@ -455,16 +545,16 @@ public class TabletController: GameStateBehaviour
 	{
 		if ( syncCamera )
 		{
-			cameraCtl.rotation = Quaternion.RotateTowards(cameraCtl.rotation, player.transform.rotation, syncRotationSpeed * Time.deltaTime);
+			rotation = Quaternion.RotateTowards(rotation, player.transform.rotation, syncRotationSpeed * Time.deltaTime);
 		}
 		else
 		{
-			cameraCtl.rotation *= Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
+			rotation *= Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
 		}
 		
 		if ( velocity > 0f )
 		{
-			Vector3 move = cameraCtl.rotation * localVelocity;
+			Vector3 move = rotation * localVelocity;
 			Quaternion q = Quaternion.LookRotation(move, Vector3.up);
 			
 			rb.rotation = Quaternion.RotateTowards(rb.rotation, q, maxRotationSpeed * Time.deltaTime);
@@ -474,7 +564,7 @@ public class TabletController: GameStateBehaviour
 		{
 			if ( rotatePlayer )
 			{
-				rb.rotation = Quaternion.RotateTowards(rb.rotation, cameraCtl.rotation, maxRotationSpeed * Time.deltaTime);
+				rb.rotation = Quaternion.RotateTowards(rb.rotation, rotation, maxRotationSpeed * Time.deltaTime);
 			}
 		}
 		
@@ -490,6 +580,23 @@ public class TabletController: GameStateBehaviour
 		{
 			HandleMouseInput();
 		}
+	}
+	
+	void LateUpdate()
+	{
+		camAngle = ClampAngle(camAngle - camAngleSpeed * Time.deltaTime, minAngle, maxAngle);
+		
+		Vector3 tp = player.transform.position + player.transform.up * height;
+		
+		float rad = camAngle * Mathf.Deg2Rad;
+		
+		Vector3 up = rotation * Vector3.up;
+		Vector3 forward = rotation * Vector3.forward;
+		Vector3 cv = up * (Mathf.Sin(rad) * distance);
+		Vector3 sv = forward * (-Mathf.Cos(rad) * distance);
+		pCamera.transform.position = tp + cv + sv;
+		
+		pCamera.transform.LookAt(tp);
 	}
 	
 } // class TabletController
