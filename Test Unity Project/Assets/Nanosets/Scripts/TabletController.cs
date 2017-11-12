@@ -586,15 +586,28 @@ public class TabletController: GameStateBehaviour
 	{
 		camAngle = ClampAngle(camAngle - camAngleSpeed * Time.deltaTime, minAngle, maxAngle);
 		
+		// точка куда смотрит камера (центр экрана)
 		Vector3 tp = player.transform.position + player.transform.up * height;
 		
+		// вектор смещения камеры (вектор от объекта к камере)
 		float rad = camAngle * Mathf.Deg2Rad;
+		Vector3 cv = (rotation * Vector3.up) * (Mathf.Sin(rad) * distance);
+		Vector3 sv = (rotation * Vector3.forward) * (-Mathf.Cos(rad) * distance);
+		Vector3 cdir = cv + sv;
 		
-		Vector3 up = rotation * Vector3.up;
-		Vector3 forward = rotation * Vector3.forward;
-		Vector3 cv = up * (Mathf.Sin(rad) * distance);
-		Vector3 sv = forward * (-Mathf.Cos(rad) * distance);
-		pCamera.transform.position = tp + cv + sv;
+		// пускаем луч от цели к камере
+		// (проверка, есть ли на пути преграждающие объекты)
+		RaycastHit hit;
+		if ( Physics.Raycast(tp, cdir, out hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) )
+		{
+			// если луч нашел препрятствие, то корректируем дистанцию
+			pCamera.transform.position = tp + cdir * (hit.distance / distance);
+		}
+		else
+		{
+			// если препятствий нет, то полное расстояние
+			pCamera.transform.position = tp + cdir;
+		}
 		
 		pCamera.transform.LookAt(tp);
 	}

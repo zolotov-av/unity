@@ -22,9 +22,7 @@ public class CameraFollow: MonoBehaviour
 	/**
 	 * Цель за которой должна следить камера
 	 */
-	public GameObject target;
-	
-	[Header("Camera Settings")]
+	public Transform target;
 	
 	/**
 	 * Высота полета камеры
@@ -46,8 +44,15 @@ public class CameraFollow: MonoBehaviour
 	 */
 	public float camAngle = 30f;
 	
-	private const float minAngle = -40f;
-	private const float maxAngle = 80f;
+	/**
+	 * Минимальный угол наклона камеры
+	 */
+	public float minAngle = -40f;
+	
+	/**
+	 * Максимальный угол наклона камеры
+	 */
+	public float maxAngle = 80f;
 	
 	/**
 	 * Функция ограничивает угол некоторым пределами min/max
@@ -67,23 +72,42 @@ public class CameraFollow: MonoBehaviour
 		camAngle = ClampAngle(camAngle, minAngle, maxAngle);
 	}
 	
+	/**
+	 * Расчет камеры делаем в LateUpdate(), чтобы было гарантированно после
+	 * всех обновлений (расчетов в Update())
+	 */
 	void LateUpdate()
 	{
-		Transform tt = target.transform;
-		
 		// точка на которую будет смотреть камера (центр экрана)
-		Vector3 tp = tt.position + tt.up * height;
+		Vector3 tp = target.position + target.up * height;
 		
 		// переводим угол наклона из градусов в радианы
 		float rad = camAngle * Mathf.Deg2Rad;
 		
+		// расчет положения камеры
+		// UPD: для Raycast'а нам нужен вектор-смещение от цели к камере
+		//
 		// немного арифметики - перемещаем камеру назад на расстояние distance
 		// и наклоняем под углом camAngle, а точнее вычисляем позицию где
 		// должна находиться камера, чтобы она была на расстоянии distance
 		// и смотрела под углом camAngle
-		Vector3 cv = tt.up * (Mathf.Sin(rad) * distance);
-		Vector3 sv = tt.forward * (-Mathf.Cos(rad) * distance);
-		transform.position = tp + cv + sv;
+		Vector3 cv = target.up * (Mathf.Sin(rad) * distance);
+		Vector3 sv = target.forward * (-Mathf.Cos(rad) * distance);
+		Vector3 cdir = cv + sv;
+		
+		// пускаем луч от цели к камере, чтобы убедиться что на пути нет
+		// препятствий (магии нет, проверка осуществляется только по коллайдерам)
+		RaycastHit hit;
+		if ( Physics.Raycast(tp, cdir, out hit, distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) )
+		{
+			// если луч нашел препрятствие, то корректируем дистанцию
+			transform.position = tp + cdir * (hit.distance / distance);
+		}
+		else
+		{
+			// если препятствий нет, то полное расстояние
+			transform.position = tp + cdir;
+		}
 		
 		// смотреть на заданную точку.
 		// У функции LookAt() есть второй необязательный аргумент и возможно
