@@ -71,6 +71,11 @@ public class TabletController: GameStateBehaviour
 	 */
 	private Transform targetPoint;
 	
+	/**
+	 * Ссылка на объектект указывающий на цель движения (NPC)
+	 */
+	private Transform targetCircle;
+	
 	[Header("Player Settings")]
 	
 	/**
@@ -212,8 +217,10 @@ public class TabletController: GameStateBehaviour
 	public Quaternion rotation;
 	
 	private RectTransform hRotateBox;
+	private RectTransform rotateTap;
 	private TouchTracker hRotateTracker;
 	private TouchTracker vRotateTracker;
+	private TouchTracker rotateTracker;
 	
 	private const string rotateCameraXInput = "Mouse X";
 	private const string rotateCameraYInput = "Mouse Y";
@@ -316,6 +323,11 @@ public class TabletController: GameStateBehaviour
 		targetPoint.gameObject.SetActive(false);
 		DontDestroyOnLoad(targetPoint.gameObject);
 		
+		targetCircle = transform.Find("TargetCircle");
+		targetCircle.SetParent(null, true);
+		targetCircle.gameObject.SetActive(false);
+		DontDestroyOnLoad(targetCircle.gameObject);
+		
 		SetPlayer(player);
 		SetCamera(pCamera);
 		
@@ -329,6 +341,12 @@ public class TabletController: GameStateBehaviour
 		
 		vRotateTracker = new TouchTracker();
 		vRotateTracker.rt = canvas.transform.Find("vRotateBox") as RectTransform;
+		
+		rotateTap = canvas.transform.Find("RotateTap") as RectTransform;
+		rotateTap.gameObject.SetActive(false);
+		rotateTracker = new TouchTracker();
+		rotateTracker.rt = null;
+		rotateTracker.active = false;
 	}
 	
 	/**
@@ -476,6 +494,7 @@ public class TabletController: GameStateBehaviour
 		handleMovement();
 	}
 	
+	int invert = 1;
 	void HandleTouchInput()
 	{
 		if ( Input.GetKeyDown(KeyCode.Escape) )
@@ -497,20 +516,79 @@ public class TabletController: GameStateBehaviour
 		
 		camAngleSpeed = Mathf.Clamp(vRotateTracker.deltaPosition.y, -maxAngleSpeed, maxAngleSpeed);
 		
-		/*
-		if ( Input.GetMouseButtonDown(0) )
+		if ( rotateTracker.active )
 		{
-			Camera c = pCamera.GetComponent<Camera>();
-			Ray ray = c.ScreenPointToRay(Input.mousePosition);
-			RaycastHit hit;
-			if ( Physics.Raycast(ray, out hit, 1000, 1 << 9, QueryTriggerInteraction.Ignore) )
+			rotateTracker.ProcessTouch();
+			rotateTap.position = rotateTracker.position;
+			
+			if ( rotateTracker.active )
 			{
-				targetPoint.position = hit.point;
-				targetPoint.gameObject.SetActive(true);
-				playerNav.SetDestination(hit.point);
+				rotationSpeed = invert * rotateTracker.deltaPosition.x;
+				
+				//var distanceDelta = 0f;//Input.GetAxis("Camera Distance");
+				
+				//distance -= distanceDelta;
+				//distance = Mathf.Clamp(distance, 1f, maxDistance);
+				
+				camAngleSpeed = Mathf.Clamp(rotateTracker.deltaPosition.y, -maxAngleSpeed, maxAngleSpeed);
+			}
+			else
+			{
+				rotateTap.gameObject.SetActive(false);
+			}
+			
+			if ( rotateTracker.tap )
+			{
+				Camera c = pCamera.GetComponent<Camera>();
+				Ray ray = c.ScreenPointToRay(rotateTracker.position);
+				RaycastHit hit;
+				if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) )
+				{
+					if ( hit.collider.tag == "Interactable" )
+					{
+						var t = hit.collider.transform;
+						var p = t.position + t.forward * 0.4f;
+						targetCircle.position = t.position;
+						targetCircle.gameObject.SetActive(true);
+						targetPoint.gameObject.SetActive(false);
+						playerNav.SetDestination(p);
+					}
+					else
+					{
+						targetPoint.position = hit.point;
+						targetPoint.gameObject.SetActive(true);
+						targetCircle.gameObject.SetActive(false);
+						playerNav.SetDestination(hit.point);
+					}
+				}
 			}
 		}
-		*/
+		else
+		{
+			
+			int count = Input.touchCount;
+			for(int i = 0; i < count; i++)
+			{
+				var touch = Input.GetTouch(i);
+				if ( touch.phase == TouchPhase.Began )
+				{
+					if ( hRotateTracker.TouchIsFree(touch) && vRotateTracker.TouchIsFree(touch) )
+					{
+						rotateTap.position = touch.position;
+						rotateTap.gameObject.SetActive(true);
+						rotateTracker.Bind(touch);
+						
+						Camera c = pCamera.GetComponent<Camera>();
+						Vector3 cp = c.WorldToScreenPoint(player.transform.position);
+						invert = (cp.y > touch.position.y) ? 1 : -1;
+						break;
+					}
+				}
+			}
+			
+		}
+		
+		/*
 		int count = Input.touchCount;
 		for(int i = 0; i < count; i++)
 		{
@@ -524,14 +602,28 @@ public class TabletController: GameStateBehaviour
 					RaycastHit hit;
 					if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) )
 					{
-						targetPoint.position = hit.point;
-						targetPoint.gameObject.SetActive(true);
-						playerNav.SetDestination(hit.point);
+						if ( hit.collider.tag == "Interactable" )
+						{
+							var t = hit.collider.transform;
+							var p = t.position + t.forward * 0.4f;
+							targetCircle.position = t.position;
+							targetCircle.gameObject.SetActive(true);
+							targetPoint.gameObject.SetActive(false);
+							playerNav.SetDestination(p);
+						}
+						else
+						{
+							targetPoint.position = hit.point;
+							targetPoint.gameObject.SetActive(true);
+							targetCircle.gameObject.SetActive(false);
+							playerNav.SetDestination(hit.point);
+						}
 					}
 					break;
 				}
 			}
 		}
+		*/
 		
 		syncCamera = playerNav.velocity.magnitude > 0.05f;
 		animator.SetBool("walk", playerNav.velocity.magnitude > 0.01f);

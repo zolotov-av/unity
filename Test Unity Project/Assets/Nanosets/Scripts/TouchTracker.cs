@@ -16,14 +16,20 @@ public class TouchTracker
 	 */
 	public RectTransform rt;
 	
-	private bool active = false;
+	public bool active = false;
 	
-	private int fingerId;
+	public int fingerId;
+	
+	public float startTime;
 	
 	public float sensitivity = 1f;
 	
-	[HideInInspector]
 	public Vector2 deltaPosition;
+	
+	public Vector2 position;
+	
+	public bool tap;
+	public bool moved;
 	
 	public bool TouchIsFree(Touch touch)
 	{
@@ -93,6 +99,77 @@ public class TouchTracker
 					}
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Привязать тач
+	 *
+	 * Начать отслеживать тач по fingerId
+	 */
+	public void Bind(Touch touch)
+	{
+		tap = false;
+		moved = false;
+		active = true;
+		fingerId = touch.fingerId;
+		position = touch.position;
+	}
+	
+	public void ProcessTouch()
+	{
+		if ( active )
+		{
+			int count = Input.touchCount;
+			for(int i = 0; i < count; i++)
+			{
+				var touch = Input.GetTouch(i);
+				if ( touch.fingerId == fingerId )
+				{
+					if ( touch.phase == TouchPhase.Ended )
+					{
+						tap = !moved;
+						active = false;
+						deltaPosition.x = 0f;
+						deltaPosition.y = 0f;
+						position = touch.position;
+						return;
+					}
+					
+					if ( touch.phase == TouchPhase.Canceled )
+					{
+						tap = false;
+						active = false;
+						deltaPosition.x = 0f;
+						deltaPosition.y = 0f;
+						position = touch.position;
+						return;
+					}
+					
+					if ( touch.phase == TouchPhase.Moved ) moved = true;
+					if ( touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary )
+					{
+						int w = Screen.width;
+						int h = Screen.height;
+						float scale = 6000f / Mathf.Sqrt(w * w + h * h);
+						
+						deltaPosition = (touch.position - position) * scale;
+						position = touch.position;
+						return;
+					}
+					
+					active = false;
+					deltaPosition.x = 0f;
+					deltaPosition.y = 0f;
+					position = touch.position;
+					return;
+				}
+			}
+			
+			active = false;
+			deltaPosition.x = 0f;
+			deltaPosition.y = 0f;
+			return;
 		}
 	}
 	
