@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 namespace Nanosoft
@@ -285,6 +286,31 @@ public class TabletController: GameStateBehaviour
 				cursorLocked = false;
 			}
 		}
+	}
+	
+	/**
+	 * Найти элемент UI по экранным координатам
+	 */
+	public static GameObject RaycastUI(Vector2 p)
+	{
+		PointerEventData eventData = new PointerEventData(EventSystem.current);
+		eventData.position = p;
+		List<RaycastResult> rc_list = new List<RaycastResult>(); 
+		EventSystem.current.RaycastAll(eventData, rc_list);
+		
+		int count = rc_list.Count;
+		for (int i = 0; i < count; i++)
+		{
+			GameObject obj = rc_list[i].gameObject;
+			if ( obj != null )
+			{
+				rc_list.Clear();
+				return obj;
+			}
+		}
+		
+		rc_list.Clear();
+		return null;
 	}
 	
 	/**
@@ -572,7 +598,7 @@ public class TabletController: GameStateBehaviour
 				var touch = Input.GetTouch(i);
 				if ( touch.phase == TouchPhase.Began )
 				{
-					if ( hRotateTracker.TouchIsFree(touch) && vRotateTracker.TouchIsFree(touch) )
+					if ( RaycastUI(touch.position) == null )
 					{
 						rotateTap.position = touch.position;
 						rotateTap.gameObject.SetActive(true);
