@@ -31,6 +31,17 @@ public class TouchTracker
 	public bool tap;
 	public bool moved;
 	
+	public int tag;
+	
+	public TouchTracker()
+	{
+		rt = null;
+		active = false;
+		tap = false;
+		moved = false;
+		tag = 0;
+	}
+	
 	public bool TouchIsFree(Touch touch)
 	{
 		if ( active )

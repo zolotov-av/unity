@@ -217,11 +217,15 @@ public class TabletController: GameStateBehaviour
 	[HideInInspector]
 	public Quaternion rotation;
 	
-	private RectTransform hRotateBox;
 	private RectTransform rotateTap;
-	private TouchTracker hRotateTracker;
-	private TouchTracker vRotateTracker;
+	private RectTransform scaleTap;
+	private TouchManager touchManager;
 	private TouchTracker rotateTracker;
+	private TouchTracker trackerA;
+	private TouchTracker trackerB;
+	private int touchCount;
+	private float touchScale;
+	private float touchScaleDistance;
 	
 	private const string rotateCameraXInput = "Mouse X";
 	private const string rotateCameraYInput = "Mouse Y";
@@ -313,6 +317,8 @@ public class TabletController: GameStateBehaviour
 		return null;
 	}
 	
+	public Text dbg;
+	
 	/**
 	 * Событие инициализации
 	 *
@@ -360,19 +366,26 @@ public class TabletController: GameStateBehaviour
 		Debug.Log("GameState init canvas");
 		canvasCtl = canvas.GetComponent<CanvasScript>();
 		canvasCtl.questManager = questManager;
-		
-		hRotateBox = canvas.transform.Find("hRotateBox") as RectTransform;
-		hRotateTracker = new TouchTracker();
-		hRotateTracker.rt = hRotateBox;
-		
-		vRotateTracker = new TouchTracker();
-		vRotateTracker.rt = canvas.transform.Find("vRotateBox") as RectTransform;
+		dbg = canvas.transform.Find("Panel/Text").GetComponent<Text>();
+		dbg.text = "Debug";
 		
 		rotateTap = canvas.transform.Find("RotateTap") as RectTransform;
 		rotateTap.gameObject.SetActive(false);
-		rotateTracker = new TouchTracker();
-		rotateTracker.rt = null;
-		rotateTracker.active = false;
+		
+		scaleTap = canvas.transform.Find("ScaleTap") as RectTransform;
+		scaleTap.gameObject.SetActive(false);
+		
+		touchManager = new TouchManager(4);
+		touchCount = 0;
+		int w = Screen.width;
+		int h = Screen.height;
+		float m = Mathf.Sqrt(w * w + h * h);
+		touchScale = 6000f / m;
+		touchScaleDistance = 32.0f / m;
+		
+		rotateTracker = null;
+		trackerA = null;
+		trackerB = null;
 	}
 	
 	/**
@@ -452,6 +465,9 @@ public class TabletController: GameStateBehaviour
 		}
 	}
 	
+	/**
+	 * Обработка ввода с мышкой
+	 */
 	void HandleMouseInput()
 	{
 		if ( canvasCtl.inDialog )
@@ -520,7 +536,9 @@ public class TabletController: GameStateBehaviour
 		handleMovement();
 	}
 	
-	int invert = 1;
+	/**
+	 * Обработка ввода с мультитач
+	 */
 	void HandleTouchInput()
 	{
 		if ( Input.GetKeyDown(KeyCode.Escape) )
@@ -529,129 +547,185 @@ public class TabletController: GameStateBehaviour
 			return;
 		}
 		
-		hRotateTracker.HandleTouch();
-		vRotateTracker.HandleTouch();
-		
-		var rotateDelta = -hRotateTracker.deltaPosition.x;
-		rotationSpeed = rotateDelta;//Mathf.Clamp(rotateDelta, -maxRotationSpeed, maxRotationSpeed);
-		
-		//var distanceDelta = 0f;//Input.GetAxis("Camera Distance");
-		
-		//distance -= distanceDelta;
-		//distance = Mathf.Clamp(distance, 1f, maxDistance);
-		
-		camAngleSpeed = Mathf.Clamp(vRotateTracker.deltaPosition.y, -maxAngleSpeed, maxAngleSpeed);
-		
-		if ( rotateTracker.active )
-		{
-			rotateTracker.ProcessTouch();
-			rotateTap.position = rotateTracker.position;
-			
-			if ( rotateTracker.active )
-			{
-				rotationSpeed = invert * rotateTracker.deltaPosition.x;
-				
-				//var distanceDelta = 0f;//Input.GetAxis("Camera Distance");
-				
-				//distance -= distanceDelta;
-				//distance = Mathf.Clamp(distance, 1f, maxDistance);
-				
-				camAngleSpeed = Mathf.Clamp(rotateTracker.deltaPosition.y, -maxAngleSpeed, maxAngleSpeed);
-			}
-			else
-			{
-				rotateTap.gameObject.SetActive(false);
-			}
-			
-			if ( rotateTracker.tap )
-			{
-				Camera c = pCamera.GetComponent<Camera>();
-				Ray ray = c.ScreenPointToRay(rotateTracker.position);
-				RaycastHit hit;
-				if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) )
-				{
-					if ( hit.collider.tag == "Interactable" )
-					{
-						var t = hit.collider.transform;
-						var p = t.position + t.forward * 0.4f;
-						targetCircle.position = t.position;
-						targetCircle.gameObject.SetActive(true);
-						targetPoint.gameObject.SetActive(false);
-						playerNav.SetDestination(p);
-					}
-					else
-					{
-						targetPoint.position = hit.point;
-						targetPoint.gameObject.SetActive(true);
-						targetCircle.gameObject.SetActive(false);
-						playerNav.SetDestination(hit.point);
-					}
-				}
-			}
-		}
-		else
-		{
-			
-			int count = Input.touchCount;
-			for(int i = 0; i < count; i++)
-			{
-				var touch = Input.GetTouch(i);
-				if ( touch.phase == TouchPhase.Began )
-				{
-					if ( RaycastUI(touch.position) == null )
-					{
-						rotateTap.position = touch.position;
-						rotateTap.gameObject.SetActive(true);
-						rotateTracker.Bind(touch);
-						
-						Camera c = pCamera.GetComponent<Camera>();
-						Vector3 cp = c.WorldToScreenPoint(player.transform.position);
-						invert = (cp.y > touch.position.y) ? 1 : -1;
-						break;
-					}
-				}
-			}
-			
-		}
-		
-		/*
 		int count = Input.touchCount;
 		for(int i = 0; i < count; i++)
 		{
 			var touch = Input.GetTouch(i);
+			
 			if ( touch.phase == TouchPhase.Began )
 			{
-				if ( hRotateTracker.TouchIsFree(touch) && vRotateTracker.TouchIsFree(touch) )
+				if ( RaycastUI(touch.position) == null )
 				{
-					Camera c = pCamera.GetComponent<Camera>();
-					Ray ray = c.ScreenPointToRay(touch.position);
-					RaycastHit hit;
-					if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) )
+					TouchTracker tracker = touchManager.AllocTracker(touch.fingerId);
+					if ( tracker != null )
 					{
-						if ( hit.collider.tag == "Interactable" )
+						touchCount++;
+						tracker.tag = 0;
+						tracker.moved = false;
+						tracker.position = touch.position;
+						tracker.deltaPosition.x = 0f;
+						tracker.deltaPosition.y = 0f;
+					}
+				}
+			}
+			
+			if ( touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary )
+			{
+				TouchTracker tracker = touchManager.GetTracker(touch.fingerId);
+				if ( tracker != null )
+				{
+					tracker.position = touch.position;
+					tracker.deltaPosition = touch.deltaPosition;
+					if ( touch.phase == TouchPhase.Moved ) tracker.moved = true;
+				}
+			}
+			
+			if ( touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled )
+			{
+				TouchTracker tracker = touchManager.GetTracker(touch.fingerId);
+				if ( tracker != null )
+				{
+					touchCount--;
+					tracker.active = false;
+					
+					if ( !tracker.moved && tracker.tag == 1 )
+					{
+						Camera c = pCamera.GetComponent<Camera>();
+						Ray ray = c.ScreenPointToRay(touch.position);
+						RaycastHit hit;
+						if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) )
 						{
-							var t = hit.collider.transform;
-							var p = t.position + t.forward * 0.4f;
-							targetCircle.position = t.position;
-							targetCircle.gameObject.SetActive(true);
-							targetPoint.gameObject.SetActive(false);
-							playerNav.SetDestination(p);
-						}
-						else
-						{
-							targetPoint.position = hit.point;
-							targetPoint.gameObject.SetActive(true);
-							targetCircle.gameObject.SetActive(false);
-							playerNav.SetDestination(hit.point);
+							syncCamera = true;
+							if ( hit.collider.tag == "Interactable" )
+							{
+								var t = hit.collider.transform;
+								var p = t.position + t.forward * 0.4f;
+								targetCircle.position = t.position;
+								targetCircle.gameObject.SetActive(true);
+								targetPoint.gameObject.SetActive(false);
+								playerNav.SetDestination(p);
+							}
+							else
+							{
+								targetPoint.position = hit.point;
+								targetPoint.gameObject.SetActive(true);
+								targetCircle.gameObject.SetActive(false);
+								playerNav.SetDestination(hit.point);
+							}
 						}
 					}
+				}
+			}
+		}
+		
+		count = touchManager.touches.Length;
+		int minTag = 3;
+		for(int i = 0; i < count; i++)
+		{
+			var touch = touchManager.touches[i];
+			if ( touch.active )
+			{
+				if ( touch.tag < touchCount ) touch.tag = touchCount;
+				if ( touch.tag < minTag ) minTag = touch.tag;
+			}
+		}
+		
+		rotateTracker = null;
+		trackerA = null;
+		trackerB = null;
+		
+		if ( minTag == 1 )
+		{
+			for(int i = 0; i < count; i++)
+			{
+				var touch = touchManager.touches[i];
+				if ( touch.tag == 1 )
+				{
+					rotateTracker = touch;
 					break;
 				}
 			}
 		}
-		*/
+		else if ( minTag == 2 )
+		{
+			
+			int i = 0;
+			for(; i < count; i++)
+			{
+				var touch = touchManager.touches[i];
+				if ( touch.tag == 2 )
+				{
+					trackerA = touch;
+					break;
+				}
+			}
+			
+			i++;
+			
+			for(; i < count; i++)
+			{
+				var touch = touchManager.touches[i];
+				if ( touch.tag == 2 )
+				{
+					trackerB = touch;
+					break;
+				}
+			}
+		}
 		
-		syncCamera = playerNav.velocity.magnitude > 0.05f;
+		dbg.text = "touches: " + touchCount.ToString() + ", minTag: " + minTag.ToString();
+		
+		rotationSpeed = 0f;
+		camAngleSpeed = 0f;
+		
+		if ( trackerA != null && trackerB != null )
+		{
+			syncCamera = false;
+			
+			rotateTap.position = trackerA.position;
+			rotateTap.gameObject.SetActive(true);
+			
+			scaleTap.position = trackerB.position;
+			scaleTap.gameObject.SetActive(true);
+			
+			Vector2 a1 = trackerA.position - trackerA.deltaPosition;
+			Vector2 b1 = trackerB.position - trackerB.deltaPosition;
+			
+			Vector2 r1 = a1 - b1;
+			Vector2 r2 = trackerA.position - trackerB.position;
+			
+			float delta = (r2.magnitude - r1.magnitude) * touchScaleDistance;
+			distance = Mathf.Clamp(distance - delta, 1f, maxDistance);
+			
+			r1.Normalize();
+			r2.Normalize();
+			
+			float x = Mathf.Clamp(r1.x * r2.x + r1.y * r2.y, -1f, 1f);
+			float y = r2.x * r1.y - r1.x * r2.y;
+			
+			rotationSpeed = Mathf.Rad2Deg * Mathf.Acos(x) * 12f;
+			if ( y > 0f ) rotationSpeed = - rotationSpeed;
+			
+			return;
+		}
+		
+		if ( rotateTracker != null )
+		{
+			syncCamera = false;
+			
+			rotateTap.position = rotateTracker.position;
+			rotateTap.gameObject.SetActive(true);
+			scaleTap.gameObject.SetActive(false);
+			
+			rotationSpeed = rotateTracker.deltaPosition.x * touchScale;
+			camAngleSpeed = Mathf.Clamp(rotateTracker.deltaPosition.y * touchScale, -maxAngleSpeed, maxAngleSpeed);
+			
+			return;
+		}
+		
+		scaleTap.gameObject.SetActive(false);
+		rotateTap.gameObject.SetActive(false);
+		
 		animator.SetBool("walk", playerNav.velocity.magnitude > 0.01f);
 	}
 	
