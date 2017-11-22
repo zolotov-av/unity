@@ -640,7 +640,7 @@ public class TabletController: GameStateBehaviour
 				}
 			}
 			
-			if ( touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled )
+			if ( touch.phase == TouchPhase.Ended )
 			{
 				TouchTracker tracker = touchManager.GetTracker(touch.fingerId);
 				if ( tracker != null )
@@ -650,6 +650,16 @@ public class TabletController: GameStateBehaviour
 					{
 						NavigateByScreenPoint(touch.position);
 					}
+					tracker.EndTrack();
+				}
+			}
+			
+			if ( touch.phase == TouchPhase.Canceled )
+			{
+				TouchTracker tracker = touchManager.GetTracker(touch.fingerId);
+				if ( tracker != null )
+				{
+					touchCount--;
 					tracker.EndTrack();
 				}
 			}
