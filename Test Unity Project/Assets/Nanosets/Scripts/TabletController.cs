@@ -208,6 +208,11 @@ public class TabletController: GameStateBehaviour
 	public float maxDistance = 10f;
 	
 	/**
+	 * Порог времени для определения клика/тапа
+	 */
+	public float clickThreshold = 0.15f;
+	
+	/**
 	 * Дистанция камеры (расстояние от персонажа до камеры)
 	 */
 	private float distance = 0f;
@@ -242,6 +247,16 @@ public class TabletController: GameStateBehaviour
 	private int touchCount;
 	private float touchScale;
 	private float touchScaleDistance;
+	
+	/**
+	 * Флаг удержания левой кнопки мыши
+	 */
+	private bool mouseActive = false;
+	
+	/**
+	 * Время нажатия левой кнопки мыши
+	 */
+	private float mouseStartTime;
 	
 	private const string rotateCameraXInput = "Mouse X";
 	private const string rotateCameraYInput = "Mouse Y";
@@ -414,6 +429,8 @@ public class TabletController: GameStateBehaviour
 		rotateTracker = null;
 		trackerA = null;
 		trackerB = null;
+		
+		mouseActive = false;
 	}
 	
 	/**
@@ -449,6 +466,9 @@ public class TabletController: GameStateBehaviour
 			
 			// если игрок нажал клавиши движения, то сбрасываем режим бега
 			run = false;
+			
+			// и режим движения по клику
+			StopNavigation();
 		}
 		else
 		{
@@ -484,6 +504,7 @@ public class TabletController: GameStateBehaviour
 		{
 			var rotateDelta = Input.GetAxis(rotateCameraXInput) * rotateSensitivity;
 			rotationSpeed = Mathf.Clamp(rotateDelta, -maxRotationSpeed, maxRotationSpeed);
+			syncCamera = false;
 		}
 		else
 		{
@@ -504,10 +525,37 @@ public class TabletController: GameStateBehaviour
 		// нажали левую кнопку мыши
 		if ( Input.GetMouseButtonDown(0) )
 		{
-			// переходим в режим свободного вращения камеры
-			rotateCamera = true;
-			rotatePlayer = false;
-			lockCursor(true);
+			if ( RaycastUI(Input.mousePosition) == null )
+			{
+				Debug.Log("BeginTrack()");
+				mouseActive = true;
+				mouseStartTime = Time.unscaledTime;
+			}
+		}
+		else if ( mouseActive )
+		{
+			if ( !rotateCamera )
+			{
+				if ( Time.unscaledTime - mouseStartTime > clickThreshold )
+				{
+					// переходим в режим свободного вращения камеры
+					rotateCamera = true;
+					rotatePlayer = false;
+					lockCursor(true);
+				}
+			}
+		}
+		
+		// отпустили левую кнопку мыши
+		if ( Input.GetMouseButtonUp(0) )
+		{
+			if ( mouseActive )
+			{
+				Debug.Log("EndTrack()");
+				mouseActive = false;
+				if ( !rotateCamera ) NavigateByScreenPoint(Input.mousePosition);
+				rotateCamera = false;
+			}
 		}
 		
 		// нажали правую кнопку мыши
@@ -517,12 +565,6 @@ public class TabletController: GameStateBehaviour
 			rotateCamera = false;
 			rotatePlayer = true;
 			lockCursor(true);
-		}
-		
-		// отпустили левую кнопку мыши
-		if ( Input.GetMouseButtonUp(0) )
-		{
-			rotateCamera = false;
 		}
 		
 		// отпустили правую кнопку мыши
@@ -535,11 +577,7 @@ public class TabletController: GameStateBehaviour
 		if ( Input.GetButtonDown("Run") )
 		{
 			run = !run;
-		}
-		
-		if ( Input.GetKeyDown("1") )
-		{
-			animator.SetTrigger("attack");
+			if ( run ) StopNavigation();
 		}
 		
 		// на случай если что-то заглючит Escape принудительно нас возвращает
@@ -550,6 +588,7 @@ public class TabletController: GameStateBehaviour
 			rotateCamera = false;
 			rotatePlayer = false;
 			run = false;
+			StopNavigation();
 		}
 		
 		// разблокировать курсор если мы в режиме UI
@@ -740,6 +779,7 @@ public class TabletController: GameStateBehaviour
 		RaycastHit hit;
 		if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers & ~(1<<8), QueryTriggerInteraction.Ignore) )
 		{
+			run = false;
 			navigate = true;
 			if ( navMoving ) syncCamera = true;
 			if ( hit.collider.tag == "Interactable" )
@@ -770,10 +810,15 @@ public class TabletController: GameStateBehaviour
 	 */
 	public void StopNavigation()
 	{
-		navigate = false;
-		navMoving = false;
-		syncCamera = false;
-		playerNav.ResetPath();
+		if ( navigate )
+		{
+			navigate = false;
+			navMoving = false;
+			syncCamera = false;
+			playerNav.ResetPath();
+			targetPoint.gameObject.SetActive(false);
+			targetCircle.gameObject.SetActive(false);
+		}
 	}
 	/**
 	 * Дополнительные проверки для исправления глюков NavMeshAgent
@@ -832,7 +877,7 @@ public class TabletController: GameStateBehaviour
 		}
 		else
 		{
-			if ( rotatePlayer )
+			if ( rotatePlayer && !navMoving )
 			{
 				rb.rotation = Quaternion.RotateTowards(rb.rotation, rotation, maxRotationSpeed * Time.deltaTime);
 			}
