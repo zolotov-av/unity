@@ -625,11 +625,8 @@ public class TabletController: GameStateBehaviour
 					if ( tracker != null )
 					{
 						touchCount++;
+						tracker.BeginTrack(touch.position);
 						tracker.tag = 0;
-						tracker.moved = false;
-						tracker.position = touch.position;
-						tracker.deltaPosition.x = 0f;
-						tracker.deltaPosition.y = 0f;
 					}
 				}
 			}
@@ -639,9 +636,7 @@ public class TabletController: GameStateBehaviour
 				TouchTracker tracker = touchManager.GetTracker(touch.fingerId);
 				if ( tracker != null )
 				{
-					tracker.position = touch.position;
-					tracker.deltaPosition = touch.deltaPosition;
-					if ( touch.phase == TouchPhase.Moved ) tracker.moved = true;
+					tracker.Track(touch.position);
 				}
 			}
 			
@@ -651,12 +646,11 @@ public class TabletController: GameStateBehaviour
 				if ( tracker != null )
 				{
 					touchCount--;
-					tracker.active = false;
-					
-					if ( !tracker.moved && tracker.tag == 1 )
+					if ( tracker.tag == 1 && Time.unscaledTime - tracker.startTime <= clickThreshold )
 					{
 						NavigateByScreenPoint(touch.position);
 					}
+					tracker.EndTrack();
 				}
 			}
 		}
