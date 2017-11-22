@@ -48,6 +48,9 @@ public class TouchManager
 		return null;
 	}
 	
+	/**
+	 * Найти активный трекер по fingerId
+	 */
 	public TouchTracker GetTracker(int fingerId)
 	{
 		int count = touches.Length;

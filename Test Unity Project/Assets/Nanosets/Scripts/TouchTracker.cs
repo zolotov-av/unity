@@ -10,179 +10,36 @@ namespace Nanosoft
  */
 public class TouchTracker
 {
-	
 	/**
-	 * Ссылка на UI элемент определяющий зону касания
+	 * Флаг активности трекера
 	 */
-	public RectTransform rt;
-	
 	public bool active = false;
 	
+	/**
+	 * Идентификатор касания
+	 */
 	public int fingerId;
 	
-	public float startTime;
-	
-	public float sensitivity = 1f;
-	
-	public Vector2 deltaPosition;
-	
+	/**
+	 * Текущая позиция касания
+	 */
 	public Vector2 position;
 	
-	public bool tap;
-	public bool moved;
-	
-	public int tag;
-	
-	public TouchTracker()
-	{
-		rt = null;
-		active = false;
-		tap = false;
-		moved = false;
-		tag = 0;
-	}
-	
-	public bool TouchIsFree(Touch touch)
-	{
-		if ( active )
-		{
-			if ( touch.fingerId == fingerId )
-			{
-				return false;
-			}
-		}
-		
-		if ( touch.phase == TouchPhase.Began )
-		{
-			if ( RectTransformUtility.RectangleContainsScreenPoint(rt, touch.position, null) )
-			{
-				return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	public void HandleTouch()
-	{
-		int count = Input.touchCount;
-		if ( active )
-		{
-			for(int i = 0; i < count; i++)
-			{
-				var touch = Input.GetTouch(i);
-				if ( touch.fingerId == fingerId )
-				{
-					if ( touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled )
-					{
-						active = false;
-						deltaPosition.x = 0f;
-						deltaPosition.y = 0f;
-						return;
-					}
-					
-					int w = Screen.width;
-					int h = Screen.height;
-					float scale = 6000f / Mathf.Sqrt(w * w + h * h);
-					deltaPosition = touch.deltaPosition * scale;
-					return;
-				}
-			}
-			
-			active = false;
-			deltaPosition.x = 0f;
-			deltaPosition.y = 0f;
-		}
-		else
-		{
-			for(int i = 0; i < count; i++)
-			{
-				var touch = Input.GetTouch(i);
-				if ( touch.phase == TouchPhase.Began )
-				{
-					if ( RectTransformUtility.RectangleContainsScreenPoint(rt, touch.position, null) )
-					{
-						active = true;
-						fingerId = touch.fingerId;
-						deltaPosition.x = 0f;
-						deltaPosition.y = 0f;
-						return;
-					}
-				}
-			}
-		}
-	}
+	/**
+	 * Дельта позиции касания
+	 */
+	public Vector2 deltaPosition;
 	
 	/**
-	 * Привязать тач
-	 *
-	 * Начать отслеживать тач по fingerId
+	 * Флаг движения
+	 * true - было движение, false - движения не было
 	 */
-	public void Bind(Touch touch)
-	{
-		tap = false;
-		moved = false;
-		active = true;
-		fingerId = touch.fingerId;
-		position = touch.position;
-	}
+	public bool moved = false;
 	
-	public void ProcessTouch()
-	{
-		if ( active )
-		{
-			int count = Input.touchCount;
-			for(int i = 0; i < count; i++)
-			{
-				var touch = Input.GetTouch(i);
-				if ( touch.fingerId == fingerId )
-				{
-					if ( touch.phase == TouchPhase.Ended )
-					{
-						tap = !moved;
-						active = false;
-						deltaPosition.x = 0f;
-						deltaPosition.y = 0f;
-						position = touch.position;
-						return;
-					}
-					
-					if ( touch.phase == TouchPhase.Canceled )
-					{
-						tap = false;
-						active = false;
-						deltaPosition.x = 0f;
-						deltaPosition.y = 0f;
-						position = touch.position;
-						return;
-					}
-					
-					if ( touch.phase == TouchPhase.Moved ) moved = true;
-					if ( touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary )
-					{
-						int w = Screen.width;
-						int h = Screen.height;
-						float scale = 6000f / Mathf.Sqrt(w * w + h * h);
-						
-						deltaPosition = (touch.position - position) * scale;
-						position = touch.position;
-						return;
-					}
-					
-					active = false;
-					deltaPosition.x = 0f;
-					deltaPosition.y = 0f;
-					position = touch.position;
-					return;
-				}
-			}
-			
-			active = false;
-			deltaPosition.x = 0f;
-			deltaPosition.y = 0f;
-			return;
-		}
-	}
+	/**
+	 * Пользовательская метка
+	 */
+	public int tag = 0;
 	
 } // class TouchTracker
 
