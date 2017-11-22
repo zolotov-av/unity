@@ -43,12 +43,15 @@ public class TabletController: GameStateBehaviour
 	 */
 	protected GameObject player;
 	
+	/**
+	 * Ссылка на NavMeshAgent персонажа
+	 */
 	private NavMeshAgent playerNav;
 	
 	/**
 	 * Ссылка на камеру
 	 */
-	protected GameObject pCamera;
+	protected Camera pCamera;
 	
 	/**
 	 * Канва пользовательского интерфейса (загруженный экземляр)
@@ -76,6 +79,16 @@ public class TabletController: GameStateBehaviour
 	 * Ссылка на объектект указывающий на цель движения (NPC)
 	 */
 	private Transform targetCircle;
+	
+	/**
+	 * Флаг навигации (движения по клику)
+	 */
+	private bool navigate = false;
+	
+	/**
+	 * Флаг фактического движения NavMeshAgent
+	 */
+	private bool navMoving = false;
 	
 	[Header("Player Settings")]
 	
@@ -114,6 +127,9 @@ public class TabletController: GameStateBehaviour
 	 */
 	private bool rotatePlayer = false;
 	
+	/**
+	 * Флаг синхронизации камеры
+	 */
 	private bool syncCamera = false;
 	
 	/**
@@ -254,9 +270,14 @@ public class TabletController: GameStateBehaviour
 		player = obj;
 		animator = obj.GetComponent<Animator>();
 		rb = obj.GetComponent<Rigidbody>();
+		rb.isKinematic = true;
+		rotation = player.transform.rotation;
+		
 		playerNav = obj.GetComponent<NavMeshAgent>();
 		playerNav.enabled = true;
-		rotation = player.transform.rotation;
+		playerNav.ResetPath();
+		navigate = false;
+		navMoving = false;
 		
 		// присоединяем AudioListener к персонажу
 		if ( audioListener ) audioListener.SetParent(player.transform, false);
@@ -264,7 +285,14 @@ public class TabletController: GameStateBehaviour
 	
 	public void SetCamera(GameObject obj)
 	{
-		pCamera = obj;
+		if ( obj != null )
+		{
+			pCamera = obj.GetComponent<Camera>();
+		}
+		else
+		{
+			pCamera = null;
+		}
 	}
 	
 	/**
@@ -336,8 +364,8 @@ public class TabletController: GameStateBehaviour
 		// создаем камеру
 		distance = startDistance;
 		camAngle = startAngle;
-		pCamera = Instantiate(cameraPrefab);
-		pCamera.name = cameraPrefab.name;
+		GameObject cam = Instantiate(cameraPrefab);
+		cam.name = cameraPrefab.name;
 		
 		// создаем канву
 		canvas = Instantiate(canvasPrefab);
@@ -345,7 +373,7 @@ public class TabletController: GameStateBehaviour
 		
 		// персонаж и камера не должны удаляться при переключении сцены
 		DontDestroyOnLoad(player);
-		DontDestroyOnLoad(pCamera);
+		DontDestroyOnLoad(cam);
 		DontDestroyOnLoad(canvas);
 		
 		audioListener = transform.Find("AudioListener");
@@ -361,7 +389,7 @@ public class TabletController: GameStateBehaviour
 		DontDestroyOnLoad(targetCircle.gameObject);
 		
 		SetPlayer(player);
-		SetCamera(pCamera);
+		SetCamera(cam);
 		
 		Debug.Log("GameState init canvas");
 		canvasCtl = canvas.GetComponent<CanvasScript>();
@@ -439,8 +467,6 @@ public class TabletController: GameStateBehaviour
 				localVelocity.z = 0f;
 			}
 		}
-		
-		animator.SetBool("walk", velocity > 0.01f);
 	}
 	
 	/**
@@ -590,29 +616,7 @@ public class TabletController: GameStateBehaviour
 					
 					if ( !tracker.moved && tracker.tag == 1 )
 					{
-						Camera c = pCamera.GetComponent<Camera>();
-						Ray ray = c.ScreenPointToRay(touch.position);
-						RaycastHit hit;
-						if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) )
-						{
-							syncCamera = true;
-							if ( hit.collider.tag == "Interactable" )
-							{
-								var t = hit.collider.transform;
-								var p = t.position + t.forward * 0.4f;
-								targetCircle.position = t.position;
-								targetCircle.gameObject.SetActive(true);
-								targetPoint.gameObject.SetActive(false);
-								playerNav.SetDestination(p);
-							}
-							else
-							{
-								targetPoint.position = hit.point;
-								targetPoint.gameObject.SetActive(true);
-								targetCircle.gameObject.SetActive(false);
-								playerNav.SetDestination(hit.point);
-							}
-						}
+						NavigateByScreenPoint(touch.position);
 					}
 				}
 			}
@@ -725,8 +729,86 @@ public class TabletController: GameStateBehaviour
 		
 		scaleTap.gameObject.SetActive(false);
 		rotateTap.gameObject.SetActive(false);
+	}
+	
+	/**
+	 * Отправить персонажа на указанные координаты (экранные)
+	 */
+	public bool NavigateByScreenPoint(Vector2 dest)
+	{
+		Ray ray = pCamera.ScreenPointToRay(dest);
+		RaycastHit hit;
+		if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers & ~(1<<8), QueryTriggerInteraction.Ignore) )
+		{
+			navigate = true;
+			if ( navMoving ) syncCamera = true;
+			if ( hit.collider.tag == "Interactable" )
+			{
+				var t = hit.collider.transform;
+				var p = t.position + t.forward * 0.4f;
+				targetCircle.position = t.position;
+				targetPoint.position = t.position;
+				targetCircle.gameObject.SetActive(true);
+				targetPoint.gameObject.SetActive(false);
+				playerNav.SetDestination(p);
+			}
+			else
+			{
+				targetPoint.position = hit.point;
+				targetPoint.gameObject.SetActive(true);
+				targetCircle.gameObject.SetActive(false);
+				playerNav.SetDestination(hit.point);
+			}
+			return true;
+		}
 		
-		animator.SetBool("walk", playerNav.velocity.magnitude > 0.01f);
+		return false;
+	}
+	
+	/**
+	 * Остановить/отменить NavMeshAgent
+	 */
+	public void StopNavigation()
+	{
+		navigate = false;
+		navMoving = false;
+		syncCamera = false;
+		playerNav.ResetPath();
+	}
+	/**
+	 * Дополнительные проверки для исправления глюков NavMeshAgent
+	 */
+	protected void HandleNavigation()
+	{
+		if ( navigate && !playerNav.pathPending )
+		{
+			if ( playerNav.pathStatus == NavMeshPathStatus.PathInvalid )
+			{
+				Debug.Log("PathInvalid => ResetPath()");
+				StopNavigation();
+				return;
+			}
+			
+			if ( navMoving )
+			{
+				if ( playerNav.velocity == Vector3.zero )
+				{
+					Debug.Log("stop walking");
+					navMoving = false;
+					syncCamera = false;
+					return;
+				}
+			}
+			else
+			{
+				if ( playerNav.velocity != Vector3.zero )
+				{
+					Debug.Log("start walking");
+					navMoving = true;
+					syncCamera = true;
+				}
+			}
+		}
 	}
 	
 	void FixedUpdate()
@@ -768,6 +850,10 @@ public class TabletController: GameStateBehaviour
 		{
 			HandleMouseInput();
 		}
+		
+		HandleNavigation();
+		
+		animator.SetBool("walk", navMoving || velocity > 0.01f);
 	}
 	
 	void LateUpdate()
