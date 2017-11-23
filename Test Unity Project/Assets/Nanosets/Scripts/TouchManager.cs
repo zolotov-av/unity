@@ -40,7 +40,7 @@ public class TouchManager
 			if ( ! touch.active )
 			{
 				touch.active = true;
-				touch.fingerId = fingerId;
+				touch.pointerId = fingerId;
 				return touch;
 			}
 		}
@@ -57,7 +57,7 @@ public class TouchManager
 		for(int i = 0; i < count; i++)
 		{
 			var touch = touches[i];
-			if ( touch.fingerId == fingerId && touch.active ) return touch;
+			if ( touch.pointerId == fingerId && touch.active ) return touch;
 		}
 		
 		return null;

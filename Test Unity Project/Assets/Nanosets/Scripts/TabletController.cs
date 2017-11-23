@@ -622,53 +622,52 @@ public class TabletController: GameStateBehaviour
 		int count = Input.touchCount;
 		for(int i = 0; i < count; i++)
 		{
+			TouchTracker tracker;
 			var touch = Input.GetTouch(i);
 			
-			if ( touch.phase == TouchPhase.Began )
+			switch ( touch.phase )
 			{
-				if ( RaycastUI(touch.position) == null )
-				{
-					TouchTracker tracker = touchManager.AllocTracker(touch.fingerId);
-					if ( tracker != null )
-					{
-						touchCount++;
-						tracker.BeginTrack(touch.position);
-						tracker.tag = 0;
-					}
-				}
-			}
 			
-			if ( touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary )
-			{
-				TouchTracker tracker = touchManager.GetTracker(touch.fingerId);
+			case TouchPhase.Began:
+				tracker = touchManager.AllocTracker(touch.fingerId);
 				if ( tracker != null )
 				{
-					tracker.Track(touch.position);
+					tracker.BeginTrack(touch.position);
+					if ( tracker.user ) touchCount++;
 				}
-			}
+				break;
 			
-			if ( touch.phase == TouchPhase.Ended )
-			{
-				TouchTracker tracker = touchManager.GetTracker(touch.fingerId);
+			case TouchPhase.Moved:
+			case TouchPhase.Stationary:
+				tracker = touchManager.GetTracker(touch.fingerId);
+				if ( tracker != null ) tracker.Track(touch.position);
+				break;
+			
+			case TouchPhase.Ended:
+				tracker = touchManager.GetTracker(touch.fingerId);
 				if ( tracker != null )
 				{
-					touchCount--;
-					if ( tracker.tag == 1 && Time.unscaledTime - tracker.startTime <= clickThreshold )
+					if ( tracker.user )
 					{
-						NavigateByScreenPoint(touch.position);
+						if ( tracker.tag == 1 && Time.unscaledTime - tracker.startTime <= clickThreshold )
+						{
+							NavigateByScreenPoint(touch.position);
+						}
+						touchCount--;
 					}
 					tracker.EndTrack();
 				}
-			}
+				break;
 			
-			if ( touch.phase == TouchPhase.Canceled )
-			{
-				TouchTracker tracker = touchManager.GetTracker(touch.fingerId);
+			case TouchPhase.Canceled:
+				tracker = touchManager.GetTracker(touch.fingerId);
 				if ( tracker != null )
 				{
-					touchCount--;
+					if ( tracker.user ) touchCount--;
 					tracker.EndTrack();
 				}
+				break;
+			
 			}
 		}
 		
@@ -677,7 +676,7 @@ public class TabletController: GameStateBehaviour
 		for(int i = 0; i < count; i++)
 		{
 			var touch = touchManager.touches[i];
-			if ( touch.active )
+			if ( touch.user )
 			{
 				if ( touch.tag < touchCount ) touch.tag = touchCount;
 				if ( touch.tag < minTag ) minTag = touch.tag;
@@ -726,8 +725,6 @@ public class TabletController: GameStateBehaviour
 				}
 			}
 		}
-		
-		dbg.text = "touches: " + touchCount.ToString() + ", minTag: " + minTag.ToString();
 		
 		rotationSpeed = 0f;
 		camAngleSpeed = 0f;

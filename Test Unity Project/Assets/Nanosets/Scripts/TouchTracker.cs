@@ -18,14 +18,19 @@ public class TouchTracker: PointerEventData
 	public bool active = false;
 	
 	/**
-	 * Идентификатор касания
+	 * Системный трекер
+	 *
+	 * Система использует этот трекер для обработки событий UI
 	 */
-	public int fingerId;
+	public bool system = false;
 	
 	/**
-	 * Начальная позиция касания
+	 * Пользовательский трекер
+	 *
+	 * Пользователь может использовать этот трекер не беспокоясь, о конфликтах
+	 * с системой
 	 */
-	public Vector2 startPosition;
+	public bool user = false;
 	
 	/**
 	 * Время начала касания
@@ -33,7 +38,7 @@ public class TouchTracker: PointerEventData
 	public float startTime = 0f;
 	
 	/**
-	 * Пользовательская метка
+	 * Метка для пользователя
 	 */
 	public int tag = 0;
 	
@@ -80,10 +85,42 @@ public class TouchTracker: PointerEventData
 	public void BeginTrack(Vector2 point)
 	{
 		active = true;
-		startTime = Time.unscaledTime;
-		startPosition = point;
 		position = point;
 		delta = Vector2.zero;
+		startTime = Time.unscaledTime;
+		tag = 0;
+		up = false;
+		down = false;
+		
+		hoverUI = RaycastUI();
+		if ( hoverUI != null )
+		{
+			system = true;
+			user = false;
+			
+			hover = hoverUI.GetComponentInParent<Selectable>();
+			if ( hover == null )
+			{
+				target = null;
+				targetRT = null;
+			}
+			else
+			{
+				target = hover;
+				targetRT = target.gameObject.transform as RectTransform;
+				target.OnPointerEnter(this);
+				target.OnPointerDown(this);
+			}
+		}
+		else
+		{
+			system = false;
+			user = true;
+			
+			hover = null;
+			target = null;
+			targetRT = null;
+		}
 	}
 	
 	/**
@@ -93,6 +130,8 @@ public class TouchTracker: PointerEventData
 	{
 		delta = point - position;
 		position = point;
+		
+		if ( targetRT != null ) TrackMouseHover();
 	}
 	
 	/**
@@ -100,7 +139,24 @@ public class TouchTracker: PointerEventData
 	 */
 	public void EndTrack()
 	{
+		if ( targetRT != null )
+		{
+			target.OnPointerUp(this);
+			
+			if ( hover != null )
+			{
+				hover.OnPointerExit(this);
+				ExecuteEvents.Execute<IPointerClickHandler>(hover.gameObject, this, ExecuteEvents.pointerClickHandler);
+			}
+		}
+		
 		active = false;
+		system = false;
+		user = false;
+		target = null;
+		targetRT = null;
+		hover = null;
+		hoverUI = null;
 	}
 	
 	/**
@@ -162,7 +218,6 @@ public class TouchTracker: PointerEventData
 			if ( oldHover != null )
 			{
 				oldHover.OnPointerExit(this);
-				Debug.Log("OnPointerExit executed on " + oldHover.gameObject.ToString());
 			}
 			
 			hover = newHover;
@@ -170,7 +225,6 @@ public class TouchTracker: PointerEventData
 			if ( newHover != null )
 			{
 				newHover.OnPointerEnter(this);
-				Debug.Log("OnPointerEnter executed on " + newHover.gameObject.ToString());
 			}
 		}
 	}
@@ -193,12 +247,10 @@ public class TouchTracker: PointerEventData
 			if ( up )
 			{
 				target.OnPointerUp(this);
-				Debug.Log("OnPointerUp executed on " + target.gameObject.ToString());
 				
 				if ( hover != null )
 				{
 					ExecuteEvents.Execute<IPointerClickHandler>(hover.gameObject, this, ExecuteEvents.pointerClickHandler);
-					Debug.Log("OnPointerClick executed on " + hover.gameObject.ToString());
 				}
 				
 				active = false;
@@ -214,7 +266,6 @@ public class TouchTracker: PointerEventData
 				target = hover;
 				targetRT = target.gameObject.transform as RectTransform;
 				target.OnPointerDown(this);
-				Debug.Log("OnPointerDown executed on " + target.gameObject.ToString());
 			}
 		}
 	}
