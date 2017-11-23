@@ -244,6 +244,7 @@ public class TabletController: GameStateBehaviour
 	private TouchTracker rotateTracker;
 	private TouchTracker trackerA;
 	private TouchTracker trackerB;
+	private TouchTracker mouse;
 	private int touchCount;
 	private float touchScale;
 	private float touchScaleDistance;
@@ -418,6 +419,12 @@ public class TabletController: GameStateBehaviour
 		scaleTap = canvas.transform.Find("ScaleTap") as RectTransform;
 		scaleTap.gameObject.SetActive(false);
 		
+		Input.simulateMouseWithTouches = false;
+		if ( ! Input.mousePresent )
+		{
+			mobileInput = true;
+		}
+		
 		touchManager = new TouchManager(4);
 		touchCount = 0;
 		int w = Screen.width;
@@ -431,6 +438,7 @@ public class TabletController: GameStateBehaviour
 		trackerB = null;
 		
 		mouseActive = false;
+		mouse = new TouchTracker();
 	}
 	
 	/**
@@ -522,17 +530,9 @@ public class TabletController: GameStateBehaviour
 			return;
 		}
 		
-		// нажали левую кнопку мыши
-		if ( Input.GetMouseButtonDown(0) )
-		{
-			if ( RaycastUI(Input.mousePosition) == null )
-			{
-				Debug.Log("BeginTrack()");
-				mouseActive = true;
-				mouseStartTime = Time.unscaledTime;
-			}
-		}
-		else if ( mouseActive )
+		mouse.TrackMouse();
+		
+		if ( mouseActive )
 		{
 			if ( !rotateCamera )
 			{
@@ -544,17 +544,24 @@ public class TabletController: GameStateBehaviour
 					lockCursor(true);
 				}
 			}
-		}
-		
-		// отпустили левую кнопку мыши
-		if ( Input.GetMouseButtonUp(0) )
-		{
-			if ( mouseActive )
+			
+			// отпустили левую кнопку мыши
+			if ( mouse.up )
 			{
 				Debug.Log("EndTrack()");
 				mouseActive = false;
 				if ( !rotateCamera ) NavigateByScreenPoint(Input.mousePosition);
 				rotateCamera = false;
+			}
+		}
+		else
+		{
+			// нажали левую кнопку мыши
+			if ( mouse.down && mouse.hoverUI == null )
+			{
+				Debug.Log("BeginTrack()");
+				mouseActive = true;
+				mouseStartTime = Time.unscaledTime;
 			}
 		}
 		
@@ -735,8 +742,8 @@ public class TabletController: GameStateBehaviour
 			scaleTap.position = trackerB.position;
 			scaleTap.gameObject.SetActive(true);
 			
-			Vector2 a1 = trackerA.position - trackerA.deltaPosition;
-			Vector2 b1 = trackerB.position - trackerB.deltaPosition;
+			Vector2 a1 = trackerA.position - trackerA.delta;
+			Vector2 b1 = trackerB.position - trackerB.delta;
 			
 			Vector2 r1 = a1 - b1;
 			Vector2 r2 = trackerA.position - trackerB.position;
@@ -764,8 +771,8 @@ public class TabletController: GameStateBehaviour
 			rotateTap.gameObject.SetActive(true);
 			scaleTap.gameObject.SetActive(false);
 			
-			rotationSpeed = rotateTracker.deltaPosition.x * touchScale;
-			camAngleSpeed = Mathf.Clamp(rotateTracker.deltaPosition.y * touchScale, -maxAngleSpeed, maxAngleSpeed);
+			rotationSpeed = rotateTracker.delta.x * touchScale;
+			camAngleSpeed = Mathf.Clamp(rotateTracker.delta.y * touchScale, -maxAngleSpeed, maxAngleSpeed);
 			
 			return;
 		}
