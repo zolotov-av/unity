@@ -113,6 +113,21 @@ public class TabletController: GameStateBehaviour
 	private Vector3 localVelocity = new Vector3(0f, 0f, 0f);
 	
 	/**
+	 * Состояние прыжка
+	 */
+	private bool jumping = false;
+	
+	/**
+	 * Состояние падения
+	 */
+	private bool falling = false;
+	
+	/**
+	 * Стоит ли персонаж на земле?
+	 */
+	private bool grounded = false;
+	
+	/**
 	 * Режим вращения камеры
 	 *
 	 * В этом режиме камера свободно вращается вокруг персонажа
@@ -162,6 +177,11 @@ public class TabletController: GameStateBehaviour
 	 * Ссылка на Rigidbody (твердое тело)
 	 */
 	private Rigidbody rb;
+	
+	/**
+	 * Ссылка на коллайдер персонажа
+	 */
+	private CapsuleCollider capsule;
 	
 	[Header("Camera Settings")]
 	
@@ -286,12 +306,28 @@ public class TabletController: GameStateBehaviour
 		player = obj;
 		animator = obj.GetComponent<Animator>();
 		rb = obj.GetComponent<Rigidbody>();
-		rb.isKinematic = true;
+		//rb.isKinematic = true;
 		rotation = player.transform.rotation;
 		
+		capsule = obj.GetComponent<CapsuleCollider>();
+		if ( capsule == null )
+		{
+			Debug.LogError("player haven't CapsuleCollider");
+		}
+		
 		playerNav = obj.GetComponent<NavMeshAgent>();
-		playerNav.enabled = true;
-		playerNav.ResetPath();
+		if ( playerNav )
+		{
+			playerNav.enabled = true;
+			playerNav.ResetPath();
+			
+			if ( capsule != null )
+			{
+				Debug.Log("fix NavMeshAgent");
+				playerNav.height = capsule.height;
+				playerNav.radius = capsule.radius;
+			}
+		}
 		navigate = false;
 		navMoving = false;
 		
@@ -425,6 +461,8 @@ public class TabletController: GameStateBehaviour
 			mobileInput = true;
 		}
 		
+		playerNav.enabled = mobileInput;
+		
 		touchManager = new TouchManager(4);
 		touchCount = 0;
 		int w = Screen.width;
@@ -458,6 +496,8 @@ public class TabletController: GameStateBehaviour
 	 */
 	protected void handleMovement()
 	{
+		if ( falling || jumping ) return;
+		
 		// прочитаем ввод направления движения
 		var inputV = Input.GetAxis(verticallInput);
 		var inputH = Input.GetAxis(horizontalInput);
@@ -517,6 +557,29 @@ public class TabletController: GameStateBehaviour
 		else
 		{
 			rotationSpeed = 0f;
+		}
+	}
+	
+	public void JumpHeight(float height)
+	{
+		Debug.Log("Jump!");
+		float v = Mathf.Sqrt(2f * height * Physics.gravity.magnitude);
+		rb.AddForce(0f, v, 0f, ForceMode.VelocityChange);
+	}
+	
+	/**
+	 * Обработка ввода с клавиатуры (действия)
+	 */
+	protected void HandleKeyboard()
+	{
+		if ( !falling && !jumping )
+		{
+			if ( Input.GetKeyDown("space") )
+			{
+				jumping = true;
+				animator.SetTrigger("Jump");
+				JumpHeight(2.4f);
+			}
 		}
 	}
 	
@@ -864,8 +927,47 @@ public class TabletController: GameStateBehaviour
 		}
 	}
 	
+	/**
+	 * Проверка стоит ли персонаж на земле
+	 */
+	protected void GroundCheck()
+	{
+		bool PreviouslyGrounded = grounded;
+		grounded = ControllerUtils.GroundCheck(capsule);
+		
+		if ( PreviouslyGrounded )
+		{
+			if ( !grounded )
+			{
+				falling = true;
+				animator.SetBool("grounded", false);
+				Debug.Log("falling/jumping");
+			}
+		}
+		else
+		{
+			if ( grounded )
+			{
+				falling = false;
+				jumping = false;
+				animator.SetBool("grounded", true);
+				Debug.Log("grounded");
+			}
+		}
+		
+		if ( jumping && grounded )
+		{
+			falling = false;
+			jumping = false;
+			animator.SetBool("grounded", true);
+			Debug.Log("grounded (2)");
+		}
+	}
+	
 	void FixedUpdate()
 	{
+		GroundCheck();
+		
 		if ( syncCamera )
 		{
 			rotation = Quaternion.RotateTowards(rotation, player.transform.rotation, syncRotationSpeed * Time.deltaTime);
@@ -901,6 +1003,7 @@ public class TabletController: GameStateBehaviour
 		}
 		else
 		{
+			HandleKeyboard();
 			HandleMouseInput();
 		}
 		
