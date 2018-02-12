@@ -108,9 +108,14 @@ public class TabletController: GameStateBehaviour
 	private float velocity = 0f;
 	
 	/**
-	 * Вектор скорости персонажа в локальных координатах
+	 * Вектор скорости персонажа относительно ориентации камеры
 	 */
 	private Vector3 localVelocity = new Vector3(0f, 0f, 0f);
+	
+	/**
+	 * Вектор скорости персонажа в мировых координатах
+	 */
+	private Vector3 playerVelocity = new Vector3(0f, 0f, 0f);
 	
 	/**
 	 * Состояние прыжка
@@ -461,8 +466,6 @@ public class TabletController: GameStateBehaviour
 			mobileInput = true;
 		}
 		
-		playerNav.enabled = mobileInput;
-		
 		touchManager = new TouchManager(4);
 		touchCount = 0;
 		int w = Screen.width;
@@ -560,9 +563,20 @@ public class TabletController: GameStateBehaviour
 		}
 	}
 	
-	public void JumpHeight(float height)
+	public void Jump()
 	{
 		Debug.Log("Jump!");
+		if ( playerNav.enabled )
+		{
+			playerNav.ResetPath();
+			playerNav.enabled = false;
+		}
+		rb.AddForce(0f, 13.72f, 0f, ForceMode.VelocityChange);
+	}
+	
+	public void JumpHeight(float height)
+	{
+		Debug.Log("Jump! (height)");
 		float v = Mathf.Sqrt(2f * height * Physics.gravity.magnitude);
 		rb.AddForce(0f, v, 0f, ForceMode.VelocityChange);
 	}
@@ -578,7 +592,8 @@ public class TabletController: GameStateBehaviour
 			{
 				jumping = true;
 				animator.SetTrigger("Jump");
-				JumpHeight(2.4f);
+				//JumpHeight(12f);
+				Jump();
 			}
 		}
 	}
@@ -846,6 +861,12 @@ public class TabletController: GameStateBehaviour
 	 */
 	public bool NavigateByScreenPoint(Vector2 dest)
 	{
+		if ( !playerNav.enabled )
+		{
+			playerNav.enabled = true;
+			
+		}
+		
 		Ray ray = pCamera.ScreenPointToRay(dest);
 		RaycastHit hit;
 		if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers & ~(1<<8), QueryTriggerInteraction.Ignore) )
@@ -979,14 +1000,18 @@ public class TabletController: GameStateBehaviour
 		
 		if ( velocity > 0f )
 		{
-			Vector3 move = rotation * localVelocity;
-			Quaternion q = Quaternion.LookRotation(move, Vector3.up);
+			Vector3 cameraVelocity = rotation * localVelocity;
+			Quaternion q = Quaternion.LookRotation(cameraVelocity, Vector3.up);
+			
+			if ( grounded ) playerVelocity = cameraVelocity;
 			
 			rb.rotation = Quaternion.RotateTowards(rb.rotation, q, maxRotationSpeed * Time.deltaTime);
-			rb.position += move * Time.deltaTime;
+			rb.position += playerVelocity * Time.deltaTime;
 		}
 		else
 		{
+			playerVelocity = Vector3.zero;
+			
 			if ( rotatePlayer && !navMoving )
 			{
 				rb.rotation = Quaternion.RotateTowards(rb.rotation, rotation, maxRotationSpeed * Time.deltaTime);
