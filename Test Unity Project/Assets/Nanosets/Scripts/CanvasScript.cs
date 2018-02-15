@@ -26,6 +26,14 @@ public class CanvasScript: MonoBehaviour
 	private Text actionMessage;
 	private Text lootMessage;
 	
+	private GameObject zoneInfo;
+	private Text zoneMessage;
+	private float zoneTimer = 0f;
+	
+	private GameObject raycastInfo;
+	private Text raycastMessage;
+	private TargetInfo raycastTarget;
+	
 	/**
 	 * Ссылка на скрипт управляющий списком квестов
 	 */
@@ -72,8 +80,19 @@ public class CanvasScript: MonoBehaviour
 		lootPanel = actionGroup.transform.Find("LootPanel").gameObject;
 		lootPanel.SetActive(false);
 		lootMessage = lootPanel.transform.Find("LootMessage").gameObject.GetComponent<Text>();
+		lootMessage.text = "lootMessage";
 		
 		questWindow.SetQuestManager(questManager);
+		
+		zoneInfo = transform.Find("ZoneInfo").gameObject;
+		zoneInfo.SetActive(false);
+		zoneMessage = zoneInfo.transform.Find("Text").GetComponent<Text>();
+		zoneMessage.text = null;
+		
+		raycastInfo = transform.Find("RaycastInfo").gameObject;
+		raycastInfo.SetActive(false);
+		raycastMessage = raycastInfo.transform.Find("Text").GetComponent<Text>();
+		raycastTarget = null;
 	}
 	
 	/**
@@ -95,6 +114,15 @@ public class CanvasScript: MonoBehaviour
 		if ( Input.GetKeyDown(KeyCode.L) )
 		{
 			questWindow.ToggleWindow();
+		}
+		
+		if ( zoneTimer != 0f )
+		{
+			if ( Time.unscaledTime > zoneTimer + 1.8f )
+			{
+				zoneTimer = 0f;
+				zoneInfo.SetActive(false);
+			}
 		}
 	}
 	
@@ -134,6 +162,57 @@ public class CanvasScript: MonoBehaviour
 	{
 		instance.actionActive = false;
 		instance.actionPanel.SetActive(false);
+	}
+	
+	public static void Zone(string message)
+	{
+		instance.zoneInfo.SetActive(true);
+		instance.zoneMessage.text = message;
+		instance.zoneTimer = Time.unscaledTime;
+	}
+	
+	public static void ZoneLeave(string message)
+	{
+		if ( instance.zoneMessage.text == message )
+		{
+			instance.zoneInfo.SetActive(false);
+			instance.zoneMessage.text = null;
+		}
+	}
+	
+	public static void RaycastInfo(GameObject obj)
+	{
+		if ( obj == null )
+		{
+			if ( instance.raycastTarget != null )
+			{
+				instance.raycastTarget = null;
+				instance.raycastInfo.SetActive(false);
+			}
+			return;
+		}
+		
+		TargetInfo info = obj.GetComponent<TargetInfo>();
+		if ( info == null )
+		{
+			if ( instance.raycastTarget != null )
+			{
+				instance.raycastTarget = null;
+				instance.raycastInfo.SetActive(false);
+			}
+			return;
+		}
+		
+		if ( instance.raycastTarget == null )
+		{
+			instance.raycastInfo.SetActive(true);
+		}
+		
+		if ( info != instance.raycastTarget )
+		{
+			instance.raycastTarget = info;
+			instance.raycastMessage.text = info.objectName;
+		}
 	}
 	
 } // class CanvasScript

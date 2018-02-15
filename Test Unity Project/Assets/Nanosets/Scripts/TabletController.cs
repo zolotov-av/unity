@@ -132,6 +132,8 @@ public class TabletController: GameStateBehaviour
 	 */
 	private bool grounded = false;
 	
+	public static bool bigJump = false;
+	
 	/**
 	 * Режим вращения камеры
 	 *
@@ -328,7 +330,7 @@ public class TabletController: GameStateBehaviour
 			
 			if ( capsule != null )
 			{
-				Debug.Log("fix NavMeshAgent");
+				//Debug.Log("fix NavMeshAgent");
 				playerNav.height = capsule.height;
 				playerNav.radius = capsule.radius;
 			}
@@ -448,10 +450,10 @@ public class TabletController: GameStateBehaviour
 		SetPlayer(player);
 		SetCamera(cam);
 		
-		Debug.Log("GameState init canvas");
+		//Debug.Log("GameState init canvas");
 		canvasCtl = canvas.GetComponent<CanvasScript>();
 		canvasCtl.questManager = questManager;
-		dbg = canvas.transform.Find("Panel/Text").GetComponent<Text>();
+		dbg = canvas.transform.Find("DebugPanel/Text").GetComponent<Text>();
 		dbg.text = "Debug";
 		
 		rotateTap = canvas.transform.Find("RotateTap") as RectTransform;
@@ -577,6 +579,11 @@ public class TabletController: GameStateBehaviour
 	public void JumpHeight(float height)
 	{
 		Debug.Log("Jump! (height)");
+		if ( playerNav.enabled )
+		{
+			playerNav.ResetPath();
+			playerNav.enabled = false;
+		}
 		float v = Mathf.Sqrt(2f * height * Physics.gravity.magnitude);
 		rb.AddForce(0f, v, 0f, ForceMode.VelocityChange);
 	}
@@ -586,14 +593,12 @@ public class TabletController: GameStateBehaviour
 	 */
 	protected void HandleKeyboard()
 	{
-		if ( !falling && !jumping )
+		if ( grounded )
 		{
 			if ( Input.GetKeyDown("space") )
 			{
-				jumping = true;
-				animator.SetTrigger("Jump");
-				//JumpHeight(12f);
-				Jump();
+				if ( bigJump ) JumpHeight(12f);
+				else JumpHeight(2.4f);
 			}
 		}
 	}
@@ -626,7 +631,7 @@ public class TabletController: GameStateBehaviour
 			// отпустили левую кнопку мыши
 			if ( mouse.up )
 			{
-				Debug.Log("EndTrack()");
+				//Debug.Log("EndTrack()");
 				mouseActive = false;
 				if ( !rotateCamera ) NavigateByScreenPoint(Input.mousePosition);
 				rotateCamera = false;
@@ -637,7 +642,7 @@ public class TabletController: GameStateBehaviour
 			// нажали левую кнопку мыши
 			if ( mouse.down && mouse.hoverUI == null )
 			{
-				Debug.Log("BeginTrack()");
+				//Debug.Log("BeginTrack()");
 				mouseActive = true;
 				mouseStartTime = Time.unscaledTime;
 			}
@@ -921,7 +926,7 @@ public class TabletController: GameStateBehaviour
 		{
 			if ( playerNav.pathStatus == NavMeshPathStatus.PathInvalid )
 			{
-				Debug.Log("PathInvalid => ResetPath()");
+				//Debug.Log("PathInvalid => ResetPath()");
 				StopNavigation();
 				return;
 			}
@@ -930,7 +935,7 @@ public class TabletController: GameStateBehaviour
 			{
 				if ( playerNav.velocity == Vector3.zero )
 				{
-					Debug.Log("stop walking");
+					//Debug.Log("stop walking");
 					navMoving = false;
 					syncCamera = false;
 					return;
@@ -940,7 +945,7 @@ public class TabletController: GameStateBehaviour
 			{
 				if ( playerNav.velocity != Vector3.zero )
 				{
-					Debug.Log("start walking");
+					//Debug.Log("start walking");
 					navMoving = true;
 					syncCamera = true;
 				}
@@ -953,6 +958,8 @@ public class TabletController: GameStateBehaviour
 	 */
 	protected void GroundCheck()
 	{
+		dbg.text = "rb.velocity = " + rb.velocity.ToString();
+		
 		bool PreviouslyGrounded = grounded;
 		grounded = ControllerUtils.GroundCheck(capsule);
 		
@@ -960,29 +967,32 @@ public class TabletController: GameStateBehaviour
 		{
 			if ( !grounded )
 			{
-				falling = true;
-				animator.SetBool("grounded", false);
 				Debug.Log("falling/jumping");
+				animator.SetBool("grounded", false);
 			}
 		}
 		else
 		{
 			if ( grounded )
 			{
+				Debug.Log("grounded");
 				falling = false;
 				jumping = false;
 				animator.SetBool("grounded", true);
-				Debug.Log("grounded");
+				animator.SetBool("jumping", false);
+				animator.SetBool("falling", false);
 			}
 		}
 		
-		if ( jumping && grounded )
+		if ( ! grounded )
 		{
-			falling = false;
-			jumping = false;
-			animator.SetBool("grounded", true);
-			Debug.Log("grounded (2)");
+			jumping = rb.velocity.y > 0f;
+			falling = !jumping;
+			
+			animator.SetBool("jumping", jumping);
+			animator.SetBool("falling", falling);
 		}
+		
 	}
 	
 	void FixedUpdate()
@@ -1065,6 +1075,18 @@ public class TabletController: GameStateBehaviour
 		}
 		
 		pCamera.transform.LookAt(tp);
+		
+		Vector3 dest = new Vector3(Screen.width*0.5f, Screen.height*0.5f, 0f);
+		Ray ray = pCamera.ScreenPointToRay(dest);
+		//Ray ray = new Ray(ControllerUtils.CapsuleCenter(capsule), player.transform.forward);
+		if ( Physics.SphereCast(ray, 1f, out hit, 100f, Physics.DefaultRaycastLayers & ~(1<<8), QueryTriggerInteraction.Ignore) )
+		{
+			CanvasScript.RaycastInfo(hit.collider.transform.root.gameObject);
+		}
+		else
+		{
+			CanvasScript.RaycastInfo(null);
+		}
 	}
 	
 } // class TabletController
