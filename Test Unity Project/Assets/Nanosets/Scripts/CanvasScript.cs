@@ -91,6 +91,8 @@ public class CanvasScript: MonoBehaviour
 		raycastInfo.SetActive(false);
 		raycastMessage = raycastInfo.transform.Find("Text").GetComponent<Text>();
 		raycastTarget = null;
+		
+		dialogWindow.Init();
 	}
 	
 	/**

@@ -1,0 +1,29 @@
+<dialog-bundle>
+ <bundle-name>Dialog2 Query-chan</bundle-name>
+ <items>
+  
+  <dialog-item>
+   <message>У нас здесь большая стройка, мы делаем игру! Ах, сколько работы!... нам предстоит отстроить целый мир!</message>
+   <actions>
+    
+    <dialog-action type="1">
+     <reply>Ты кто?</reply>
+	 <next-dialog>
+	  <message>Меня зовут Квери-чан, меня сделали разработчики чтобы я помогала тестировать мир.</message>
+	  <actions>
+	   <dialog-action type="0">
+	    <reply>[теперь точно надо идти]</reply>
+	   </dialog-action>
+	  </actions>
+	 </next-dialog>
+	</dialog-action>
+	
+    <dialog-action type="0">
+     <reply>[мне надо идти]</reply>
+	</dialog-action>
+	
+   </actions>
+  </dialog-item>
+  
+ </items>
+</dialog-bundle>

@@ -23,8 +23,14 @@ public class WindowBehaviour: MonoBehaviour
 		gameObject.SetActive(!gameObject.activeSelf);
 	}
 	
+	void Awake()
+	{
+		Debug.Log("WindowBehaviour Awake()");
+	}
+	
 	void Start()
 	{
+		Debug.Log("WindowBehaviour Start()");
 		if ( initShow )
 		{
 			gameObject.SetActive(true);

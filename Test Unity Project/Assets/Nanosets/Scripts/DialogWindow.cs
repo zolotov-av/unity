@@ -68,7 +68,7 @@ public class DialogWindow: MonoBehaviour
 	 */
 	private GameObject[] items;
 	
-	void Awake()
+	public void Init()
 	{
 		gameObject.SetActive(false);
 		actorPanel.SetActive(false);

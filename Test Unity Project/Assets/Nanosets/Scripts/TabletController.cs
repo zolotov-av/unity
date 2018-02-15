@@ -607,12 +607,12 @@ public class TabletController: GameStateBehaviour
 	 */
 	void HandleMouseInput()
 	{
+		mouse.TrackMouse();
+		
 		if ( canvasCtl.inDialog )
 		{
 			return;
 		}
-		
-		mouse.TrackMouse();
 		
 		if ( mouseActive )
 		{
@@ -1074,6 +1074,12 @@ public class TabletController: GameStateBehaviour
 		}
 		
 		pCamera.transform.LookAt(tp);
+		
+		if ( canvasCtl.inDialog )
+		{
+			CanvasScript.RaycastInfo(null);
+			return;
+		}
 		
 		Vector3 dest = new Vector3(Screen.width*0.5f, Screen.height*0.5f, 0f);
 		Ray ray = pCamera.ScreenPointToRay(dest);

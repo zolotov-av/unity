@@ -8,7 +8,7 @@ namespace Nanosoft
 /**
  * Класс управляющий окном списка квестов
  */
-public class QuestWindow: MonoBehaviour
+public class QuestWindow: WindowBehaviour
 {
 	
 	/**
@@ -20,11 +20,6 @@ public class QuestWindow: MonoBehaviour
 	 * Ссылка на список квестов
 	 */
 	public QuestList questList;
-	
-	void Awake()
-	{
-		gameObject.SetActive(false);
-	}
 	
 	public void SetQuestManager(QuestManager qm)
 	{
