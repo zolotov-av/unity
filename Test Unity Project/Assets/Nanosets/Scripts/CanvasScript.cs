@@ -69,8 +69,6 @@ public class CanvasScript: MonoBehaviour
 	
 	void Start()
 	{
-		Debug.Log("CanvasScript.Start()");
-		
 		GameObject actionGroup = transform.Find("ActionGroup").gameObject;
 		
 		actionPanel = actionGroup.transform.Find("ActionPanel").gameObject;

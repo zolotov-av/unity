@@ -493,7 +493,6 @@ public class TabletController: GameStateBehaviour
 	 */
 	protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 	{
-		Debug.Log("TabletController.OnSceneLoaded(" + scene.name + ")");
 	}
 	
 	/**
