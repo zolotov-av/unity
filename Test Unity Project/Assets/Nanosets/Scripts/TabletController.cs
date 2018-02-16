@@ -611,6 +611,7 @@ public class TabletController: GameStateBehaviour
 		
 		if ( canvasCtl.inDialog )
 		{
+			canvasCtl.dialogWindow.HandleInput();
 			return;
 		}
 		

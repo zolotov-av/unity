@@ -64,6 +64,11 @@ public class DialogWindow: MonoBehaviour
 	private int replyCapacity;
 	
 	/**
+	 * Индекс выделенного ответа
+	 */
+	private int selectedReply;
+	
+	/**
 	 * Ссылки на элементы для вариантов ответов
 	 */
 	private GameObject[] items;
@@ -74,7 +79,7 @@ public class DialogWindow: MonoBehaviour
 		actorPanel.SetActive(false);
 		repliesPanel.SetActive(false);
 		
-		replyCapacity = 3;
+		replyCapacity = 5;
 		replyCount = 0;
 		items = new GameObject[replyCapacity];
 		Transform t = repliesPanel.transform;
@@ -134,6 +139,7 @@ public class DialogWindow: MonoBehaviour
 		repliesPanel.SetActive( replyCount > 0 );
 		gameObject.SetActive(true);
 		
+		selectedReply = 0;
 		if ( replyCount > 0 )
 		{
 			items[0].GetComponent<Button>().Select();
@@ -146,6 +152,43 @@ public class DialogWindow: MonoBehaviour
 	public void CloseDialog()
 	{
 		gameObject.SetActive(false);
+	}
+	
+	/**
+	 * Обработка ввода с клавиатуры
+	 */
+	public void HandleInput()
+	{
+		if ( replyCount <= 0 ) return;
+		
+		if ( Input.GetKeyDown(KeyCode.UpArrow) )
+		{
+			selectedReply = (selectedReply + replyCount - 1) % replyCount;
+			items[selectedReply].GetComponent<Button>().Select();
+		}
+		
+		if ( Input.GetKeyDown(KeyCode.DownArrow) )
+		{
+			selectedReply = (selectedReply + 1) % replyCount;
+			items[selectedReply].GetComponent<Button>().Select();
+		}
+		
+		float scroll = Input.GetAxis("Mouse ScrollWheel");
+		if ( scroll > 0f )
+		{
+			selectedReply = (selectedReply + replyCount - 1) % replyCount;
+			items[selectedReply].GetComponent<Button>().Select();
+		}
+		else if ( scroll < 0f )
+		{
+			selectedReply = (selectedReply + 1) % replyCount;
+			items[selectedReply].GetComponent<Button>().Select();
+		}
+		
+		if ( Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0) )
+		{
+			items[selectedReply].GetComponent<Button>().onClick.Invoke();
+		}
 	}
 	
 } // class DialogWindow
