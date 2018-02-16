@@ -118,7 +118,7 @@ public class CanvasScript: MonoBehaviour
 		
 		if ( zoneTimer != 0f )
 		{
-			if ( Time.unscaledTime > zoneTimer + 1.8f )
+			if ( Time.unscaledTime > zoneTimer )
 			{
 				zoneTimer = 0f;
 				zoneInfo.SetActive(false);
@@ -164,11 +164,11 @@ public class CanvasScript: MonoBehaviour
 		instance.actionPanel.SetActive(false);
 	}
 	
-	public static void Zone(string message)
+	public static void Zone(string message, float duration = 1.8f)
 	{
 		instance.zoneInfo.SetActive(true);
 		instance.zoneMessage.text = message;
-		instance.zoneTimer = Time.unscaledTime;
+		instance.zoneTimer = Time.unscaledTime + duration;
 	}
 	
 	public static void ZoneLeave(string message)

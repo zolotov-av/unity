@@ -25,6 +25,24 @@ public class DialogAction
 	public int actionType;
 	
 	/**
+	 * Тип действия
+	 */
+	[XmlAttribute("quest")]
+	public string actionQuest;
+	
+	/**
+	 * Тип действия
+	 */
+	[XmlAttribute("trigger")]
+	public string actionTrigger;
+	
+	/**
+	 * Тип действия
+	 */
+	[XmlAttribute("if")]
+	public string condition;
+	
+	/**
 	 * Действие - выход из диалога, завершение диалога
 	 */
 	public const int ExitDialog = 0;
@@ -49,6 +67,19 @@ public class DialogAction
 	public void RunReply()
 	{
 		QuestManager.RunAction(this);
+	}
+	
+	public bool CheckCondition()
+	{
+		if ( condition == null || condition == "" ) return true;
+		
+		int pos = condition.IndexOf("=");
+		if ( pos < 0 ) return false;
+		
+		string key = condition.Substring(0, pos);
+		string val = condition.Substring(pos+1);
+		
+		return QuestManager.GetQuestVar(actionQuest, key) == val;
 	}
 	
 } // class DialogAction

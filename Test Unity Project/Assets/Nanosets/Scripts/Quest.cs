@@ -10,19 +10,23 @@ namespace Nanosoft
  *
  * Квест может состоять из серии этапов или из одного единственного этапа
  */
-[System.Serializable]
-public class Quest
+public class Quest: MonoBehaviour
 {
 	
 	/**
-	 * Имя квеста, которое будет отображаться в списке квестов
+	 * Имя квеста (идентификатор)
 	 */
-	public string questName;
+	public string questName = "";
+	
+	/**
+	 * Имя квеста (отображаемое игроку)
+	 */
+	public string questTitle = "";
 	
 	/**
 	 * Краткое текстовое описание квеста
 	 */
-	public string description;
+	public string description = "";
 	
 	/**
 	 * Флаг доступности квеста
@@ -54,6 +58,36 @@ public class Quest
 	 * Список этапов квеста
 	 */
 	public QuestStage[] stages;
+	
+	/**
+	 * Вернуть значение квестовой переменной
+	 */
+	public virtual string GetQuestVar(string key)
+	{
+		return "";
+	}
+	
+	/**
+	 * Установить значение квестовой переменной
+	 */
+	public virtual bool SetQuestVar(string key, string value)
+	{
+		return false;
+	}
+	
+	/**
+	 * Установить/вызвать триггер
+	 */
+	public virtual void SetTrigger(string trigger)
+	{
+	}
+	
+	/**
+	 * Установить/вызвать триггер
+	 */
+	public virtual void ResetTrigger(string trigger)
+	{
+	}
 	
 } // class Quest
 

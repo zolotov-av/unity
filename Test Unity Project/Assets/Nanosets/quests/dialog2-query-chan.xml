@@ -12,22 +12,34 @@
 	  <message>Меня зовут Квери-чан, меня сделали разработчики чтобы я помогала тестировать мир.</message>
 	  <actions>
 	   <dialog-action type="0">
-	    <reply>[теперь точно надо идти]</reply>
+	    <reply>[конец]</reply>
 	   </dialog-action>
 	  </actions>
 	 </next-dialog>
 	</dialog-action>
 	
-    <dialog-action type="1">
+    <dialog-action type="1" quest="lost-sword" if="found=start">
      <reply>Могу я чем-то помочь?</reply>
 	 <next-dialog>
 	  <message>Гоблины-строители куда-то утащили "Меч героя". Как же искатели приключений будут сражаться без меча? Не мог бы ты поискать его?</message>
 	  <actions>
-	   <dialog-action type="0">
+	   <dialog-action type="0" quest="lost-sword" trigger="accept-quest">
 	    <reply>я поищу</reply>
 	   </dialog-action>
 	   <dialog-action type="0">
 	    <reply>не сейчас</reply>
+	   </dialog-action>
+	  </actions>
+	 </next-dialog>
+	</dialog-action>
+	
+    <dialog-action type="1" quest="lost-sword" if="found=yes" trigger="end-quest">
+     <reply>Я нашел "Меч героя"...</reply>
+	 <next-dialog>
+	  <message>О да, это он, ты меня очень выручил! Искатель приключений теперь не пропадает.</message>
+	  <actions>
+	   <dialog-action type="0">
+	    <reply>[конец]</reply>
 	   </dialog-action>
 	  </actions>
 	 </next-dialog>

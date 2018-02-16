@@ -105,7 +105,8 @@ public class TabletController: GameStateBehaviour
 	/**
 	 * Текущая скорость персонажа (с которой персонаж движется в данный момент)
 	 */
-	private float velocity = 0f;
+	// TODO it right
+	public static float velocity = 0f;
 	
 	/**
 	 * Вектор скорости персонажа относительно ориентации камеры
@@ -165,7 +166,8 @@ public class TabletController: GameStateBehaviour
 	 * В этом режиме персонаж всё время бежит вперед, даже если игрок
 	 * не нажимает клавиши движения
 	 */
-	private bool run = false;
+	// TODO
+	public static bool run = false;
 	
 	/**
 	 * Флаг блокировки курсора
@@ -866,6 +868,8 @@ public class TabletController: GameStateBehaviour
 	 */
 	public bool NavigateByScreenPoint(Vector2 dest)
 	{
+		if ( ! mobileInput ) return false;
+		
 		if ( !playerNav.enabled )
 		{
 			playerNav.enabled = true;

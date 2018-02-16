@@ -73,6 +73,8 @@ public class DialogWindow: MonoBehaviour
 	 */
 	private GameObject[] items;
 	
+	private bool lockCursor = true;
+	
 	public void Init()
 	{
 		gameObject.SetActive(false);
@@ -110,39 +112,62 @@ public class DialogWindow: MonoBehaviour
 		actorPanel.SetActive(true);
 	}
 	
+	public void SetLockCursor(bool state)
+	{
+		lockCursor = state;
+	}
+	
 	/**
 	 * Отобразить диалог
 	 */
 	public void ShowDialog(DialogItem dialog)
 	{
+		if ( lockCursor )
+		{
+			Cursor.visible = false;
+			Cursor.lockState = CursorLockMode.Locked;
+		}
+		
+		// TODO it right
+		TabletController.run = false;
+		TabletController.velocity = 0f;
+		
 		messageText.text = dialog.message;
 		
 		// TODO resize and scrolling
-		DialogAction[] replies = dialog.replies;
-		int len = replies.Length;
-		if ( len > replyCapacity ) len = replyCapacity;
-		for(int i = 0; i < len; i++)
+		replyCount = 0;
+		foreach(DialogAction action in dialog.replies)
 		{
-			var obj = items[i];
-			obj.transform.Find("Text").gameObject.GetComponent<Text>().text = replies[i].reply;
-			var btnClick = obj.GetComponent<Button>().onClick;
-			btnClick.RemoveAllListeners();
-			btnClick.AddListener( replies[i].RunReply );
-			obj.SetActive(true);
+			if ( action.CheckCondition() )
+			{
+				var obj = items[replyCount];
+				obj.transform.Find("Text").gameObject.GetComponent<Text>().text = action.reply;
+				var btnClick = obj.GetComponent<Button>().onClick;
+				btnClick.RemoveAllListeners();
+				btnClick.AddListener( action.RunReply );
+				obj.SetActive(true);
+				replyCount++;
+			}
 		}
-		for(int i = len; i < replyCount; i++)
+		
+		for(int i = replyCount; i < replyCapacity; i++)
 		{
 			items[i].SetActive(false);
 		}
-		replyCount = len;
 		
 		repliesPanel.SetActive( replyCount > 0 );
 		gameObject.SetActive(true);
 		
-		selectedReply = 0;
+		
 		if ( replyCount > 0 )
 		{
+			selectedReply = 0;
 			items[0].GetComponent<Button>().Select();
+		}
+		else
+		{
+			selectedReply = -1;
+			Debug.LogError("replyCount <= 0");
 		}
 	}
 	
@@ -151,7 +176,11 @@ public class DialogWindow: MonoBehaviour
 	 */
 	public void CloseDialog()
 	{
+		EventSystem.current.SetSelectedGameObject(null);
 		gameObject.SetActive(false);
+		
+		Cursor.visible = true;
+		Cursor.lockState = CursorLockMode.None;
 	}
 	
 	/**
@@ -185,7 +214,13 @@ public class DialogWindow: MonoBehaviour
 			items[selectedReply].GetComponent<Button>().Select();
 		}
 		
-		if ( Input.GetKeyDown(KeyCode.Return) || Input.GetMouseButtonDown(0) )
+		if ( Input.GetKeyDown(KeyCode.Return) )
+		{
+			items[selectedReply].GetComponent<Button>().onClick.Invoke();
+			return;
+		}
+		
+		if ( lockCursor && Input.GetMouseButtonDown(0) )
 		{
 			items[selectedReply].GetComponent<Button>().onClick.Invoke();
 		}
