@@ -8,6 +8,8 @@ namespace Nanosoft
 public class WindowBehaviour: MonoBehaviour
 {
 	
+	public static WindowBehaviour current = null;
+	
 	/**
 	 * Если true, то показать окно при загрузке
 	 */
@@ -23,13 +25,29 @@ public class WindowBehaviour: MonoBehaviour
 		gameObject.SetActive(!gameObject.activeSelf);
 	}
 	
+	public void ToggleMain()
+	{
+		if ( gameObject.activeSelf )
+		{
+			gameObject.SetActive(false);
+			current = null;
+		}
+		else
+		{
+			if ( current != null ) current.gameObject.SetActive(false);
+			current = this;
+			gameObject.SetActive(true);
+		}
+	}
+	
 	void Awake()
 	{
-		Debug.Log("WindowBehaviour Awake()");
+		//Debug.Log("WindowBehaviour Awake()");
 	}
 	
 	void Start()
 	{
+		/*
 		Debug.Log("WindowBehaviour Start()");
 		if ( initShow )
 		{
@@ -39,6 +57,7 @@ public class WindowBehaviour: MonoBehaviour
 		{
 			gameObject.SetActive(false);
 		}
+		*/
 	}
 	
 }

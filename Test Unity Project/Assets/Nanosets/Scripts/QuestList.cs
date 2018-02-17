@@ -20,7 +20,7 @@ public class QuestList: MonoBehaviour
 	/**
 	 * Размер выделенного массива (кеш элементов)
 	 */
-	private int capacity;
+	private int capacity = 0;
 	
 	/**
 	 * Фактическое число элементов в массиве
@@ -38,10 +38,8 @@ public class QuestList: MonoBehaviour
 	[HideInInspector]
 	public QuestManager questManager;
 	
-	void Awake()
+	public void Init()
 	{
-		Debug.Log("QuestList.Awake()");
-		
 		capacity = 6;
 		count = 0;
 		items = new GameObject[capacity];
@@ -54,12 +52,6 @@ public class QuestList: MonoBehaviour
 		}
 	}
 	
-	void Start()
-	{
-		Debug.Log("QuestList.Start()");
-		Refresh();
-	}
-	
 	/**
 	 * Обновить список квестов
 	 */
@@ -67,22 +59,23 @@ public class QuestList: MonoBehaviour
 	{
 		if ( questManager == null ) return;
 		
-		// TODO resize and scrolling
-		Quest[] quests = questManager.quests;
-		int len = quests.Length;
-		Debug.Log("QuestList.Refresh(), quests.count=" + len + ", capacity=" + capacity);
-		if ( len > capacity ) len = capacity;
-		for(int i = 0; i < len; i++)
+		int i = 0;
+		foreach(Quest quest in questManager.quests)
 		{
+			if ( i >= capacity ) break;
+			if ( quest == null || !quest.active ) continue;
+			
 			var obj = items[i];
-			obj.transform.Find("Text").gameObject.GetComponent<Text>().text = quests[i].questName;
+			obj.transform.Find("Text").GetComponent<Text>().text = quest.questTitle;
 			obj.SetActive(true);
+			i++;
 		}
-		for(int i = len; i < count; i++)
+		
+		for(int j = i; j < count; j++)
 		{
-			items[i].SetActive(false);
+			items[j].SetActive(false);
 		}
-		count = len;
+		count = i;
 	}
 	
 } // class QuestList

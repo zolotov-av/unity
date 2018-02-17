@@ -35,11 +35,6 @@ public class CanvasScript: MonoBehaviour
 	private TargetInfo raycastTarget;
 	
 	/**
-	 * Ссылка на скрипт управляющий списком квестов
-	 */
-	private QuestList questList;
-	
-	/**
 	 * Ссылка на скрипт управляющий диалоговым окном
 	 */
 	public DialogWindow dialogWindow;
@@ -80,8 +75,6 @@ public class CanvasScript: MonoBehaviour
 		lootMessage = lootPanel.transform.Find("LootMessage").gameObject.GetComponent<Text>();
 		lootMessage.text = "lootMessage";
 		
-		questWindow.SetQuestManager(questManager);
-		
 		zoneInfo = transform.Find("ZoneInfo").gameObject;
 		zoneInfo.SetActive(false);
 		zoneMessage = zoneInfo.transform.Find("Text").GetComponent<Text>();
@@ -113,7 +106,7 @@ public class CanvasScript: MonoBehaviour
 		
 		if ( Input.GetKeyDown(KeyCode.L) )
 		{
-			questWindow.ToggleWindow();
+			questWindow.ToggleMain();
 		}
 		
 		if ( zoneTimer != 0f )

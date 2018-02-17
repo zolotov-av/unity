@@ -13,6 +13,10 @@ public class TabletSettings: MonoBehaviour
 		TabletController.bigJump = !TabletController.bigJump;
 	}
 	
+	public void ExitButton()
+	{
+		Application.Quit();
+	}
 }
 
 } // namespace Nanosoft

@@ -452,6 +452,11 @@ public class TabletController: GameStateBehaviour
 		SetPlayer(player);
 		SetCamera(cam);
 		
+		if ( questManager == null ) Debug.LogError("questManager=null");
+		questManager.questWindow = canvas.transform.Find("QuestWindow").GetComponent<QuestWindow>();
+		if ( questManager.questWindow == null ) Debug.LogError("questWindow not found");
+		questManager.questWindow.Init(questManager);
+		
 		//Debug.Log("GameState init canvas");
 		canvasCtl = canvas.GetComponent<CanvasScript>();
 		canvasCtl.questManager = questManager;

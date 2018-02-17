@@ -26,6 +26,11 @@ public class QuestManager: MonoBehaviour
 	 */
 	public Quest[] quests;
 	
+	/**
+	 * Ссылка на окно квестов
+	 */
+	public QuestWindow questWindow;
+	
 	protected void Init()
 	{
 		clip = GetComponent<AudioSource>();
@@ -42,6 +47,17 @@ public class QuestManager: MonoBehaviour
 				i++;
 			}
 		}
+	}
+	
+	public int GetActiveQuests()
+	{
+		int count = 0;
+		foreach(Quest quest in quests)
+		{
+			if ( quest != null && quest.active ) count ++;
+		}
+		
+		return count;
 	}
 	
 	void Awake()
@@ -173,6 +189,11 @@ public class QuestManager: MonoBehaviour
 			c.Stop();
 			c.Play();
 		}
+	}
+	
+	public static void Refresh()
+	{
+		instance.questWindow.Refresh();
 	}
 	
 } // class QuestManager

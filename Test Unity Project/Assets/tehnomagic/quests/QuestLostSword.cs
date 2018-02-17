@@ -63,16 +63,20 @@ public class QuestLostSword: Quest
 	public void AcceptTrigger()
 	{
 		found = "no";
-		CanvasScript.Zone("Новая запись в дневнике");
+		CanvasScript.Zone("Добавлен квест");
+		active = true;
 		QuestManager.WriteSound();
+		QuestManager.Refresh();
 		LostSwordTrigger.Enable();
 	}
 	
 	public void EndTrigger()
 	{
 		found = "done";
-		CanvasScript.Zone("Новая запись в дневнике");
+		CanvasScript.Zone("Квест завершен");
+		active = false;
 		QuestManager.WriteSound();
+		QuestManager.Refresh();
 		LostSwordTrigger.Disable();
 	}
 	
