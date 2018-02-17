@@ -40,24 +40,15 @@ public class WindowBehaviour: MonoBehaviour
 		}
 	}
 	
-	void Awake()
+	public void Show()
 	{
-		//Debug.Log("WindowBehaviour Awake()");
+		gameObject.SetActive(true);
 	}
 	
-	void Start()
+	public void Hide()
 	{
-		/*
-		Debug.Log("WindowBehaviour Start()");
-		if ( initShow )
-		{
-			gameObject.SetActive(true);
-		}
-		else if ( initHide )
-		{
-			gameObject.SetActive(false);
-		}
-		*/
+		gameObject.SetActive(false);
+		if ( current == this ) current = null;
 	}
 	
 }

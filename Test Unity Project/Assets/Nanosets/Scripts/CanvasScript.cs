@@ -64,6 +64,16 @@ public class CanvasScript: MonoBehaviour
 	
 	void Start()
 	{
+		foreach(Transform t in transform)
+		{
+			WindowBehaviour w = t.GetComponent<WindowBehaviour>();
+			if ( w != null )
+			{
+				if ( w.initShow ) w.Show();
+				else if ( w.initHide ) w.Hide();
+			}
+		}
+		
 		GameObject actionGroup = transform.Find("ActionGroup").gameObject;
 		
 		actionPanel = actionGroup.transform.Find("ActionPanel").gameObject;
