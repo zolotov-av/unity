@@ -28,6 +28,16 @@ public class QuestWindow: WindowBehaviour
 	public GameObject noQuestInfo;
 	
 	/**
+	 * Ссылка на панельку с журналом квеста
+	 */
+	public GameObject questLog;
+	
+	/**
+	 * Ссылка на префаб элемента журнала квеста
+	 */
+	public GameObject questLogPrefab;
+	
+	/**
 	 * Ссылка на менеджер квестов
 	 */
 	protected QuestManager questManager;
@@ -48,6 +58,21 @@ public class QuestWindow: WindowBehaviour
 	private GameObject[] questItems;
 	
 	/**
+	 * Максимальное число записей в журнале квеста
+	 */
+	public int logCapacity = 10;
+	
+	/**
+	 * Актуальное число записей в журнале квеста
+	 */
+	private int logCount = 0;
+	
+	/**
+	 * Сслыка на элементы журнала квеста
+	 */
+	private GameObject[] logItems;
+	
+	/**
 	 * Инициализация
 	 */
 	public void Init(QuestManager qm)
@@ -55,6 +80,7 @@ public class QuestWindow: WindowBehaviour
 		Debug.Log("QuestWindow.Init()");
 		questManager = qm;
 		InitQuestList();
+		InitQuestLog();
 		Refresh();
 	}
 	
@@ -75,6 +101,22 @@ public class QuestWindow: WindowBehaviour
 	}
 	
 	/**
+	 * Инициализация журнала квеста
+	 */
+	protected void InitQuestLog()
+	{
+		logCount = 0;
+		logItems = new GameObject[logCapacity];
+		Transform t = questLog.transform;
+		for(int i = 0; i < logCapacity; i++)
+		{
+			GameObject obj = Instantiate(questLogPrefab, t);
+			obj.SetActive(false);
+			logItems[i] = obj;
+		}
+	}
+	
+	/**
 	 * Обновить список квестов
 	 */
 	public void Refresh()
@@ -89,6 +131,7 @@ public class QuestWindow: WindowBehaviour
 		{
 			questList.SetActive(false);
 			noQuestInfo.SetActive(true);
+			ClearQuestLog();
 		}
 		
 	}
@@ -103,6 +146,11 @@ public class QuestWindow: WindowBehaviour
 			
 			var obj = questItems[i];
 			obj.transform.Find("Text").GetComponent<Text>().text = quest.questTitle;
+			
+			var btnClick = obj.GetComponent<Button>().onClick;
+			btnClick.RemoveAllListeners();
+			btnClick.AddListener( quest.ShowQuestLog );
+			
 			obj.SetActive(true);
 			i++;
 		}
@@ -112,6 +160,56 @@ public class QuestWindow: WindowBehaviour
 			questItems[j].SetActive(false);
 		}
 		questCount = i;
+		
+		if ( questCount > 0 )
+		{
+			// TODO something...
+			questItems[0].GetComponent<Button>().onClick.Invoke();
+		}
+		else
+		{
+			ClearQuestLog();
+		}
+	}
+	
+	/**
+	 * Отобразить журнал квеста
+	 *
+	 * Данная функция вызывается при нажатии соответствующей кнопки в журнале
+	 * заданий
+	 */
+	public void ShowQuestLog(Quest quest)
+	{
+		int i = 0;
+		foreach(string msg in quest.questLog)
+		{
+			if ( i >= logCapacity || msg == null ) break;
+			
+			var obj = logItems[i];
+			obj.GetComponent<Text>().text = msg;
+			
+			obj.SetActive(true);
+			i++;
+		}
+		
+		for(int j = i; j < logCount; j++)
+		{
+			logItems[j].SetActive(false);
+		}
+		logCount = i;
+	}
+	
+	/**
+	 * Очистить журнал квеста
+	 */
+	public void ClearQuestLog()
+	{
+		Debug.Log("ClearQuestLog");
+		for(int j = 0; j < logCount; j++)
+		{
+			logItems[j].SetActive(false);
+		}
+		logCount = 0;
 	}
 	
 } // class QuestWindow

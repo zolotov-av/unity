@@ -115,6 +115,17 @@ public class QuestManager: MonoBehaviour
 	}
 	
 	/**
+	 * Отобразить журнал квеста
+	 *
+	 * Данная функция вызывается при нажатии соответствующей кнопки в журнале
+	 * заданий
+	 */
+	public static void ShowQuestLog(Quest quest)
+	{
+		instance.questWindow.ShowQuestLog(quest);
+	}
+	
+	/**
 	 * Вернуть значение квестовой переменной
 	 */
 	public static string GetQuestVar(string questName, string key)
@@ -179,6 +190,24 @@ public class QuestManager: MonoBehaviour
 		}
 		
 		Debug.LogError("quest (" + questName + ") not found");
+	}
+	
+	/**
+	 * Добавить запись в журнал квеста
+	 */
+	public static bool logEvent(string questName, string message, string note = null)
+	{
+		foreach(Quest quest in instance.quests)
+		{
+			if ( quest == null ) continue;
+			if ( quest.questName == questName )
+			{
+				return quest.logEvent(message, note);
+			}
+		}
+		
+		Debug.LogError("quest (" + questName + ") not found");
+		return false;
 	}
 	
 	public static void WriteSound()

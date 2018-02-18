@@ -60,6 +60,11 @@ public class Quest: MonoBehaviour
 	public QuestStage[] stages;
 	
 	/**
+	 * Журнал квеста
+	 */
+	public string[] questLog;
+	
+	/**
 	 * Вернуть значение квестовой переменной
 	 */
 	public virtual string GetQuestVar(string key)
@@ -87,6 +92,44 @@ public class Quest: MonoBehaviour
 	 */
 	public virtual void ResetTrigger(string trigger)
 	{
+	}
+	
+	/**
+	 * Сделать записть в журнал квеста
+	 */
+	public bool logEvent(string message, string note = null)
+	{
+		int len = questLog.Length;
+		for(int i = 0; i < len; i++)
+		{
+			if ( questLog[i] == null )
+			{
+				questLog[i] = message;
+				CanvasScript.Zone(note == null ? "Новая запись в дневнике" : note);
+				QuestManager.WriteSound();
+				return true;
+			}
+		}
+		
+		CanvasScript.Zone("Ошибка! журнал заданий переполнен");
+		QuestManager.WriteSound();
+		return false;
+	}
+	
+	/**
+	 * Обработчик события для кнопки.
+	 *
+	 * Возможно не самое лучше место для этой функции, но пока лучшего не
+	 * придумал
+	 */
+	public void ShowQuestLog()
+	{
+		QuestManager.ShowQuestLog(this);
+	}
+	
+	void Awake()
+	{
+		questLog = new string[10];
 	}
 	
 } // class Quest
