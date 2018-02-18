@@ -66,8 +66,10 @@ public class LostSwordTrigger: MonoBehaviour, IAction
 		sword.SetActive(false);
 		trigger.enabled = false;
 		QuestManager.SetQuestVar("lost-sword", "found", "yes");
-		QuestManager.WriteSound();
-		CanvasScript.Zone("Кажется вы нашли \"Меч героя\", покажите его Квери-чан", 3.4f);
+		const string msg = "Кажется вы нашли \"Меч героя\", покажите его Квери-чан";
+		QuestManager.logEvent("lost-sword", msg);
+		QuestManager.Refresh();
+		CanvasScript.Zone(msg, 3.4f);
 	}
 	
 }

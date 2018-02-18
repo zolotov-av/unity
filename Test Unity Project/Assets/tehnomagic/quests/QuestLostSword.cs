@@ -63,9 +63,8 @@ public class QuestLostSword: Quest
 	public void AcceptTrigger()
 	{
 		found = "no";
-		CanvasScript.Zone("Добавлен квест");
 		active = true;
-		QuestManager.WriteSound();
+		logEvent("Гоблины-строители утащили куда-то \"Меч героя\", Квери-чан просит нас его найти");
 		QuestManager.Refresh();
 		LostSwordTrigger.Enable();
 	}
@@ -77,7 +76,7 @@ public class QuestLostSword: Quest
 		active = false;
 		QuestManager.WriteSound();
 		QuestManager.Refresh();
-		LostSwordTrigger.Disable();
+		//LostSwordTrigger.Disable();
 	}
 	
 }
