@@ -78,7 +78,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
-  m_StereoMirrorMode: 0
 --- !u!92 &92350712465575508
 Behaviour:
   m_ObjectHideFlags: 1
@@ -100,8 +99,8 @@ MonoBehaviour:
   target: {fileID: 0}
   camdbg: {fileID: 0}
   height: 1.4
-  startDistance: 3
-  startAngle: 20
+  startDistance: 4
+  startAngle: 30
   maxDistance: 10
   rotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!124 &124310162853789888
