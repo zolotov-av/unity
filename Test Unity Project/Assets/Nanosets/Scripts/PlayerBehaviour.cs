@@ -33,6 +33,10 @@ public class PlayerBehaviour: MonoBehaviour
 		CanvasScript.HideAction();
 	}
 	
+	public virtual void Attack1()
+	{
+	}
+	
 	void Update()
 	{
 		if ( Input.GetKeyDown(KeyCode.E) && action != null )

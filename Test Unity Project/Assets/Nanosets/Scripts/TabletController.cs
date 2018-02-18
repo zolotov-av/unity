@@ -44,6 +44,11 @@ public class TabletController: GameStateBehaviour
 	protected GameObject player;
 	
 	/**
+	 * Ссылка на скрипт персонажа
+	 */
+	protected PlayerBehaviour playerScript;
+	
+	/**
 	 * Ссылка на NavMeshAgent персонажа
 	 */
 	private NavMeshAgent playerNav;
@@ -322,6 +327,12 @@ public class TabletController: GameStateBehaviour
 		if ( capsule == null )
 		{
 			Debug.LogError("player haven't CapsuleCollider");
+		}
+		
+		playerScript = obj.GetComponent<PlayerBehaviour>();
+		if ( playerScript == null )
+		{
+			Debug.LogError("player haven't PlayerBehaviour");
 		}
 		
 		playerNav = obj.GetComponent<NavMeshAgent>();
@@ -606,6 +617,11 @@ public class TabletController: GameStateBehaviour
 				if ( bigJump ) JumpHeight(12f);
 				else JumpHeight(2.4f);
 			}
+		}
+		
+		if ( Input.GetKey("1") )
+		{
+			playerScript.Attack1();
 		}
 	}
 	
