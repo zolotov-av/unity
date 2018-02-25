@@ -39,6 +39,11 @@ public class TabletController: GameStateBehaviour
 	public QuestManager questManager;
 	
 	/**
+	 * Ссылка на менеджер фоновой музыки
+	 */
+	public SoundManager soundManager;
+	
+	/**
 	 * Ссылка на персонажа (загруженный экземляр)
 	 */
 	protected GameObject player;
@@ -69,6 +74,12 @@ public class TabletController: GameStateBehaviour
 	 */
 	[HideInInspector]
 	public CanvasScript canvasCtl;
+	
+	/**
+	 * Ссылка на менеджер меню
+	 */
+	[HideInInspector]
+	public MainMenuScript menuCtl;
 	
 	/**
 	 * Ссылка на объект держащий AudioListener
@@ -474,6 +485,11 @@ public class TabletController: GameStateBehaviour
 		dbg = canvas.transform.Find("DebugPanel/Text").GetComponent<Text>();
 		dbg.text = "Debug";
 		
+		menuCtl = canvas.transform.Find("MainMenu").GetComponent<MainMenuScript>();
+		menuCtl.showMainMenu();
+		
+		soundManager.Play("menu");
+		
 		rotateTap = canvas.transform.Find("RotateTap") as RectTransform;
 		rotateTap.gameObject.SetActive(false);
 		
@@ -623,6 +639,11 @@ public class TabletController: GameStateBehaviour
 		{
 			playerScript.Attack1();
 		}
+		
+		if ( Input.GetKeyDown("2") )
+		{
+			playerScript.Attack2();
+		}
 	}
 	
 	/**
@@ -631,6 +652,12 @@ public class TabletController: GameStateBehaviour
 	void HandleMouseInput()
 	{
 		mouse.TrackMouse();
+		
+		if ( menuCtl.inMenu )
+		{
+			menuCtl.HandleInput();
+			return;
+		}
 		
 		if ( canvasCtl.inDialog )
 		{

@@ -37,6 +37,10 @@ public class PlayerBehaviour: MonoBehaviour
 	{
 	}
 	
+	public virtual void Attack2()
+	{
+	}
+	
 	void Update()
 	{
 		if ( Input.GetKeyDown(KeyCode.E) && action != null )
