@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Nanosoft
 {
@@ -11,6 +12,8 @@ public class MainMenuScript: WindowBehaviour
 	public bool inMenu = true;
 	public GameObject mainPanel;
 	public GameObject introPanel;
+	public GameObject loadingPanel;
+	public GameObject backgroundPanel;
 	private GameObject currentPanel = null;
 	
 	public void showMainMenu()
@@ -39,6 +42,27 @@ public class MainMenuScript: WindowBehaviour
 		introPanel.SetActive(true);
 	}
 	
+	public void ShowLoading()
+	{
+		Debug.Log("ShowLoading");
+		inMenu = true;
+		gameObject.SetActive(true);
+		if ( currentPanel != null )
+		{
+			currentPanel.SetActive(false);
+		}
+		currentPanel = loadingPanel;
+		loadingPanel.SetActive(true);
+		backgroundPanel.SetActive(true);
+	}
+	
+	public void EndLoading()
+	{
+		Debug.Log("EndLoading");
+		inMenu = false;
+		gameObject.SetActive(false);
+	}
+	
 	public void HandleInput()
 	{
 		if ( Input.GetKeyDown(KeyCode.Escape) )
@@ -53,9 +77,15 @@ public class MainMenuScript: WindowBehaviour
 	
 	public void OnNewGameButton()
 	{
+		//ShowLoading();
+		//SceneManager.LoadScene(1);
+		TabletController.LoadScene(1);
+		/*
 		SoundManager.instance.FadePlay("town");
 		gameObject.SetActive(false);
 		inMenu = false;
+		Time.timeScale = 1f;
+		*/
 	}
 	
 	public void OnLoadGameButton()

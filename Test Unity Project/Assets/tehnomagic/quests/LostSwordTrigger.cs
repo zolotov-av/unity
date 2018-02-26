@@ -7,28 +7,44 @@ public class LostSwordTrigger: MonoBehaviour, IAction
 {
 	public Collider trigger;
 	
-	public static LostSwordTrigger instance;
+	private static LostSwordTrigger instance;
+	private static bool active = false;
+	public static bool swordActive = true;
 	
 	public GameObject sword;
-
-	// Use this for initialization
-	void Awake()
+	
+	void OnEnable()
 	{
-		if ( instance == null )
-		{
-			instance = this;
-		}
+		Debug.Log("LostSwordTrigger OnEnable()");
+		instance = this;
+		trigger.enabled = active;
+		sword.SetActive(swordActive);
+	}
+	
+	void OnDisable()
+	{
+		Debug.Log("LostSwordTrigger OnDisable()");
+		instance = null;
 	}
 	
 	public static void Enable()
 	{
 		Debug.Log("enable trigger");
-		instance.trigger.enabled = true;
+		active = true;
+		if ( instance != null )
+		{
+			instance.trigger.enabled = true;
+		}
 	}
 	
-	public static void Disable()
+	public static void Finish()
 	{
-		instance.trigger.enabled = false;
+		active = false;
+		swordActive = false;
+		if ( instance != null )
+		{
+			instance.trigger.enabled = false;
+		}
 	}
 	
 	/**

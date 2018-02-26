@@ -56,6 +56,7 @@ public class CanvasScript: MonoBehaviour
 	
 	void Awake()
 	{
+		Debug.Log("CanvasScript Awake()");
 		if ( instance == null )
 		{
 			instance = this;
@@ -64,6 +65,7 @@ public class CanvasScript: MonoBehaviour
 	
 	void Start()
 	{
+		Debug.Log("CanvasScript Start()");
 		foreach(Transform t in transform)
 		{
 			WindowBehaviour w = t.GetComponent<WindowBehaviour>();

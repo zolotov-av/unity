@@ -33,6 +33,12 @@ public class PlayerBehaviour: MonoBehaviour
 		CanvasScript.HideAction();
 	}
 	
+	public void RemoveAction()
+	{
+		action = null;
+		CanvasScript.HideAction();
+	}
+	
 	public virtual void Attack1()
 	{
 	}

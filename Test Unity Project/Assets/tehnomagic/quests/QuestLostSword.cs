@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Nanosoft
 {
@@ -21,6 +22,11 @@ public class QuestLostSword: Quest
 		if ( key == "found" )
 		{
 			return found;
+		}
+		
+		if ( key == "scene" )
+		{
+			return SceneManager.GetActiveScene().name;
 		}
 		
 		return "";
@@ -57,6 +63,18 @@ public class QuestLostSword: Quest
 			return;
 		}
 		
+		if ( trigger == "load-mainland" )
+		{
+			TabletController.LoadScene("mainland");
+			return;
+		}
+		
+		if ( trigger == "load-startland" )
+		{
+			TabletController.LoadScene("startland");
+			return;
+		}
+		
 		Debug.LogError("QuestLostSword: trigger (" + trigger + ") not found");
 	}
 	
@@ -76,7 +94,7 @@ public class QuestLostSword: Quest
 		active = false;
 		QuestManager.WriteSound();
 		QuestManager.Refresh();
-		//LostSwordTrigger.Disable();
+		LostSwordTrigger.Finish();
 	}
 	
 }

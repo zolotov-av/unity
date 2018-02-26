@@ -74,7 +74,7 @@ public class SoundManager: MonoBehaviour
 	{
 		if ( fadeTarget != null )
 		{
-			float volume = sound.volume - 0.4f * Time.deltaTime;
+			float volume = sound.volume - 0.4f * Time.unscaledDeltaTime;
 			if ( volume > 0f )
 			{
 				sound.volume = volume;

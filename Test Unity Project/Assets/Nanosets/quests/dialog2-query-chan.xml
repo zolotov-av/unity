@@ -45,6 +45,14 @@
 	 </next-dialog>
 	</dialog-action>
 	
+    <dialog-action type="0" quest="lost-sword" if="scene=mainland" trigger="load-startland">
+     <reply>[отправиться на стартовую сцену]</reply>
+	</dialog-action>
+	
+    <dialog-action type="0" quest="lost-sword" if="scene=startland" trigger="load-mainland">
+     <reply>[отправиться на главную сцену]</reply>
+	</dialog-action>
+	
     <dialog-action type="0">
      <reply>[мне надо идти]</reply>
 	</dialog-action>

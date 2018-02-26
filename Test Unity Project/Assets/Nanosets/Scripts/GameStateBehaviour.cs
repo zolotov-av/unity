@@ -31,12 +31,18 @@ public class GameStateBehaviour: MonoBehaviour
 	 */
 	void Awake()
 	{
+		Debug.Log("GameStateBehaviour Awake()");
 		if ( !instance )
 		{
 			instance = this;
 			DontDestroyOnLoad(gameObject);
 			InitInstance();
 		}
+	}
+	
+	void Start()
+	{
+		Debug.Log("GameStateBehaviour Start()");
 	}
 	
 	/**

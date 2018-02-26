@@ -15,8 +15,13 @@ namespace Nanosoft
  * Данный контроллер в одном классе управляет и персонажем и камерой и глобльным
  * состоянием игры.
  */
-public class TabletController: GameStateBehaviour
+public class TabletController: MonoBehaviour
 {
+	
+	/**
+	 * Ссылка на экземляр
+	 */
+	public static TabletController instance = null;
 	
 	/**
 	 * Ссылка на префаб для загрузки персонажа
@@ -431,13 +436,14 @@ public class TabletController: GameStateBehaviour
 	public Text dbg;
 	
 	/**
-	 * Событие инициализации
-	 *
-	 * Пользователь должен переопределить этот метод и реализовать в нём
-	 * инициализацию глобального состояния.
+	 * Инициализация
 	 */
-	protected override void OnInit()
+	protected void Init()
 	{
+		Debug.Log("TabletController Init()");
+		
+		SceneManager.sceneLoaded += OnSceneLoaded;
+		
 		// создаем персонажа
 		var t = gameObject.transform;
 		
@@ -489,6 +495,7 @@ public class TabletController: GameStateBehaviour
 		menuCtl.showMainMenu();
 		
 		soundManager.Play("menu");
+		//soundManager.Play("town");
 		
 		rotateTap = canvas.transform.Find("RotateTap") as RectTransform;
 		rotateTap.gameObject.SetActive(false);
@@ -516,17 +523,61 @@ public class TabletController: GameStateBehaviour
 		
 		mouseActive = false;
 		mouse = new TouchTracker();
+		
+		Debug.Log("TabletController Init() done");
 	}
 	
+	private bool loading = false;
+	public static string sceneName;
+	
 	/**
-	 * События загрузки новой сцены
+	 * Событие загрузки новой сцены
 	 *
 	 * Если пользователю нужно производить какие-то действия при смене сцены,
 	 * например чтобы передвинуть персонажа в определенную позицию, то можно
 	 * переопределить этот метод.
 	 */
-	protected override void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+	protected void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 	{
+		Debug.Log("TabletController OnSceneLoaded(" + scene.name + ")");
+		sceneName = scene.name;
+		if ( loading )
+		{
+			loading = false;
+			menuCtl.EndLoading();
+			var entry = GameObject.FindWithTag("EntryPoint");
+			if ( entry != null )
+			{
+				var t = entry.transform;
+				rb.position = t.position;
+				rb.rotation = t.rotation;
+				rotation = t.rotation;
+				var te = entry.GetComponent<TabletEntry>();
+				if ( te != null )
+				{
+					if ( te.backgroundMusic != null && te.backgroundMusic != "" )
+					{
+						soundManager.FadePlay(te.backgroundMusic);
+					}
+				}
+			}
+		}
+	}
+	
+	public static void LoadScene(int i)
+	{
+		instance.loading = true;
+		instance.playerScript.RemoveAction();
+		instance.menuCtl.ShowLoading();
+		SceneManager.LoadScene(i);
+	}
+	
+	public static void LoadScene(string sceneName)
+	{
+		instance.loading = true;
+		instance.playerScript.RemoveAction();
+		instance.menuCtl.ShowLoading();
+		SceneManager.LoadScene(sceneName);
 	}
 	
 	/**
@@ -1045,6 +1096,22 @@ public class TabletController: GameStateBehaviour
 			animator.SetBool("falling", falling);
 		}
 		
+	}
+	
+	void Awake()
+	{
+		Debug.Log("TabletController Awake()");
+		if ( instance == null )
+		{
+			instance = this;
+			DontDestroyOnLoad(gameObject);
+			Init();
+		}
+	}
+	
+	void Start()
+	{
+		Debug.Log("TabletController Start()");
 	}
 	
 	void FixedUpdate()
