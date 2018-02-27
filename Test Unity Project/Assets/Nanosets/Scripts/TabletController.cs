@@ -354,8 +354,7 @@ public class TabletController: MonoBehaviour
 		playerNav = obj.GetComponent<NavMeshAgent>();
 		if ( playerNav )
 		{
-			playerNav.enabled = true;
-			playerNav.ResetPath();
+			playerNav.enabled = false;
 			
 			if ( capsule != null )
 			{
@@ -544,13 +543,16 @@ public class TabletController: MonoBehaviour
 		if ( loading )
 		{
 			loading = false;
+			StopNavigation();
+			rb.Sleep();
 			menuCtl.EndLoading();
 			var entry = GameObject.FindWithTag("EntryPoint");
 			if ( entry != null )
 			{
 				var t = entry.transform;
-				rb.position = t.position;
-				rb.rotation = t.rotation;
+				var pt = player.transform;
+				pt.position = t.position;
+				pt.rotation = t.rotation;
 				rotation = t.rotation;
 				var te = entry.GetComponent<TabletEntry>();
 				if ( te != null )
@@ -561,12 +563,19 @@ public class TabletController: MonoBehaviour
 					}
 				}
 			}
+			else
+			{
+				Debug.LogError("EntryPoint not found");
+			}
 		}
+		GroundCheck();
+		Time.timeScale = 1f;
 	}
 	
 	public static void LoadScene(int i)
 	{
 		instance.loading = true;
+		Time.timeScale = 0f;
 		instance.playerScript.RemoveAction();
 		instance.menuCtl.ShowLoading();
 		SceneManager.LoadScene(i);
@@ -575,6 +584,7 @@ public class TabletController: MonoBehaviour
 	public static void LoadScene(string sceneName)
 	{
 		instance.loading = true;
+		Time.timeScale = 0f;
 		instance.playerScript.RemoveAction();
 		instance.menuCtl.ShowLoading();
 		SceneManager.LoadScene(sceneName);
@@ -966,7 +976,6 @@ public class TabletController: MonoBehaviour
 		if ( !playerNav.enabled )
 		{
 			playerNav.enabled = true;
-			
 		}
 		
 		Ray ray = pCamera.ScreenPointToRay(dest);
@@ -1009,7 +1018,7 @@ public class TabletController: MonoBehaviour
 			navigate = false;
 			navMoving = false;
 			syncCamera = false;
-			playerNav.ResetPath();
+			playerNav.enabled = false;
 			targetPoint.gameObject.SetActive(false);
 			targetCircle.gameObject.SetActive(false);
 		}
