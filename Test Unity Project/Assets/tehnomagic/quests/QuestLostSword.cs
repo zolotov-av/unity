@@ -14,71 +14,32 @@ public class QuestLostSword: Quest
 	
 	private string found = "start";
 	
-	/**
-	 * Вернуть значение квестовой переменной
-	 */
-	public override string GetQuestVar(string key)
+	public string GetFoundVar()
 	{
-		if ( key == "found" )
-		{
-			return found;
-		}
-		
-		if ( key == "scene" )
-		{
-			return SceneManager.GetActiveScene().name;
-		}
-		
-		return "";
+		return found;
 	}
 	
-	/**
-	 * Установить значение квестовой переменной
-	 */
-	public override bool SetQuestVar(string key, string value)
+	public void SetFoundVar(string value)
 	{
-		if ( key == "found" )
-		{
-			found = value;
-			return true;
-		}
-		
-		return false;
+		found = value;
 	}
 	
-	/**
-	 * Установить/вызвать триггер
-	 */
-	public override void SetTrigger(string trigger)
+	public string GetSceneVar()
 	{
-		if ( trigger == "accept-quest" )
-		{
-			AcceptTrigger();
-			return;
-		}
-		
-		if ( trigger == "end-quest" )
-		{
-			EndTrigger();
-			return;
-		}
-		
-		if ( trigger == "load-mainland" )
-		{
-			TabletController.LoadScene("mainland");
-			return;
-		}
-		
-		if ( trigger == "load-startland" )
-		{
-			TabletController.LoadScene("startland");
-			return;
-		}
-		
-		Debug.LogError("QuestLostSword: trigger (" + trigger + ") not found");
+		return TabletController.sceneName;
 	}
 	
-	public void AcceptTrigger()
+	public void SetLoadMainlandTrigger()
+	{
+		TabletController.LoadScene("mainland");
+	}
+	
+	public void SetLoadStartlandTrigger()
+	{
+		TabletController.LoadScene("startland");
+	}
+	
+	public void SetAcceptTrigger()
 	{
 		found = "no";
 		active = true;
@@ -87,7 +48,7 @@ public class QuestLostSword: Quest
 		LostSwordTrigger.Enable();
 	}
 	
-	public void EndTrigger()
+	public void SetEndTrigger()
 	{
 		found = "done";
 		CanvasScript.Zone("Квест завершен");
@@ -95,6 +56,12 @@ public class QuestLostSword: Quest
 		QuestManager.WriteSound();
 		QuestManager.Refresh();
 		LostSwordTrigger.Finish();
+	}
+	
+	protected void Awake()
+	{
+		base.Awake();
+		InitTriggers(this.GetType());
 	}
 	
 }

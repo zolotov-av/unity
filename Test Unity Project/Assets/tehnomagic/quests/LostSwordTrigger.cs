@@ -81,7 +81,7 @@ public class LostSwordTrigger: MonoBehaviour, IAction
 		pb.RemoveAction(this);
 		sword.SetActive(false);
 		trigger.enabled = false;
-		QuestManager.SetQuestVar("lost-sword", "found", "yes");
+		QuestManager.SetQuestVar("lost-sword", "Found", "yes");
 		const string msg = "Кажется вы нашли \"Меч героя\", покажите его Квери-чан";
 		QuestManager.logEvent("lost-sword", msg);
 		QuestManager.Refresh();

@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Reflection;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -65,10 +67,66 @@ public class Quest: MonoBehaviour
 	public string[] questLog;
 	
 	/**
+	 * Список триггеров (здесь и триггеры и переменные)
+	 */
+	private Dictionary<string, MethodInfo> triggers;
+	
+	/**
+	 * Инициализация списка триггеров
+	 */
+	protected void InitTriggers(Type type)
+	{
+		triggers.Clear();
+		MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+		foreach(MethodInfo method in methods)
+		{
+			ParameterInfo[] argv = method.GetParameters();
+			int argc = argv.Length;
+			
+			if ( !method.IsPublic ) continue;
+			
+			string name = method.Name;
+			
+			if ( name.EndsWith("Trigger") )
+			{
+				if ( name.StartsWith("Set") || name.StartsWith("Reset") )
+				{
+					if ( argc == 0 ) triggers.Add(name, method);
+				}
+				
+				continue;
+			}
+			
+			if ( name.EndsWith("Var") )
+			{
+				if ( name.StartsWith("Get") )
+				{
+					if ( argc == 0 ) triggers.Add(name, method);
+					continue;
+				}
+				
+				if ( name.StartsWith("Set") )
+				{
+					if ( argc == 1 ) triggers.Add(name, method);
+					continue;
+				}
+				
+				continue;
+			}
+		}
+	}
+	
+	/**
 	 * Вернуть значение квестовой переменной
 	 */
 	public virtual string GetQuestVar(string key)
 	{
+		MethodInfo method;
+		if ( triggers.TryGetValue("Get" + key + "Var", out method) )
+		{
+			return (string) method.Invoke(this, null);
+		}
+		Debug.LogWarning("GetQuestVar(" + key + ") var not found");
 		return "";
 	}
 	
@@ -77,6 +135,13 @@ public class Quest: MonoBehaviour
 	 */
 	public virtual bool SetQuestVar(string key, string value)
 	{
+		MethodInfo method;
+		if ( triggers.TryGetValue("Set" + key + "Var", out method) )
+		{
+			method.Invoke(this, new object[]{value});
+			return true;
+		}
+		Debug.LogWarning("SetQuestVar(" + key + ") var not found");
 		return false;
 	}
 	
@@ -85,6 +150,15 @@ public class Quest: MonoBehaviour
 	 */
 	public virtual void SetTrigger(string trigger)
 	{
+		MethodInfo method;
+		if ( triggers.TryGetValue("Set" + trigger + "Trigger", out method) )
+		{
+			method.Invoke(this, null);
+		}
+		else
+		{
+			Debug.LogWarning("SetTrigger(" + trigger + ") var not found");
+		}
 	}
 	
 	/**
@@ -92,6 +166,15 @@ public class Quest: MonoBehaviour
 	 */
 	public virtual void ResetTrigger(string trigger)
 	{
+		MethodInfo method;
+		if ( triggers.TryGetValue("Reset" + trigger + "Trigger", out method) )
+		{
+			method.Invoke(this, null);
+		}
+		else
+		{
+			Debug.LogWarning("ResetTrigger(" + trigger + ") var not found");
+		}
 	}
 	
 	/**
@@ -127,9 +210,11 @@ public class Quest: MonoBehaviour
 		QuestManager.ShowQuestLog(this);
 	}
 	
-	void Awake()
+	protected void Awake()
 	{
+		Debug.Log("Quest Awake()");
 		questLog = new string[10];
+		triggers = new Dictionary<string, MethodInfo>();
 	}
 	
 } // class Quest

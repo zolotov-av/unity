@@ -18,12 +18,12 @@
 	 </next-dialog>
 	</dialog-action>
 	
-    <dialog-action type="1" quest="lost-sword" if="found=start">
+    <dialog-action type="1" quest="lost-sword" if="Found=start">
      <reply>Могу я чем-то помочь?</reply>
 	 <next-dialog>
 	  <message>Гоблины-строители куда-то утащили "Меч героя". Как же искатели приключений будут сражаться без меча? Не мог бы ты поискать его?</message>
 	  <actions>
-	   <dialog-action type="0" quest="lost-sword" trigger="accept-quest">
+	   <dialog-action type="0" quest="lost-sword" trigger="Accept">
 	    <reply>я поищу</reply>
 	   </dialog-action>
 	   <dialog-action type="0">
@@ -33,7 +33,7 @@
 	 </next-dialog>
 	</dialog-action>
 	
-    <dialog-action type="1" quest="lost-sword" if="found=yes" trigger="end-quest">
+    <dialog-action type="1" quest="lost-sword" if="Found=yes" trigger="End">
      <reply>Я нашел "Меч героя"...</reply>
 	 <next-dialog>
 	  <message>О да, это он, ты меня очень выручил! Искатель приключений теперь не пропадает.</message>
@@ -45,11 +45,11 @@
 	 </next-dialog>
 	</dialog-action>
 	
-    <dialog-action type="0" quest="lost-sword" if="scene=mainland" trigger="load-startland">
+    <dialog-action type="0" quest="lost-sword" if="Scene=mainland" trigger="LoadStartland">
      <reply>[отправиться на стартовую сцену]</reply>
 	</dialog-action>
 	
-    <dialog-action type="0" quest="lost-sword" if="scene=startland" trigger="load-mainland">
+    <dialog-action type="0" quest="lost-sword" if="Scene=startland" trigger="LoadMainland">
      <reply>[отправиться на главную сцену]</reply>
 	</dialog-action>
 	
