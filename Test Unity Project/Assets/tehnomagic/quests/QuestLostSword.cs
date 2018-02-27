@@ -58,7 +58,7 @@ public class QuestLostSword: Quest
 		LostSwordTrigger.Finish();
 	}
 	
-	protected void Awake()
+	protected new void Awake()
 	{
 		base.Awake();
 		InitTriggers(this.GetType());

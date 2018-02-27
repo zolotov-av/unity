@@ -44,12 +44,7 @@ public class CanvasScript: MonoBehaviour
 	 */
 	public QuestWindow questWindow;
 	
-	/**
-	 * Флаг диалогового режима
-	 */
-	[HideInInspector]
-	public bool inDialog = false;
-	
+	// TODO убрать костыль...
 	private bool actionActive = false;
 	
 	public static CanvasScript instance;
@@ -100,22 +95,8 @@ public class CanvasScript: MonoBehaviour
 		dialogWindow.Init();
 	}
 	
-	/**
-	 * Обработка ввода
-	 */
-	protected void handleInput()
-	{
-		if ( Input.GetKey(KeyCode.Escape) )
-		{
-			CloseDialog();
-			return;
-		}
-	}
-	
 	void Update()
 	{
-		if ( inDialog ) handleInput();
-		
 		if ( Input.GetKeyDown(KeyCode.L) )
 		{
 			questWindow.ToggleMain();
@@ -134,7 +115,6 @@ public class CanvasScript: MonoBehaviour
 	public static void ShowMessage(string msg)
 	{
 		instance.dialogWindow.ShowMessage(msg);
-		instance.inDialog = true;
 	}
 	
 	public static void SetAvatar(string avatarName, Sprite avatarPhoto)
@@ -145,15 +125,13 @@ public class CanvasScript: MonoBehaviour
 	public static void ShowDialog(DialogItem dialog)
 	{
 		instance.dialogWindow.ShowDialog(dialog);
-		instance.inDialog = true;
 		instance.actionPanel.SetActive(false);
 	}
 	
-	public void CloseDialog()
+	public static void CloseDialog()
 	{
-		dialogWindow.CloseDialog();
-		actionPanel.SetActive(actionActive);
-		inDialog = false;
+		instance.dialogWindow.CloseDialog();
+		instance.actionPanel.SetActive(instance.actionActive);
 	}
 	
 	public static void ShowAction(IAction action)

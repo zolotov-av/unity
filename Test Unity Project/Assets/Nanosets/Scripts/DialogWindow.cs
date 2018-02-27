@@ -10,7 +10,7 @@ namespace Nanosoft
 /**
  * Класс управляющий диалоговым окном
  */
-public class DialogWindow: MonoBehaviour
+public class DialogWindow: WindowBehaviour
 {
 	
 	/**
@@ -77,7 +77,6 @@ public class DialogWindow: MonoBehaviour
 	
 	public void Init()
 	{
-		gameObject.SetActive(false);
 		actorPanel.SetActive(false);
 		repliesPanel.SetActive(false);
 		
@@ -101,7 +100,7 @@ public class DialogWindow: MonoBehaviour
 		messageText.text = message;
 		repliesPanel.SetActive(false);
 		avatarPanel.SetActive(false);
-		gameObject.SetActive(true);
+		ShowModal();
 	}
 	
 	public void SetAvatar(string name, Sprite photo)
@@ -156,8 +155,6 @@ public class DialogWindow: MonoBehaviour
 		}
 		
 		repliesPanel.SetActive( replyCount > 0 );
-		gameObject.SetActive(true);
-		
 		
 		if ( replyCount > 0 )
 		{
@@ -169,6 +166,8 @@ public class DialogWindow: MonoBehaviour
 			selectedReply = -1;
 			Debug.LogError("replyCount <= 0");
 		}
+		
+		ShowModal();
 	}
 	
 	/**
@@ -177,7 +176,7 @@ public class DialogWindow: MonoBehaviour
 	public void CloseDialog()
 	{
 		EventSystem.current.SetSelectedGameObject(null);
-		gameObject.SetActive(false);
+		Hide();
 		
 		Cursor.visible = true;
 		Cursor.lockState = CursorLockMode.None;
@@ -186,9 +185,16 @@ public class DialogWindow: MonoBehaviour
 	/**
 	 * Обработка ввода с клавиатуры
 	 */
-	public void HandleInput()
+	public override void HandleInput()
 	{
 		if ( replyCount <= 0 ) return;
+		
+		if ( Input.GetKey(KeyCode.Escape) )
+		{
+			// TODO убрать CanvasScript от сюда, костыль...
+			CanvasScript.CloseDialog();
+			return;
+		}
 		
 		if ( Input.GetKeyDown(KeyCode.UpArrow) )
 		{

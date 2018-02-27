@@ -45,10 +45,34 @@ public class WindowBehaviour: MonoBehaviour
 		gameObject.SetActive(true);
 	}
 	
+	public void ShowModal()
+	{
+		if ( current != this )
+		{
+			if ( current != null )
+			{
+				current.gameObject.SetActive(false);
+			}
+			current = this;
+		}
+		
+		if ( !gameObject.activeSelf )
+		{
+			gameObject.SetActive(true);
+		}
+	}
+	
 	public void Hide()
 	{
 		gameObject.SetActive(false);
 		if ( current == this ) current = null;
+	}
+	
+	/**
+	 * Обработка ввода
+	 */
+	public virtual void HandleInput()
+	{
 	}
 	
 }

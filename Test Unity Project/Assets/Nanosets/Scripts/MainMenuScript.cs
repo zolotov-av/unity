@@ -9,67 +9,77 @@ namespace Nanosoft
 public class MainMenuScript: WindowBehaviour
 {
 	
-	public bool inMenu = true;
 	public GameObject mainPanel;
 	public GameObject introPanel;
 	public GameObject loadingPanel;
 	public GameObject backgroundPanel;
 	private GameObject currentPanel = null;
 	
-	public void showMainMenu()
+	/**
+	 * Отобразить панель
+	 */
+	protected void ShowPanel(GameObject panel)
 	{
-		Debug.Log("showMainMenu");
-		inMenu = true;
-		gameObject.SetActive(true);
-		if ( currentPanel != null )
+		if ( currentPanel != null && currentPanel != panel )
 		{
 			currentPanel.SetActive(false);
 		}
-		currentPanel = mainPanel;
-		mainPanel.SetActive(true);
-	}
-	
-	public void showIntro()
-	{
-		Debug.Log("showIntro");
-		inMenu = true;
-		gameObject.SetActive(true);
-		if ( currentPanel != null )
+		
+		currentPanel = panel;
+		
+		if ( !panel.activeSelf )
 		{
-			currentPanel.SetActive(false);
+			panel.SetActive(true);
 		}
-		currentPanel = introPanel;
-		introPanel.SetActive(true);
 	}
 	
+	/**
+	 * Отобразить главное меню
+	 */
+	public void ShowMain()
+	{
+		ShowPanel(mainPanel);
+		ShowModal();
+	}
+	
+	/**
+	 * Отобразить вступление
+	 */
+	public void ShowIntro()
+	{
+		ShowPanel(introPanel);
+		ShowModal();
+	}
+	
+	/**
+	 * Отобразить заставку загрузки
+	 */
 	public void ShowLoading()
 	{
-		Debug.Log("ShowLoading");
-		inMenu = true;
-		gameObject.SetActive(true);
-		if ( currentPanel != null )
-		{
-			currentPanel.SetActive(false);
-		}
-		currentPanel = loadingPanel;
-		loadingPanel.SetActive(true);
+		ShowPanel(loadingPanel);
 		backgroundPanel.SetActive(true);
+		ShowModal();
 	}
 	
+	/**
+	 * Завершить загрузку сцены
+	 */
 	public void EndLoading()
 	{
-		Debug.Log("EndLoading");
-		inMenu = false;
-		gameObject.SetActive(false);
+		backgroundPanel.SetActive(false);
+		Hide();
 	}
 	
-	public void HandleInput()
+	/**
+	 * Обработка ввода
+	 */
+	public override void HandleInput()
 	{
 		if ( Input.GetKeyDown(KeyCode.Escape) )
 		{
 			if ( currentPanel != mainPanel )
 			{
-				showMainMenu();
+				ShowPanel(mainPanel);
 				return;
 			}
 		}
@@ -98,7 +108,7 @@ public class MainMenuScript: WindowBehaviour
 	
 	public void OnIntroButton()
 	{
-		showIntro();
+		ShowIntro();
 	}
 	
 	public void OnStaffButton()

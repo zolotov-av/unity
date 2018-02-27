@@ -492,7 +492,7 @@ public class TabletController: MonoBehaviour
 		dbg.text = "Debug";
 		
 		menuCtl = canvas.transform.Find("MainMenu").GetComponent<MainMenuScript>();
-		menuCtl.showMainMenu();
+		menuCtl.ShowMain();
 		
 		soundManager.Play("menu");
 		//soundManager.Play("town");
@@ -704,15 +704,9 @@ public class TabletController: MonoBehaviour
 	{
 		mouse.TrackMouse();
 		
-		if ( menuCtl.inMenu )
+		if ( WindowBehaviour.current != null )
 		{
-			menuCtl.HandleInput();
-			return;
-		}
-		
-		if ( canvasCtl.inDialog )
-		{
-			canvasCtl.dialogWindow.HandleInput();
+			WindowBehaviour.current.HandleInput();
 			return;
 		}
 		
@@ -1195,7 +1189,8 @@ public class TabletController: MonoBehaviour
 		
 		pCamera.transform.LookAt(tp);
 		
-		if ( canvasCtl.inDialog )
+		// TODO нужен рефакторинг...
+		if ( WindowBehaviour.current == null )
 		{
 			CanvasScript.RaycastInfo(null);
 			return;

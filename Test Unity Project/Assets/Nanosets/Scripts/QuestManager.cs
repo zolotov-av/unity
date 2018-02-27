@@ -100,7 +100,7 @@ public class QuestManager: MonoBehaviour
 		{
 		
 		case DialogAction.ExitDialog:
-			CanvasScript.instance.CloseDialog();
+			CanvasScript.CloseDialog();
 			break;
 		
 		case DialogAction.GotoNext:

@@ -134,7 +134,7 @@ public class AdvancedGameState: GameStateBehaviour
 	
 	void Update()
 	{
-		if ( !canvasCtl.inDialog )
+		if ( WindowBehaviour.current != null )
 		{
 			playerCtl.handleInput();
 		}
