@@ -119,6 +119,11 @@ public class TabletController: MonoBehaviour
 	public bool mobileInput = false;
 	
 	/**
+	 * Разрешить движение по клику мышкой
+	 */
+	public bool navigateByMouse = false;
+	
+	/**
 	 * Скорость движения персонажа (с которой персонаж может двигаться)
 	 */
 	public float speed = 2f;
@@ -340,6 +345,7 @@ public class TabletController: MonoBehaviour
 		rotation = player.transform.rotation;
 		
 		capsule = obj.GetComponent<CapsuleCollider>();
+		capsule.center = new Vector3(0f, capsule.height * 0.5f, 0f);
 		if ( capsule == null )
 		{
 			Debug.LogError("player haven't CapsuleCollider");
@@ -662,22 +668,14 @@ public class TabletController: MonoBehaviour
 	public void Jump()
 	{
 		Debug.Log("Jump!");
-		if ( playerNav.enabled )
-		{
-			playerNav.ResetPath();
-			playerNav.enabled = false;
-		}
+		StopNavigation();
 		rb.AddForce(0f, 13.72f, 0f, ForceMode.VelocityChange);
 	}
 	
 	public void JumpHeight(float height)
 	{
 		Debug.Log("Jump! (height)");
-		if ( playerNav.enabled )
-		{
-			playerNav.ResetPath();
-			playerNav.enabled = false;
-		}
+		StopNavigation();
 		float v = Mathf.Sqrt(2f * height * Physics.gravity.magnitude);
 		rb.AddForce(0f, v, 0f, ForceMode.VelocityChange);
 	}
@@ -705,6 +703,11 @@ public class TabletController: MonoBehaviour
 		{
 			playerScript.Attack2();
 		}
+	}
+	
+	public static void RunActionTouch()
+	{
+		instance.playerScript.RunActionTouch();
 	}
 	
 	/**
@@ -738,7 +741,7 @@ public class TabletController: MonoBehaviour
 			{
 				//Debug.Log("EndTrack()");
 				mouseActive = false;
-				if ( !rotateCamera ) NavigateByScreenPoint(Input.mousePosition);
+				if ( navigateByMouse && !rotateCamera ) NavigateByScreenPoint(Input.mousePosition);
 				rotateCamera = false;
 			}
 		}
@@ -971,11 +974,10 @@ public class TabletController: MonoBehaviour
 	 */
 	public bool NavigateByScreenPoint(Vector2 dest)
 	{
-		if ( ! mobileInput ) return false;
-		
 		if ( !playerNav.enabled )
 		{
 			playerNav.enabled = true;
+			rb.isKinematic = true;
 		}
 		
 		Ray ray = pCamera.ScreenPointToRay(dest);
@@ -1021,6 +1023,7 @@ public class TabletController: MonoBehaviour
 			playerNav.enabled = false;
 			targetPoint.gameObject.SetActive(false);
 			targetCircle.gameObject.SetActive(false);
+			rb.isKinematic = false;
 		}
 	}
 	/**

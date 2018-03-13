@@ -38,7 +38,7 @@ public class ControllerUtils
 		Vector3 position = CapsuleBase(capsule);
 		
 		// зазор на расстоянии которого будет определяться столкновение
-		const float gap = 0.05f;
+		const float gap = 0.16f;
 		
 		RaycastHit hitInfo;
 		

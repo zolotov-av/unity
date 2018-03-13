@@ -11,20 +11,20 @@ public class ZoneTrigger: MonoBehaviour
 	public bool playSound = false;
 	public bool playOnce = false;
 	private bool played = false;
-	private AudioSource audio;
+	private AudioSource _audio;
 	
 	void Start()
 	{
-		audio = GetComponent<AudioSource>();
+		_audio = GetComponent<AudioSource>();
 	}
 	
 	protected void play()
 	{
 		if ( playSound )
 		{
-			if ( audio == null ) return;
-			if ( audio.isPlaying ) return;
-			audio.Play();
+			if ( _audio == null ) return;
+			if ( _audio.isPlaying ) return;
+			_audio.Play();
 		}
 	}
 	

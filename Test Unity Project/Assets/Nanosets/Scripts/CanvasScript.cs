@@ -49,6 +49,11 @@ public class CanvasScript: MonoBehaviour
 	
 	public static CanvasScript instance;
 	
+	public void RunActionTouch()
+	{
+		TabletController.RunActionTouch();
+	}
+	
 	void Awake()
 	{
 		Debug.Log("CanvasScript Awake()");

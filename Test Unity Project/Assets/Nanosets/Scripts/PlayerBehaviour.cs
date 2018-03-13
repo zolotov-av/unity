@@ -47,6 +47,11 @@ public class PlayerBehaviour: MonoBehaviour
 	{
 	}
 	
+	public void RunActionTouch()
+	{
+		action.RunAction(this);
+	}
+	
 	void Update()
 	{
 		if ( Input.GetKeyDown(KeyCode.E) && action != null )
