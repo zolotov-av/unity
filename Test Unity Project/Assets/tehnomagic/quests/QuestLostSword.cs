@@ -39,6 +39,11 @@ public class QuestLostSword: Quest
 		TabletController.LoadScene("startland");
 	}
 	
+	public void SetLoadTestLightingTrigger()
+	{
+		TabletController.LoadScene("test-lighting");
+	}
+	
 	public void SetAcceptTrigger()
 	{
 		found = "no";
