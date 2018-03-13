@@ -33,7 +33,6 @@ public class GuardTraining: MonoBehaviour
 		
 		if ( switchTime < Time.time )
 		{
-			Debug.Log("time to switch");
 			switchTime = Time.time;
 			busy = true;
 			anim.SetTrigger("Greating");
@@ -43,7 +42,6 @@ public class GuardTraining: MonoBehaviour
 		
 		if ( isAttacker )
 		{
-			Debug.Log("make attack, time=" + Time.time + ", coolDown=" + coolDown);
 			anim.SetTrigger(flipState ? "Attack1" : "Attack2");
 			//pair.anim.SetTrigger("Damage1");
 			flipState = !flipState;
