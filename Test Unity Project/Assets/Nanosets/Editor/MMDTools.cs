@@ -13,7 +13,7 @@ public class MMDTools
 	/**
 	 * Путь к каталогу в ассетах где лежат общие текстуры MMD
 	 */
-	public const string texPath = "Assets/MMD/Textures/";
+	public const string texPath = "Assets/Nanosets/MMD/Textures/";
 	
 	/**
 	 * Открыть описание модели MMD

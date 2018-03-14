@@ -36,6 +36,7 @@ void surf(Input IN, inout ToonSurfaceOutput o)
 	half3 vn = normalize(mul(UNITY_MATRIX_V, half4(o.Normal, 0.0h)).xyz);
 	half4 cs = tex2D(_SphereTex, vn.xy * 0.5h + 0.5h);
 	
+	o.Albedo = ct.rgb;
 	o.Color = ct + cs;
 	o.Alpha = ct.a;
 }
@@ -47,10 +48,10 @@ half4 LightingToonFront(ToonSurfaceOutput s, half3 lightDir, half atten)
 {
 	half factor = (dot(lightDir, s.Normal) - _DarkClamp) / (_LightClamp - _DarkClamp);
 	
-	half4 lightColor = s.Color * _LightColor0 * (atten * _LightAtten * _LightFactor);
-	half4 darkColor = s.Color * _LightColor0 * (atten * _DarkAtten * _LightFactor);
+	half4 lightColor = s.Color * (_LightFactor * _LightAtten);
+	half4 darkColor = s.Color * (_LightFactor * _DarkAtten);
 	
-	half4 color = lerp(darkColor, lightColor, saturate(factor));
+	half4 color = lerp(darkColor, lightColor, saturate(factor)) * _LightColor0 * atten;
 	color.a = s.Alpha;
 	return color;
 }
@@ -62,8 +63,8 @@ half4 LightingToonBack(ToonSurfaceOutput s, half3 lightDir, half atten)
 {
 	half factor = (-dot(lightDir, s.Normal) - _DarkClamp) / (_LightClamp - _DarkClamp);
 	
-	half4 lightColor = s.Color * _LightColor0 * (atten * _LightAtten * _LightFactor);
-	half4 darkColor = s.Color * _LightColor0 * (atten * _DarkAtten * _LightFactor);
+	half4 lightColor = s.Color * _LightColor0 * (_LightFactor * _LightAtten);
+	half4 darkColor = s.Color * _LightColor0 * (_LightFactor * _DarkAtten);
 	
 	half4 color = lerp(darkColor, lightColor, saturate(factor));
 	color.a = s.Alpha;

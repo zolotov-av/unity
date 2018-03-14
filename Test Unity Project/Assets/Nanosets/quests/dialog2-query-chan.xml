@@ -18,6 +18,21 @@
 	 </next-dialog>
 	</dialog-action>
 	
+    <dialog-action type="1" quest="lost-sword" if="Scene=test-lighting">
+     <reply>Где это я?</reply>
+	 <next-dialog>
+	  <message>Это тестовая комната, мы здесь проверяем настройки освещения. Если ты заблудился, то я отправлю тебя на главную сцену.</message>
+	  <actions>
+	   <dialog-action type="0" quest="lost-sword" trigger="LoadMainland">
+	    <reply>[отправиться на главную сцену]</reply>
+	   </dialog-action>
+	   <dialog-action type="0">
+	    <reply>[конец]</reply>
+	   </dialog-action>
+	  </actions>
+	 </next-dialog>
+	</dialog-action>
+	
     <dialog-action type="1" quest="lost-sword" if="Found=start">
      <reply>Могу я чем-то помочь?</reply>
 	 <next-dialog>
@@ -49,7 +64,15 @@
      <reply>[отправиться на стартовую сцену]</reply>
 	</dialog-action>
 	
+    <dialog-action type="0" quest="lost-sword" if="Scene=mainland" trigger="LoadTestLighting">
+     <reply>[отправиться на сцену тестирования освещения]</reply>
+	</dialog-action>
+	
     <dialog-action type="0" quest="lost-sword" if="Scene=startland" trigger="LoadMainland">
+     <reply>[отправиться на главную сцену]</reply>
+	</dialog-action>
+	
+    <dialog-action type="0" quest="lost-sword" if="Scene=test-lighting" trigger="LoadMainland">
      <reply>[отправиться на главную сцену]</reply>
 	</dialog-action>
 	

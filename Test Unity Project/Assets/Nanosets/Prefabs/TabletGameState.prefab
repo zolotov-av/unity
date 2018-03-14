@@ -499,7 +499,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7357ec374dc09ca4f81ba4530a8872a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenuClip: {fileID: 8300000, guid: 2b83784b9a7593e4886b20235d1a91a6, type: 3}
+  mainMenuClip: {fileID: 8300000, guid: cc0eaef08fde34b4db1b3f198e4f1f3a, type: 3}
   townClip: {fileID: 8300000, guid: bead0199fb2cd8d40832fcf68aeefc5f, type: 3}
   sound: {fileID: 82319605808970568}
 --- !u!114 &114535201030719504
@@ -555,6 +555,7 @@ MonoBehaviour:
   canvasCtl: {fileID: 0}
   menuCtl: {fileID: 0}
   mobileInput: 0
+  navigateByMouse: 0
   speed: 4
   height: 1.4
   startDistance: 3

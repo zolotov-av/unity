@@ -31,10 +31,10 @@ half4 LightingMMDFront(ToonSurfaceOutput s, half3 lightDir, half atten)
 	
 	half4 ramp = tex2D(_ToonTex, half2(factor, factor));
 	
-	half4 lightColor = s.Color * _LightColor0 * (atten * _LightAtten * _LightFactor);
-	half4 darkColor = s.Color * _LightColor0 * (atten * _DarkAtten * _LightFactor);
+	half4 lightColor = s.Color * _LightColor0 * (_LightAtten);
+	half4 darkColor = s.Color * _LightColor0 * (_DarkAtten);
 	
-	half4 color = lerp(darkColor, lightColor, ramp);
+	half4 color = lerp(darkColor, lightColor, ramp) * atten * _LightFactor;
 	color.a = s.Alpha;
 	return color;
 }
@@ -45,10 +45,10 @@ half4 LightingMMDBack(ToonSurfaceOutput s, half3 lightDir, half atten)
 	
 	half4 ramp = tex2D(_ToonTex, half2(factor, factor));
 	
-	half4 lightColor = s.Color * _LightColor0 * (atten * _LightAtten * _LightFactor);
-	half4 darkColor = s.Color * _LightColor0 * (atten * _DarkAtten * _LightFactor);
+	half4 lightColor = s.Color * _LightColor0 * (_LightAtten);
+	half4 darkColor = s.Color * _LightColor0 * (_DarkAtten);
 	
-	half4 color = lerp(darkColor, lightColor, ramp);
+	half4 color = lerp(darkColor, lightColor, ramp) * atten * _LightFactor;
 	color.a = s.Alpha;
 	return color;
 }

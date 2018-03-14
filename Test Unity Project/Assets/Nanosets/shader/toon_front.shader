@@ -21,7 +21,7 @@ Shader "Toon/Toon Front"
 	SubShader
 	{
 		// Settings
-		Tags {"Queue" = "Transparent" "IgnoreProjector"="False" "RenderType" = "TransparentCutout"}
+		Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
 		
 		// Surface Shader Pass ( Front )
 		Cull Back
@@ -29,7 +29,7 @@ Shader "Toon/Toon Front"
 		AlphaTest Greater 0.9
 		Blend SrcAlpha OneMinusSrcAlpha
 		CGPROGRAM
-		#pragma surface surf ToonFront alphatest:_Cutoff
+		#pragma surface surf ToonFront alphatest:_Cutoff fullforwardshadows
 		#include "nanotoon_v1.cginc"
 		ENDCG
 	}
