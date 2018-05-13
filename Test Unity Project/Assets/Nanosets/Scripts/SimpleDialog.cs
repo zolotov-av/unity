@@ -30,9 +30,8 @@ public class SimpleDialog: MonoBehaviour, IAction
 	
 	void Start()
 	{
-		Debug.Log("SimpleDialog.Start() load bundle");
 		bundle = DialogBundle.Load(dialogAsset);
-		Debug.Log("bundle.name = " + bundle.name + ", dialog count: " + bundle.items.Length);
+		//Debug.Log("bundle.name = " + bundle.name + ", dialog count: " + bundle.items.Length);
 		
 		if ( bundle.items.Length > 0 )
 		{

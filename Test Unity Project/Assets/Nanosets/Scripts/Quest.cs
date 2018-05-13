@@ -212,7 +212,7 @@ public class Quest: MonoBehaviour
 	
 	protected void Awake()
 	{
-		Debug.Log("Quest Awake()");
+		// TODO
 		questLog = new string[10];
 		triggers = new Dictionary<string, MethodInfo>();
 	}

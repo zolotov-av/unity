@@ -15,7 +15,6 @@ public class LostSwordTrigger: MonoBehaviour, IAction
 	
 	void OnEnable()
 	{
-		Debug.Log("LostSwordTrigger OnEnable()");
 		instance = this;
 		trigger.enabled = active;
 		sword.SetActive(swordActive);
@@ -23,13 +22,11 @@ public class LostSwordTrigger: MonoBehaviour, IAction
 	
 	void OnDisable()
 	{
-		Debug.Log("LostSwordTrigger OnDisable()");
 		instance = null;
 	}
 	
 	public static void Enable()
 	{
-		Debug.Log("enable trigger");
 		active = true;
 		if ( instance != null )
 		{

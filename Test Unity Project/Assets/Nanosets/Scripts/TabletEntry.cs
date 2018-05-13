@@ -25,8 +25,6 @@ public class TabletEntry: MonoBehaviour
 	
 	void Awake()
 	{
-		Debug.Log("TabletEntry Awake()");
-		
 		if ( TabletController.instance == null )
 		{
 			var t = gameObject.transform;
@@ -38,8 +36,6 @@ public class TabletEntry: MonoBehaviour
 		{
 			dummy.SetActive(false);
 		}
-		
-		Debug.Log("TabletEntry Awake() done");
 	}
 	
 } // class TabletEntry

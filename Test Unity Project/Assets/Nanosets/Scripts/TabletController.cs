@@ -445,8 +445,6 @@ public class TabletController: MonoBehaviour
 	 */
 	protected void Init()
 	{
-		Debug.Log("TabletController Init()");
-		
 		SceneManager.sceneLoaded += OnSceneLoaded;
 		
 		// создаем персонажа
@@ -528,8 +526,6 @@ public class TabletController: MonoBehaviour
 		
 		mouseActive = false;
 		mouse = new TouchTracker();
-		
-		Debug.Log("TabletController Init() done");
 	}
 	
 	private bool loading = false;
@@ -1106,18 +1102,12 @@ public class TabletController: MonoBehaviour
 	
 	void Awake()
 	{
-		Debug.Log("TabletController Awake()");
 		if ( instance == null )
 		{
 			instance = this;
 			DontDestroyOnLoad(gameObject);
 			Init();
 		}
-	}
-	
-	void Start()
-	{
-		Debug.Log("TabletController Start()");
 	}
 	
 	void FixedUpdate()

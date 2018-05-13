@@ -77,7 +77,6 @@ public class QuestWindow: WindowBehaviour
 	 */
 	public void Init(QuestManager qm)
 	{
-		Debug.Log("QuestWindow.Init()");
 		questManager = qm;
 		InitQuestList();
 		InitQuestLog();
@@ -204,7 +203,6 @@ public class QuestWindow: WindowBehaviour
 	 */
 	public void ClearQuestLog()
 	{
-		Debug.Log("ClearQuestLog");
 		for(int j = 0; j < logCount; j++)
 		{
 			logItems[j].SetActive(false);

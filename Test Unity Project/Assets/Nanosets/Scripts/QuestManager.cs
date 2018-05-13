@@ -42,7 +42,6 @@ public class QuestManager: MonoBehaviour
 			Quest quest = child.GetComponent<Quest>();
 			if ( quest != null )
 			{
-				Debug.Log("QuestManager child quest: " + quest.questName);
 				quests[i] = quest;
 				i++;
 			}
