@@ -52,6 +52,9 @@ public class DialogAction
 	 */
 	public const int GotoNext = 1;
 	
+	[XmlAttribute("goto")]
+	public string nextId;
+	
 	/**
 	 * Ссылка на следующий диалог
 	 */
@@ -73,13 +76,24 @@ public class DialogAction
 	{
 		if ( condition == null || condition == "" ) return true;
 		
-		int pos = condition.IndexOf("=");
-		if ( pos < 0 ) return false;
+		int pos = condition.IndexOf("!=");
+		if ( pos >= 0 )
+		{
+			string key = condition.Substring(0, pos);
+			string val = condition.Substring(pos+2);
+			return QuestManager.GetQuestVar(actionQuest, key) != val;
+		}
 		
-		string key = condition.Substring(0, pos);
-		string val = condition.Substring(pos+1);
+		pos = condition.IndexOf("=");
+		if ( pos >= 0 )
+		{
+			string key = condition.Substring(0, pos);
+			string val = condition.Substring(pos+1);
+			
+			return QuestManager.GetQuestVar(actionQuest, key) == val;
+		}
 		
-		return QuestManager.GetQuestVar(actionQuest, key) == val;
+		return false;
 	}
 	
 } // class DialogAction

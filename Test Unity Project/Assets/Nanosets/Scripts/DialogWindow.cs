@@ -80,7 +80,7 @@ public class DialogWindow: WindowBehaviour
 		actorPanel.SetActive(false);
 		repliesPanel.SetActive(false);
 		
-		replyCapacity = 5;
+		replyCapacity = 10;
 		replyCount = 0;
 		items = new GameObject[replyCapacity];
 		Transform t = repliesPanel.transform;

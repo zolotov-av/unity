@@ -13,6 +13,12 @@ public class DialogItem
 {
 	
 	/**
+	 * ID элемента, может быть пустым
+	 */
+	[XmlAttribute("id")]
+	public string id;
+	
+	/**
 	 * Ссылка на спрайт лица персонажа
 	 */
 	public Sprite avatarSprite;
