@@ -44,6 +44,9 @@ public class CanvasScript: MonoBehaviour
 	 */
 	public QuestWindow questWindow;
 	
+	public GameObject labels;
+	public Transform labelPrefab;
+	
 	// TODO убрать костыль...
 	private bool actionActive = false;
 	
@@ -199,6 +202,17 @@ public class CanvasScript: MonoBehaviour
 			instance.raycastTarget = info;
 			instance.raycastMessage.text = info.objectName;
 		}
+	}
+	
+	public static Transform CreateLabel()
+	{
+		Transform label = Instantiate(instance.labelPrefab, instance.labels.transform);
+		return label;
+	}
+	
+	public static void DestroyLabel(Transform label)
+	{
+		Destroy(label);
 	}
 	
 } // class CanvasScript

@@ -1100,6 +1100,11 @@ public class TabletController: MonoBehaviour
 		
 	}
 	
+	public static void UpdateLabel(Vector3 position, Transform label)
+	{
+		label.position = instance.pCamera.WorldToScreenPoint(position);
+	}
+	
 	void Awake()
 	{
 		if ( instance == null )
