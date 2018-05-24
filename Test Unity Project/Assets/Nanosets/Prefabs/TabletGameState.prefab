@@ -595,6 +595,8 @@ MonoBehaviour:
   minDistance: 1
   maxDistance: 10
   clickThreshold: 0.15
+  idleFriction: {fileID: 13400000, guid: 464e86c76b407da4ba2b3055b4e85819, type: 2}
+  movingFriction: {fileID: 13400000, guid: ef8913898723dd94aa462862a232f1ab, type: 2}
   rotation: {x: 0, y: 0, z: 0, w: 0}
   dbg: {fileID: 0}
 --- !u!114 &114995741980496622
@@ -609,5 +611,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
+  m_sendNavigationEvents: 0
   m_DragThreshold: 5
