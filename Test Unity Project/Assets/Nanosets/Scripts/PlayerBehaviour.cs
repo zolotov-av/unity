@@ -17,6 +17,11 @@ public class PlayerBehaviour: MonoBehaviour
 	private IAction action;
 	
 	/**
+	 *
+	 */
+	private Collider[] enemies = null;
+	
+	/**
 	 * true - персонаж занят (анимация удара или заморожен)
 	 * false - персонаж свободен (им можно управлять)
 	 */
@@ -58,12 +63,43 @@ public class PlayerBehaviour: MonoBehaviour
 		action.RunAction(this);
 	}
 	
+	/**
+	 * Инициализация внутренних структур
+	 */
+	protected void Init()
+	{
+		if ( enemies == null ) enemies = new Collider[32];
+	}
+	
+	/**
+	 * Найти врагов вызвать их агрессию
+	 */
+	protected void AggroEnemies()
+	{
+		const float r = 20f;
+		const int layerMask = 1 << 11; // TODO no hardcode
+		int count = Physics.OverlapSphereNonAlloc(transform.position, r, enemies, layerMask, QueryTriggerInteraction.Ignore);
+		for(int i = 0; i < count; i++)
+		{
+			EnemyBehaviour enemy = enemies[i].GetComponent<EnemyBehaviour>();
+			if ( enemy == null )
+			{
+				Debug.LogWarning("Enemy[" + enemies[i].gameObject.name + "] without EnemyBehaviour");
+				continue;
+			}
+			
+			enemy.CheckAggro(this);
+		}
+	}
+	
 	void Update()
 	{
 		if ( Input.GetKeyDown(KeyCode.E) && action != null )
 		{
 			action.RunAction(this);
 		}
+		
+		AggroEnemies();
 	}
 	
 } // class PlayerBehaviour

@@ -94,6 +94,7 @@ public class Valrus: PlayerBehaviour
 	
 	void Awake()
 	{
+		Init();
 		animator = GetComponent<Animator>();
 		sound = GetComponent<AudioSource>();
 		sword.SetActive(battle);
@@ -117,6 +118,8 @@ public class Valrus: PlayerBehaviour
 			attack2Projector.SetActive(false);
 			attack2expire = 0f;
 		}
+		
+		AggroEnemies();
 	}
 	
 }
