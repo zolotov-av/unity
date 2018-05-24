@@ -1133,6 +1133,15 @@ public class TabletController: MonoBehaviour
 			rotation *= Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
 		}
 		
+		// TODO нужен рефакторинг
+		if ( playerScript.busy )
+		{
+			// если персонаж занят анимацией удара или заморожен, то им нельзя
+			// управлять (двигать)
+			capsule.material = idleFriction;
+			return;
+		}
+		
 		if ( velocity > 0f )
 		{
 			Vector3 cameraVelocity = rotation * localVelocity;
@@ -1158,7 +1167,6 @@ public class TabletController: MonoBehaviour
 				rb.rotation = Quaternion.RotateTowards(rb.rotation, rotation, maxRotationSpeed * Time.deltaTime);
 			}
 		}
-		
 	}
 	
 	void Update()

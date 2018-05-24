@@ -16,6 +16,12 @@ public class PlayerBehaviour: MonoBehaviour
 	
 	private IAction action;
 	
+	/**
+	 * true - персонаж занят (анимация удара или заморожен)
+	 * false - персонаж свободен (им можно управлять)
+	 */
+	public bool busy = false;
+	
 	public void SetAction(IAction act)
 	{
 		if ( act == null ) return;

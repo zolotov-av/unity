@@ -22,7 +22,6 @@ public class Valrus: PlayerBehaviour
 	private AudioSource sound;
 	
 	protected bool battle = false;
-	protected bool busy = false;
 	protected string attack = "none";
 	protected bool soundA = false;
 	
