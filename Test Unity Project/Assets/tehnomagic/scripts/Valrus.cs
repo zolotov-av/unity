@@ -110,6 +110,7 @@ public class Valrus: PlayerBehaviour
 		{
 			battle = !battle;
 			sword.SetActive(battle);
+			animator.SetBool("battle", battle);
 		}
 		
 		if ( attack2expire != 0f && Time.time > attack2expire )
