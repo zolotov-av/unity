@@ -140,11 +140,6 @@ public class TabletController: MonoBehaviour
 	private Vector3 localVelocity = new Vector3(0f, 0f, 0f);
 	
 	/**
-	 * Вектор скорости персонажа в мировых координатах
-	 */
-	private Vector3 playerVelocity = new Vector3(0f, 0f, 0f);
-	
-	/**
 	 * Состояние прыжка
 	 */
 	private bool jumping = false;
@@ -271,6 +266,16 @@ public class TabletController: MonoBehaviour
 	 * Дистанция камеры (расстояние от персонажа до камеры)
 	 */
 	private float distance = 0f;
+	
+	/**
+	 * Физический материал когда персонаж стоит (без управления игроком)
+	 */
+	public PhysicMaterial idleFriction;
+	
+	/**
+	 * Физический матераил когда персонаж движется (управляется игроком)
+	 */
+	public PhysicMaterial movingFriction;
 	
 	/**
 	 * Ориентация камеры относительно цели
@@ -1133,14 +1138,20 @@ public class TabletController: MonoBehaviour
 			Vector3 cameraVelocity = rotation * localVelocity;
 			Quaternion q = Quaternion.LookRotation(cameraVelocity, Vector3.up);
 			
-			if ( grounded ) playerVelocity = cameraVelocity;
+			capsule.material = movingFriction;
+			
 			
 			rb.rotation = Quaternion.RotateTowards(rb.rotation, q, maxRotationSpeed * Time.deltaTime);
-			rb.position += playerVelocity * Time.deltaTime;
+			
+			if ( grounded )
+			{
+				cameraVelocity.y = rb.velocity.y;
+				rb.velocity = cameraVelocity;
+			}
 		}
 		else
 		{
-			playerVelocity = Vector3.zero;
+			capsule.material = idleFriction;
 			
 			if ( rotatePlayer && !navMoving )
 			{
