@@ -27,6 +27,8 @@ public class EnemyBehaviour: MonoBehaviour
 	 */
 	public float attackDistance = 1.2f;
 	
+	public float hitPoints = 3f;
+	
 	/**
 	 * Игрок на которого агрится противник
 	 */
@@ -40,6 +42,8 @@ public class EnemyBehaviour: MonoBehaviour
 	private float attackCD = 0f;
 	private float aggroCD = 0f;
 	private bool busy = false;
+	
+	private bool dead = false;
 	
 	public void GiveupAggro()
 	{
@@ -70,6 +74,12 @@ public class EnemyBehaviour: MonoBehaviour
 	 */
 	public void CheckAggro(PlayerBehaviour player)
 	{
+		if ( dead )
+		{
+			// мертвые не агрятся
+			return;
+		}
+		
 		if ( target != null )
 		{
 			// если уже есть цель, то ничего недалать не надо
@@ -88,6 +98,12 @@ public class EnemyBehaviour: MonoBehaviour
 	 */
 	protected void UpdateAggro()
 	{
+		if ( dead )
+		{
+			// мертвые не агрятся
+			return;
+		}
+		
 		if ( target == null )
 		{
 			// цели нет
@@ -162,11 +178,29 @@ public class EnemyBehaviour: MonoBehaviour
 	
 	void OnTriggerEnter(Collider other)
 	{
+		if ( dead )
+		{
+			// мертвые не получают дамаг
+			return;
+		}
+		
 		Debug.Log("EnemyBehaviour OnTriggerEnter");
 		
 		AttackBehaviour attack = other.GetComponent<AttackBehaviour>();
 		if ( attack != null )
 		{
+			hitPoints -= 1f;
+			if ( hitPoints <= 0f )
+			{
+				hitPoints = 0f;
+				animator.SetTrigger("Fall1");
+				sound.Stop();
+				sound.Play();
+				busy = false;
+				dead = true;
+				navAgent.ResetPath();
+				return;
+			}
 			animator.SetTrigger("Hit1");
 			sound.Stop();
 			sound.Play();
