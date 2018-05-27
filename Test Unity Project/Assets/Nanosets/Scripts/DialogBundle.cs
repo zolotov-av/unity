@@ -64,7 +64,7 @@ public class DialogBundle
 			}
 			else
 			{
-				Debug.Log("goto=[" + action.nextId + "]");
+				//Debug.Log("goto=[" + action.nextId + "]");
 				
 				DialogItem item;
 				if ( map.TryGetValue(action.nextId, out item) )
@@ -91,7 +91,7 @@ public class DialogBundle
 			//Debug.Log("id=[" + item.id + "]");
 			if ( item.id != "" )
 			{
-				Debug.Log("add item[" + item.id + "]");
+				//Debug.Log("add item[" + item.id + "]");
 				map.Add(item.id, item);
 			}
 		}
