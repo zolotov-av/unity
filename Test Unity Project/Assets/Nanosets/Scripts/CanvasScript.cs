@@ -46,6 +46,7 @@ public class CanvasScript: MonoBehaviour
 	
 	public GameObject labels;
 	public Transform labelPrefab;
+	public Transform damagePrefab;
 	
 	// TODO убрать костыль...
 	private bool actionActive = false;
@@ -213,6 +214,42 @@ public class CanvasScript: MonoBehaviour
 	public static void DestroyLabel(Transform label)
 	{
 		Destroy(label);
+	}
+	
+	/**
+	 * Выделить метку дамага
+	 */
+	public static DamageLabel AllocDamageLabel()
+	{
+		// TODO сделать пул меток
+		Transform t = Instantiate(instance.damagePrefab, instance.labels.transform);
+		DamageLabel label = t.GetComponent<DamageLabel>();
+		if ( label == null )
+		{
+			Debug.LogError("AllocDamageLabel(): prefab haven't DamageLabel script");
+			Destroy(t);
+			return null;
+		}
+		
+		return label;
+	}
+	
+	public static void FreeDamageLabel(DamageLabel label)
+	{
+		// TODO сделать пул меток
+		if ( label != null )
+		{
+			Destroy(label.gameObject);
+		}
+	}
+	
+	public static void ThrowLabel(int damage, Vector3 position)
+	{
+		DamageLabel label = AllocDamageLabel();
+		if ( label != null )
+		{
+			label.SetDamage(damage, position);
+		}
 	}
 	
 } // class CanvasScript

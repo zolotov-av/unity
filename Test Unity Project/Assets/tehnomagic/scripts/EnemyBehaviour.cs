@@ -27,7 +27,10 @@ public class EnemyBehaviour: MonoBehaviour
 	 */
 	public float attackDistance = 1.2f;
 	
-	public float hitPoints = 3f;
+	private int currentHealth = 0;
+	public int maxHealth = 100;
+	
+	public Transform labelAnchor;
 	
 	/**
 	 * Игрок на которого агрится противник
@@ -174,6 +177,8 @@ public class EnemyBehaviour: MonoBehaviour
 		animator = GetComponent<Animator>();
 		sound = GetComponent<AudioSource>();
 		navAgent = GetComponent<NavMeshAgent>();
+		
+		currentHealth = maxHealth;
 	}
 	
 	void OnTriggerEnter(Collider other)
@@ -184,16 +189,17 @@ public class EnemyBehaviour: MonoBehaviour
 			return;
 		}
 		
-		Debug.Log("EnemyBehaviour OnTriggerEnter");
-		
 		AttackBehaviour attack = other.GetComponent<AttackBehaviour>();
 		if ( attack != null )
 		{
-			hitPoints -= 1f;
-			if ( hitPoints <= 0f )
+			int damage = Mathf.FloorToInt(Random.Range(24, 36));
+			CanvasScript.ThrowLabel(damage, labelAnchor.transform.position);
+			currentHealth -= damage;
+			if ( currentHealth <= 0 )
 			{
-				hitPoints = 0f;
-				animator.SetTrigger("Fall1");
+				currentHealth = 0;
+				animator.SetBool("Dead", true);
+				animator.SetTrigger("Hit1");
 				sound.Stop();
 				sound.Play();
 				busy = false;
@@ -215,6 +221,9 @@ public class EnemyBehaviour: MonoBehaviour
 	void Update()
 	{
 		UpdateAggro();
+		
+		animator.SetFloat("speedv", Vector3.Dot(navAgent.velocity, transform.forward));
+		animator.SetFloat("speedh", 0f);
 	}
 	
 }
