@@ -87,15 +87,7 @@ public class MainMenuScript: WindowBehaviour
 	
 	public void OnNewGameButton()
 	{
-		//ShowLoading();
-		//SceneManager.LoadScene(1);
-		TabletController.LoadScene(1);
-		/*
-		SoundManager.instance.FadePlay("town");
-		gameObject.SetActive(false);
-		inMenu = false;
-		Time.timeScale = 1f;
-		*/
+		TabletController.LoadNewGame();
 	}
 	
 	public void OnLoadGameButton()

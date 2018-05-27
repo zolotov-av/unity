@@ -102,6 +102,13 @@ public class TabletController: MonoBehaviour
 	private Transform targetCircle;
 	
 	/**
+	 * Флаг активности игры
+	 * true - игра активна
+	 * false - игра не началась, на паузе или остановлена
+	 */
+	protected bool gameActive = false;
+	
+	/**
 	 * Флаг навигации (движения по клику)
 	 */
 	private bool navigate = false;
@@ -576,7 +583,12 @@ public class TabletController: MonoBehaviour
 			}
 		}
 		GroundCheck();
-		Time.timeScale = 1f;
+		
+		if ( gameActive )
+		{
+			// если игра активна, то запустить отсчет времени
+			Time.timeScale = 1f;
+		}
 	}
 	
 	public static void LoadScene(int i)
@@ -595,6 +607,19 @@ public class TabletController: MonoBehaviour
 		instance.playerScript.RemoveAction();
 		instance.menuCtl.ShowLoading();
 		SceneManager.LoadScene(sceneName);
+	}
+	
+	/**
+	 * Загрузить новую игру
+	 */
+	public static void LoadNewGame()
+	{
+		instance.loading = true;
+		Time.timeScale = 0f;
+		instance.playerScript.RemoveAction();
+		instance.menuCtl.ShowLoading();
+		instance.gameActive = true;
+		SceneManager.LoadScene(1);
 	}
 	
 	/**
