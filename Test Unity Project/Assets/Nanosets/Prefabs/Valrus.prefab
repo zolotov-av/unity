@@ -889,6 +889,7 @@ GameObject:
   - component: {fileID: 195156104898163736}
   - component: {fileID: 114352831862329886}
   - component: {fileID: 82346685575376006}
+  - component: {fileID: 208562273990721694}
   m_Layer: 8
   m_Name: Valrus
   m_TagString: Untagged
@@ -2791,6 +2792,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2c33ac211b601b488cd3e87469f49f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  busy: 0
   attack1Prefab: {fileID: 1511764857556522, guid: 9777defd196572549ae5eade0eb0ccbd,
     type: 2}
   attack1SoundA: {fileID: 8300000, guid: fe0b1f9aeb45b41b089175aeeabd5d95, type: 3}
@@ -3519,3 +3521,18 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 3
+--- !u!208 &208562273990721694
+NavMeshObstacle:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1751397298907866}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 0
+  m_Extents: {x: 0.5, y: 1, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
