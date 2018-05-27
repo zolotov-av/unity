@@ -252,6 +252,23 @@ public class CanvasScript: MonoBehaviour
 		}
 	}
 	
+	/**
+	 * Обновить позиции меток
+	 */
+	public static void UpdateLabels(Camera camera)
+	{
+		// TODO лучше сделать свой связный список для BasicLabel,
+		// чтобы  не тратить время на GetComponent
+		foreach(Transform t in instance.labels.transform)
+		{
+			BasicLabel label = t.GetComponent<BasicLabel>();
+			if ( label != null )
+			{
+				t.position = camera.WorldToScreenPoint(label.worldPosition);
+			}
+		}
+	}
+	
 } // class CanvasScript
 
 } // namespace Nanosoft

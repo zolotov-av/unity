@@ -22,12 +22,10 @@ public class Label: MonoBehaviour
 		}
 	}
 	
-	void LateUpdate()
+	void Update()
 	{
-		if ( label != null )
-		{
-			TabletController.UpdateLabel(transform.position, label);
-		}
+		BasicLabel l = label.GetComponent<BasicLabel>();
+		l.worldPosition = transform.position;
 	}
 	
 } // class Label

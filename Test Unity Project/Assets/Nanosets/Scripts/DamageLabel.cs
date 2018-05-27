@@ -7,7 +7,7 @@ namespace Nanosoft
 /**
  * Метка для отображения урона
  */
-public class DamageLabel: MonoBehaviour
+public class DamageLabel: BasicLabel
 {
 	
 	/**
@@ -25,12 +25,6 @@ public class DamageLabel: MonoBehaviour
 	 */
 	public Text damageText;
 	
-	/**
-	 * Мировые координаты места
-	 */
-	[HideInInspector]
-	public Vector3 worldPosition;
-	
 	public void SetDamage(int damage, Vector3 position)
 	{
 		damageText.text = damage.ToString();
@@ -44,7 +38,7 @@ public class DamageLabel: MonoBehaviour
 		gameObject.SetActive(true);
 	}
 	
-	void LateUpdate ()
+	void Update ()
 	{
 		if ( Time.time > expireTime )
 		{
@@ -54,7 +48,7 @@ public class DamageLabel: MonoBehaviour
 		}
 		
 		worldPosition += speed * Time.deltaTime;
-		TabletController.UpdateLabel(worldPosition, transform);
+		//TabletController.UpdateLabel(worldPosition, transform);
 	}
 	
 }
