@@ -109,6 +109,13 @@ public class TabletController: MonoBehaviour
 	protected bool gameActive = false;
 	
 	/**
+	 * Флаг боевого режима
+	 * true - персонаж в боевом режиме
+	 * false - персонаж в режиме исследования
+	 */
+	protected bool battleMode = false;
+	
+	/**
 	 * Флаг навигации (движения по клику)
 	 */
 	private bool navigate = false;
@@ -749,6 +756,36 @@ public class TabletController: MonoBehaviour
 			return;
 		}
 		
+		if ( battleMode )
+		{
+			if ( Input.GetKeyDown(KeyCode.F) )
+			{
+				battleMode = false;
+				rotateCamera = false;
+				rotatePlayer = false;
+			}
+			
+			if ( Input.GetMouseButtonDown(0) )
+			{
+				playerScript.Attack1();
+			}
+			
+			handleRotation();
+			handleMovement();
+			return;
+		}
+		
+		if ( Input.GetKeyDown(KeyCode.F) )
+		{
+			battleMode = true;
+			rotateCamera = false;
+			rotatePlayer = true;
+			lockCursor(true);
+			handleRotation();
+			handleMovement();
+			return;
+		}
+		
 		if ( mouseActive )
 		{
 			if ( !rotateCamera )
@@ -1174,8 +1211,14 @@ public class TabletController: MonoBehaviour
 			
 			capsule.material = movingFriction;
 			
-			
-			rb.rotation = Quaternion.RotateTowards(rb.rotation, q, maxRotationSpeed * Time.deltaTime);
+			if ( battleMode )
+			{
+				rb.rotation = Quaternion.RotateTowards(rb.rotation, rotation, maxRotationSpeed * Time.deltaTime);
+			}
+			else
+			{
+				rb.rotation = Quaternion.RotateTowards(rb.rotation, q, maxRotationSpeed * Time.deltaTime);
+			}
 			
 			if ( grounded )
 			{
@@ -1209,6 +1252,8 @@ public class TabletController: MonoBehaviour
 		HandleNavigation();
 		
 		animator.SetBool("walk", navMoving || velocity > 0.01f);
+		animator.SetFloat("speedh", localVelocity.x);
+		animator.SetFloat("speedv", localVelocity.z);
 	}
 	
 	void LateUpdate()
