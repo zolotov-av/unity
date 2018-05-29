@@ -92,6 +92,10 @@ public class PlayerBehaviour: MonoBehaviour
 		}
 	}
 	
+	public virtual void ApplyDamage(int damage)
+	{
+	}
+	
 	void Update()
 	{
 		if ( Input.GetKeyDown(KeyCode.E) && action != null )

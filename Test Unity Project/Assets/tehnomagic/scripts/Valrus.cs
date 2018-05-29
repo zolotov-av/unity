@@ -44,8 +44,10 @@ public class Valrus: PlayerBehaviour
 			}
 			else
 			{
+				va.minDamage = 28;
+				va.maxDamage = 32;
 				va.Run(this);
-				busy = false;
+				//busy = false;
 			}
 		}
 		
@@ -57,6 +59,16 @@ public class Valrus: PlayerBehaviour
 		}
 		
 		attack = "none";
+	}
+	
+	void AttackEnd()
+	{
+		busy = false;
+	}
+	
+	void HitEnd()
+	{
+		busy = false;
 	}
 	
 	public override void Attack1()
@@ -90,6 +102,15 @@ public class Valrus: PlayerBehaviour
 		attack2Projector.transform.position = transform.position + transform.forward * 1.6f;
 		attack2Projector.SetActive(true);
 		attack2expire = Time.time + 3f;
+	}
+	
+	public override void ApplyDamage(int damage)
+	{
+		animator.SetTrigger("Hit");
+		busy = true;
+		//sound.Stop();
+		//sound.Play();
+		//busy = false;
 	}
 	
 	void Awake()

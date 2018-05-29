@@ -16,6 +16,9 @@ public class AttackBehaviour: MonoBehaviour
 	 */
 	public GameObject owner;
 	
+	public int minDamage = 2;
+	public int maxDamage = 3;
+	
 }
 
 } // namespace Nanosoft
