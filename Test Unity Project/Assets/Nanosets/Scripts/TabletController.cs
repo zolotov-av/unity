@@ -1286,6 +1286,7 @@ public class TabletController: MonoBehaviour
 		pCamera.transform.LookAt(tp);
 		
 		CanvasScript.UpdateLabels(pCamera);
+		CanvasScript.UpdateHealth(playerScript);
 		
 		// TODO нужен рефакторинг...
 		if ( WindowBehaviour.current == null )

@@ -9,10 +9,15 @@ namespace Nanosoft
 public class EnemyBehaviour: DamageBehaviour
 {
 	
-	enum State {Idle, Follow, Attack, Return};
+	enum State {Idle, Follow, Attack, Rage, Return};
 	
 	private Animator animator;
 	private AudioSource sound;
+	
+	/**
+	 * Расстояние до цели
+	 */
+	protected float distance;
 	
 	/**
 	 * Расстояние на котором противник агриться на игрока
@@ -65,7 +70,6 @@ public class EnemyBehaviour: DamageBehaviour
 	
 	private bool dead = false;
 	
-	private bool rageOn = false;
 	private float rage = 0f;
 	private float rageExpire = 0f;
 	private const float rageThreshHi = 100f;
@@ -101,7 +105,6 @@ public class EnemyBehaviour: DamageBehaviour
 		Debug.Log("Enemy[" + gameObject.name + "] aggro to player[" + player.gameObject.name + "]");
 		target = player;
 		rage = 10f;
-		rageOn = false;
 		aggroCD = Time.time + Random.Range(5f, 7f);
 		state = State.Follow;
 	}
@@ -132,41 +135,143 @@ public class EnemyBehaviour: DamageBehaviour
 	}
 	
 	/**
+	 * Перейти к новому состоянию
+	 */
+	protected void SetNextState()
+	{
+		rage -= rageCoolSpeed * Time.deltaTime;
+		if ( rage < 0f ) rage = 0f;
+		
+		if ( state == State.Rage )
+		{
+			if ( rage < rageThreshLow || Time.time > rageExpire )
+			{
+				rage = 10f;
+				state = State.Follow;
+				labelAnchor.GetComponent<MeshRenderer>().enabled = false;
+				Debug.Log(gameObject.name + " rage finished");
+			}
+			
+			return;
+		}
+		
+		if ( state == State.Follow )
+		{
+			if ( distance < attackDistance )
+			{
+				state = State.Attack;
+				navigate = false;
+				navAgent.ResetPath();
+			}
+			
+			return;
+		}
+		
+		if ( state == State.Attack )
+		{
+			if ( distance > attackDistanceMax )
+			{
+				state = State.Follow;
+			}
+			
+			return;
+		}
+	}
+	
+	/**
+	 * Действия в состоянии преследования
+	 * Цель преследования - сократить дистанцию, чтобы можно было нанести удар
+	 */
+	protected void HandleFollowState()
+	{
+		if ( follow )
+		{
+			if ( Time.time > followCD )
+			{
+				follow = false;
+				navigate = false;
+				navAgent.ResetPath();
+				followCD = Time.time + Random.Range(1f, 2f);
+			}
+		}
+		else
+		{
+			if ( Time.time > followCD )
+			{
+				follow = true;
+				followCD = Time.time + Random.Range(2f, 3f);
+			}
+		}
+		
+		if ( follow && !busy && navAgentCD < Time.time && distance > attackDistanceMax )
+		{
+			navigate = true;
+			navAgent.SetDestination(target.transform.position);
+			navAgentCD = Time.time + 0.4f;
+		}
+	}
+	
+	/**
+	 * Действия в состоянии атаки
+	 */
+	protected void HandleAttackState()
+	{
+		if ( !busy && Time.time > attackCD )
+		{
+			float angle = Vector3.Angle(transform.forward, target.transform.position - transform.position);
+			if ( angle < 10f )
+			{
+				busy = true;
+				animator.SetTrigger("Attack1");
+				attackCD = Time.time + Random.Range(2f, 4f);
+			}
+		}
+	}
+	
+	/**
+	 * Действия в состоянии ярости
+	 * В состоянии ярости монстр непрерывно преследует и атакует цель
+	 */
+	protected void HandleRageState()
+	{
+		if ( busy ) return;
+		
+		if ( distance < attackDistance )
+		{
+			float angle = Vector3.Angle(transform.forward, target.transform.position - transform.position);
+			if ( angle < 10f )
+			{
+				if ( navigate )
+				{
+					navigate = false;
+					navAgent.ResetPath();
+				}
+				busy = true;
+				animator.SetTrigger("Attack1");
+				attackCD = Time.time + Random.Range(0.4f, 0.8f);
+				return;
+			}
+		}
+		
+		if ( Time.time > navAgentCD )
+		{
+			navigate = true;
+			navAgent.SetDestination(target.transform.position);
+			navAgentCD = Time.time + 0.4f;
+		}
+	}
+	
+	/**
 	 * Обновить агро
 	 */
 	protected void UpdateAggro()
 	{
-		/**
-		if ( dead )
-		{
-			// мертвые не агрятся
-			return;
-		}
-		
-		if ( target == null )
-		{
-			// цели нет
-			return;
-		}
-		*/
-		
 		if ( state == State.Idle )
 		{
 			return;
 		}
 		
-		rage -= rageCoolSpeed * Time.deltaTime;
-		if ( rage < 0f ) rage = 0f;
-		
-		if ( rageOn && (rage < rageThreshLow || Time.time > rageExpire) )
-		{
-			rage = 10f;
-			rageOn = false;
-			labelAnchor.GetComponent<MeshRenderer>().enabled = false;
-			Debug.Log(gameObject.name + " rage finished");
-		}
-		
-		float distance = Vector3.Distance(transform.position, target.transform.position);
+		distance = Vector3.Distance(transform.position, target.transform.position);
 		if ( distance > giveupDistance && Time.time > aggroCD )
 		{
 			GiveupAggro();
@@ -196,73 +301,20 @@ public class EnemyBehaviour: DamageBehaviour
 			transform.rotation = Quaternion.RotateTowards(transform.rotation, rot, 240f * Time.deltaTime);
 		}
 		
-		if ( state == State.Follow )
-		{
-			if ( distance < attackDistance )
-			{
-				Debug.Log(gameObject.name + " start attack");
-				state = State.Attack;
-				navigate = false;
-				navAgent.ResetPath();
-			}
-		}
-		else if ( state == State.Attack )
-		{
-			if ( distance > attackDistanceMax )
-			{
-				Debug.Log(gameObject.name + " start follow");
-				state = State.Follow;
-			}
-		}
+		SetNextState();
 		
-		if ( state == State.Follow )
+		switch ( state )
 		{
-			if ( follow )
-			{
-				if ( Time.time > followCD )
-				{
-					follow = false;
-					navigate = false;
-					navAgent.ResetPath();
-					followCD = Time.time + Random.Range(1f, 2f);
-				}
-			}
-			else
-			{
-				if ( Time.time > followCD )
-				{
-					follow = true;
-					followCD = Time.time + Random.Range(2f, 3f);
-				}
-			}
-			
-			if ( follow && !busy && navAgentCD < Time.time && distance > attackDistanceMax )
-			{
-				navigate = true;
-				navAgent.SetDestination(target.transform.position);
-				navAgentCD = Time.time + 0.4f;
-			}
+		case State.Follow:
+			HandleFollowState();
+			break;
+		case State.Attack:
+			HandleAttackState();
+			break;
+		case State.Rage:
+			HandleRageState();
+			break;
 		}
-		else if ( state == State.Attack )
-		{
-			if ( !busy && Time.time > attackCD )
-			{
-				float angle = Vector3.Angle(transform.forward, target.transform.position - transform.position);
-				if ( angle > 10f )
-				{
-					//Quaternion rot = Quaternion.LookRotation(target.transform.position - transform.position);
-					//transform.rotation = Quaternion.RotateTowards(transform.rotation, rot, 240f * Time.deltaTime);
-				}
-				else
-				{
-					busy = true;
-					animator.SetTrigger("Attack1");
-					float cd = rageOn ? Random.Range(0.4f, 0.8f) : Random.Range(2f, 4f);
-					attackCD = Time.time + cd;
-				}
-			}
-		}
-		
 	}
 	
 	/**
@@ -276,7 +328,6 @@ public class EnemyBehaviour: DamageBehaviour
 		int count = Physics.OverlapSphereNonAlloc(attackAnchor.position, radius, cache, layerMask, QueryTriggerInteraction.Ignore);
 		for(int i = 0; i < count; i++)
 		{
-			Debug.Log(gameObject.name + "hits " + cache[i].gameObject.name);
 			PlayerBehaviour player = cache[i].GetComponent<PlayerBehaviour>();
 			if ( player != null )
 			{
@@ -299,7 +350,6 @@ public class EnemyBehaviour: DamageBehaviour
 	 */
 	void HitEnd()
 	{
-		Debug.Log(gameObject.name + " HitEnd()");
 		attackCD = 0f;
 		busy = false;
 	}
@@ -354,7 +404,7 @@ public class EnemyBehaviour: DamageBehaviour
 				GetComponent<Collider>().enabled = false;
 				return;
 			}
-			if ( !rageOn )
+			if ( state != State.Rage )
 			{
 				animator.SetTrigger("Hit1");
 				busy = true;
@@ -371,11 +421,11 @@ public class EnemyBehaviour: DamageBehaviour
 			rage += 10;
 			if ( follow ) rage += 6;
 			
-			if ( rage > rageThreshHi )
+			if ( state != State.Rage && rage > rageThreshHi )
 			{
 				Debug.Log(gameObject.name + " become rage");
-				rageOn = true;
-				rageExpire = Time.time + 3f;
+				state = State.Rage;
+				rageExpire = Time.time + 5f;
 				labelAnchor.GetComponent<MeshRenderer>().enabled = true;
 			}
 		}

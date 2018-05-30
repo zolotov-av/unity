@@ -106,6 +106,22 @@ public class Valrus: PlayerBehaviour
 	
 	public override void ApplyDamage(int damage)
 	{
+		if ( dead )
+		{
+			// мертвые не получают дамаг
+			return;
+		}
+		
+		currentHealth -= damage;
+		if ( currentHealth <= 0 )
+		{
+			currentHealth = 0;
+			dead = true;
+			animator.SetTrigger("dead");
+			return;
+			// TODO dead
+		}
+		
 		animator.SetTrigger("Hit");
 		busy = true;
 		//sound.Stop();
@@ -127,7 +143,12 @@ public class Valrus: PlayerBehaviour
 	
 	void Update()
 	{
-		if ( Input.GetKeyDown("f") )
+		if ( Input.GetKeyDown(KeyCode.E) && action != null )
+		{
+			action.RunAction(this);
+		}
+		
+		if ( Input.GetKeyDown(KeyCode.F) )
 		{
 			battle = !battle;
 			sword.SetActive(battle);

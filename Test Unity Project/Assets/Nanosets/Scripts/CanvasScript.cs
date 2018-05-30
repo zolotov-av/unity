@@ -48,6 +48,8 @@ public class CanvasScript: MonoBehaviour
 	public Transform labelPrefab;
 	public Transform damagePrefab;
 	
+	public Image healthBar;
+	
 	// TODO убрать костыль...
 	private bool actionActive = false;
 	
@@ -267,6 +269,11 @@ public class CanvasScript: MonoBehaviour
 				t.position = camera.WorldToScreenPoint(label.worldPosition);
 			}
 		}
+	}
+	
+	public static void UpdateHealth(PlayerBehaviour player)
+	{
+		instance.healthBar.fillAmount = ((float)player.GetCurrentHealth()) / ((float)player.maxHealth);
 	}
 	
 } // class CanvasScript

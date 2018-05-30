@@ -14,7 +14,11 @@ namespace Nanosoft
 public class PlayerBehaviour: MonoBehaviour
 {
 	
-	private IAction action;
+	protected IAction action;
+	
+	protected bool dead = false;
+	protected int currentHealth = 0;
+	public int maxHealth = 100;
 	
 	/**
 	 *
@@ -69,6 +73,8 @@ public class PlayerBehaviour: MonoBehaviour
 	protected void Init()
 	{
 		if ( enemies == null ) enemies = new Collider[32];
+		currentHealth = maxHealth;
+		dead = false;
 	}
 	
 	/**
@@ -90,6 +96,11 @@ public class PlayerBehaviour: MonoBehaviour
 			
 			enemy.CheckAggro(this);
 		}
+	}
+	
+	public int GetCurrentHealth()
+	{
+		return currentHealth;
 	}
 	
 	public virtual void ApplyDamage(int damage)
