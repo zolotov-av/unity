@@ -27,6 +27,7 @@ public class TabletEntry: MonoBehaviour
 	{
 		if ( TabletController.instance == null )
 		{
+			Time.timeScale = 0f;
 			var t = gameObject.transform;
 			var obj = Instantiate(prefab, t.position, t.rotation);
 			obj.name = prefab.name;

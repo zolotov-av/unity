@@ -41,6 +41,7 @@ public class EnemyBehaviour: DamageBehaviour
 	
 	public Transform labelAnchor;
 	public Transform attackAnchor;
+	public TestEffect1 ps;
 	
 	/**
 	 * Мобы могут быть объединены в паки
@@ -352,6 +353,11 @@ public class EnemyBehaviour: DamageBehaviour
 	{
 		attackCD = 0f;
 		busy = false;
+	}
+	
+	void BreathSound()
+	{
+		ps.BreathSound();
 	}
 	
 	void Awake()
