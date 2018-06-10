@@ -21,7 +21,9 @@ GameObject:
   - component: {fileID: 224275486644949496}
   - component: {fileID: 222462466977887342}
   - component: {fileID: 114008164966409174}
+  - component: {fileID: 114238236388999826}
   - component: {fileID: 114393699794775704}
+  - component: {fileID: 114426842028638426}
   m_Layer: 5
   m_Name: CharacterText
   m_TagString: Untagged
@@ -41,7 +43,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.1966002, g: 0.8867924, b: 0.25837287, a: 1}
+  m_Color: {r: 0.29000002, g: 0.725, b: 0.3291892, a: 0.98039216}
   m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -50,7 +52,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 16
+    m_FontSize: 22
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
@@ -62,6 +64,20 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: CharacterText
+--- !u!114 &114238236388999826
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1913555826567960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -900027084, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0.089600004, g: 0.22399999, b: 0.10079999, a: 0.8862745}
+  m_EffectDistance: {x: 1.2, y: -1.2}
+  m_UseGraphicAlpha: 1
 --- !u!114 &114393699794775704
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -75,6 +91,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 2
   m_VerticalFit: 2
+--- !u!114 &114426842028638426
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1913555826567960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 460a5bc8ca9161647b5257117b563a0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  worldPosition: {x: 0, y: 0, z: 0}
 --- !u!222 &222462466977887342
 CanvasRenderer:
   m_ObjectHideFlags: 1

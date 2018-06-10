@@ -268,7 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed9d9d45629af9e47b52c96dac2e628d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: mainland
+  sceneName: startland
 --- !u!4 &717033411
 Transform:
   m_ObjectHideFlags: 0
@@ -371,7 +371,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1134001651
+--- !u!1001 &2076505333
 Prefab:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -481,17 +481,17 @@ Prefab:
     - target: {fileID: 224506551741054240, guid: d9f66f2f63784c94097d21c8779906a1,
         type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 83.83133
+      value: 89.35698
       objectReference: {fileID: 0}
     - target: {fileID: 224276382153648764, guid: d9f66f2f63784c94097d21c8779906a1,
         type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 103.83133
+      value: 109.35698
       objectReference: {fileID: 0}
     - target: {fileID: 224268338514770392, guid: d9f66f2f63784c94097d21c8779906a1,
         type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 83.55422
+      value: 88.49882
       objectReference: {fileID: 0}
     - target: {fileID: 224927777477092438, guid: d9f66f2f63784c94097d21c8779906a1,
         type: 2}
