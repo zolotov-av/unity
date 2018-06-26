@@ -38,11 +38,11 @@ public class ControllerUtils
 		Vector3 position = CapsuleBase(capsule);
 		
 		// зазор на расстоянии которого будет определяться столкновение
-		const float gap = 0.16f;
+		const float gap = 0.4f;
 		
 		RaycastHit hitInfo;
 		
-		float s_radius = capsule.radius - gap;
+		float s_radius = capsule.radius;
 		Vector3 s_position = position + Vector3.up * (s_radius + gap);
 		
 		return Physics.SphereCast(s_position, s_radius, Vector3.down, out hitInfo,
