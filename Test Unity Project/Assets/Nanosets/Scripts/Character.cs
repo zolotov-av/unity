@@ -60,6 +60,60 @@ public class Character: MonoBehaviour
 		currentHealth = maxHealth;
 	}
 	
+	/**
+	 * Отправить персонажа в указанные координаты (мировые)
+	 */
+	public void Navigate(Vector3 p)
+	{
+		if ( !navAgent.enabled )
+		{
+			rb.isKinematic = true;
+			navAgent.enabled = true;
+		}
+		
+		navAgent.SetDestination(p);
+	}
+	
+	/**
+	 * Остановить/отменить NavMeshAgent
+	 */
+	public void StopNavigation()
+	{
+		if ( navAgent.enabled )
+		{
+			rb.isKinematic = false;
+			navAgent.enabled = false;
+		}
+	}
+	
+	/**
+	 * Сброс NavMeshAgent
+	 * TODO временный костыль
+	 */
+	public void ResetNavigation()
+	{
+		if ( navAgent != null )
+		{
+			navAgent.enabled = false;
+			
+			if ( capsule != null )
+			{
+				//Debug.Log("fix NavMeshAgent");
+				navAgent.height = capsule.height;
+				navAgent.radius = capsule.radius;
+			}
+		}
+	}
+	
+	/**
+	 * Проверка, движется ли персонаж через NavMeshAgent
+	 * TODO временный костыль
+	 */
+	public Vector3 NavVelocity
+	{
+		get { return navAgent.velocity; }
+	}
+	
 } // class Character
 
 } // namespace Nanosoft

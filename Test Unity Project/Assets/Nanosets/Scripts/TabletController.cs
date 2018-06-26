@@ -51,17 +51,17 @@ public class TabletController: MonoBehaviour
 	/**
 	 * Ссылка на персонажа (загруженный экземляр)
 	 */
-	protected GameObject player;
+	protected PlayerBehaviour player;
+	
+	/**
+	 * GameObject персонажа
+	 */
+	protected GameObject playerGO;
 	
 	/**
 	 * Ссылка на скрипт персонажа
 	 */
 	protected PlayerBehaviour playerScript;
-	
-	/**
-	 * Ссылка на NavMeshAgent персонажа
-	 */
-	private NavMeshAgent playerNav;
 	
 	/**
 	 * Ссылка на камеру
@@ -357,7 +357,13 @@ public class TabletController: MonoBehaviour
 	 */
 	public void SetPlayer(GameObject obj)
 	{
-		player = obj;
+		playerGO = obj;
+		player = obj.GetComponent<PlayerBehaviour>();
+		if ( player == null )
+		{
+			Debug.LogError("player haven't PlayerBehaviour");
+		}
+		
 		animator = obj.GetComponent<Animator>();
 		rb = obj.GetComponent<Rigidbody>();
 		//rb.isKinematic = true;
@@ -370,24 +376,9 @@ public class TabletController: MonoBehaviour
 			Debug.LogError("player haven't CapsuleCollider");
 		}
 		
-		playerScript = obj.GetComponent<PlayerBehaviour>();
-		if ( playerScript == null )
-		{
-			Debug.LogError("player haven't PlayerBehaviour");
-		}
+		playerScript = player;
 		
-		playerNav = obj.GetComponent<NavMeshAgent>();
-		if ( playerNav )
-		{
-			playerNav.enabled = false;
-			
-			if ( capsule != null )
-			{
-				//Debug.Log("fix NavMeshAgent");
-				playerNav.height = capsule.height;
-				playerNav.radius = capsule.radius;
-			}
-		}
+		player.ResetNavigation();
 		navigate = false;
 		navMoving = false;
 		
@@ -469,8 +460,8 @@ public class TabletController: MonoBehaviour
 		// создаем персонажа
 		var t = gameObject.transform;
 		
-		player = Instantiate(playerPrefab, t.position, t.rotation);
-		player.name = playerPrefab.name;
+		playerGO = Instantiate(playerPrefab, t.position, t.rotation);
+		playerGO.name = playerPrefab.name;
 		
 		// создаем камеру
 		distance = startDistance;
@@ -483,7 +474,7 @@ public class TabletController: MonoBehaviour
 		canvas.name = canvasPrefab.name;
 		
 		// персонаж и камера не должны удаляться при переключении сцены
-		DontDestroyOnLoad(player);
+		DontDestroyOnLoad(playerGO);
 		DontDestroyOnLoad(cam);
 		DontDestroyOnLoad(canvas);
 		
@@ -499,7 +490,7 @@ public class TabletController: MonoBehaviour
 		targetCircle.gameObject.SetActive(false);
 		DontDestroyOnLoad(targetCircle.gameObject);
 		
-		SetPlayer(player);
+		SetPlayer(playerGO);
 		SetCamera(cam);
 		
 		if ( questManager == null ) Debug.LogError("questManager=null");
@@ -1037,12 +1028,6 @@ public class TabletController: MonoBehaviour
 	 */
 	public bool NavigateByScreenPoint(Vector2 dest)
 	{
-		if ( !playerNav.enabled )
-		{
-			playerNav.enabled = true;
-			rb.isKinematic = true;
-		}
-		
 		Ray ray = pCamera.ScreenPointToRay(dest);
 		RaycastHit hit;
 		if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers & ~(1<<8), QueryTriggerInteraction.Ignore) )
@@ -1058,14 +1043,14 @@ public class TabletController: MonoBehaviour
 				targetPoint.position = t.position;
 				targetCircle.gameObject.SetActive(true);
 				targetPoint.gameObject.SetActive(false);
-				playerNav.SetDestination(p);
+				player.Navigate(p);
 			}
 			else
 			{
 				targetPoint.position = hit.point;
 				targetPoint.gameObject.SetActive(true);
 				targetCircle.gameObject.SetActive(false);
-				playerNav.SetDestination(hit.point);
+				player.Navigate(hit.point);
 			}
 			return true;
 		}
@@ -1083,10 +1068,9 @@ public class TabletController: MonoBehaviour
 			navigate = false;
 			navMoving = false;
 			syncCamera = false;
-			playerNav.enabled = false;
 			targetPoint.gameObject.SetActive(false);
 			targetCircle.gameObject.SetActive(false);
-			rb.isKinematic = false;
+			player.StopNavigation();
 		}
 	}
 	/**
@@ -1094,20 +1078,12 @@ public class TabletController: MonoBehaviour
 	 */
 	protected void HandleNavigation()
 	{
-		if ( navigate && !playerNav.pathPending )
+		if ( navigate )
 		{
-			if ( playerNav.pathStatus == NavMeshPathStatus.PathInvalid )
-			{
-				//Debug.Log("PathInvalid => ResetPath()");
-				StopNavigation();
-				return;
-			}
-			
 			if ( navMoving )
 			{
-				if ( playerNav.velocity == Vector3.zero )
+				if ( player.NavVelocity == Vector3.zero )
 				{
-					//Debug.Log("stop walking");
 					navMoving = false;
 					syncCamera = false;
 					return;
@@ -1115,9 +1091,8 @@ public class TabletController: MonoBehaviour
 			}
 			else
 			{
-				if ( playerNav.velocity != Vector3.zero )
+				if ( player.NavVelocity != Vector3.zero )
 				{
-					//Debug.Log("start walking");
 					navMoving = true;
 					syncCamera = true;
 				}
