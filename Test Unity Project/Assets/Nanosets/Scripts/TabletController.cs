@@ -59,11 +59,6 @@ public class TabletController: MonoBehaviour
 	protected GameObject playerGO;
 	
 	/**
-	 * Ссылка на скрипт персонажа
-	 */
-	protected PlayerBehaviour playerScript;
-	
-	/**
 	 * Ссылка на камеру
 	 */
 	protected Camera pCamera;
@@ -376,8 +371,6 @@ public class TabletController: MonoBehaviour
 			Debug.LogError("player haven't CapsuleCollider");
 		}
 		
-		playerScript = player;
-		
 		player.ResetNavigation();
 		navigate = false;
 		navMoving = false;
@@ -593,7 +586,7 @@ public class TabletController: MonoBehaviour
 	{
 		instance.loading = true;
 		Time.timeScale = 0f;
-		instance.playerScript.RemoveAction();
+		instance.player.RemoveAction();
 		instance.menuCtl.ShowLoading();
 		SceneManager.LoadScene(i);
 	}
@@ -602,7 +595,7 @@ public class TabletController: MonoBehaviour
 	{
 		instance.loading = true;
 		Time.timeScale = 0f;
-		instance.playerScript.RemoveAction();
+		instance.player.RemoveAction();
 		instance.menuCtl.ShowLoading();
 		SceneManager.LoadScene(sceneName);
 	}
@@ -614,7 +607,7 @@ public class TabletController: MonoBehaviour
 	{
 		instance.loading = true;
 		Time.timeScale = 0f;
-		instance.playerScript.RemoveAction();
+		instance.player.RemoveAction();
 		instance.menuCtl.ShowLoading();
 		instance.gameActive = true;
 		SceneManager.LoadScene(1);
@@ -720,18 +713,18 @@ public class TabletController: MonoBehaviour
 		
 		if ( Input.GetKey("1") )
 		{
-			playerScript.Attack1();
+			player.Attack1();
 		}
 		
 		if ( Input.GetKeyDown("2") )
 		{
-			playerScript.Attack2();
+			player.Attack2();
 		}
 	}
 	
 	public static void RunActionTouch()
 	{
-		instance.playerScript.RunActionTouch();
+		instance.player.RunActionTouch();
 	}
 	
 	/**
@@ -758,7 +751,7 @@ public class TabletController: MonoBehaviour
 			
 			if ( Input.GetMouseButtonDown(0) )
 			{
-				playerScript.Attack1();
+				player.Attack1();
 			}
 			
 			handleRotation();
@@ -1171,7 +1164,7 @@ public class TabletController: MonoBehaviour
 		}
 		
 		// TODO нужен рефакторинг
-		if ( playerScript.busy )
+		if ( player.busy )
 		{
 			// если персонаж занят анимацией удара или заморожен, то им нельзя
 			// управлять (двигать)
@@ -1261,7 +1254,7 @@ public class TabletController: MonoBehaviour
 		pCamera.transform.LookAt(tp);
 		
 		CanvasScript.UpdateLabels(pCamera);
-		CanvasScript.UpdateHealth(playerScript);
+		CanvasScript.UpdateHealth(player);
 		
 		// TODO нужен рефакторинг...
 		if ( WindowBehaviour.current == null )
