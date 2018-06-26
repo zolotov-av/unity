@@ -15,10 +15,6 @@ public class Valrus: PlayerBehaviour
 	
 	public GameObject sword;
 	
-	/**
-	 * Ссылка на аниматор персонажа
-	 */
-	private Animator animator;
 	private AudioSource sound;
 	
 	protected bool battle = false;
@@ -132,7 +128,6 @@ public class Valrus: PlayerBehaviour
 	void Awake()
 	{
 		Init();
-		animator = GetComponent<Animator>();
 		sound = GetComponent<AudioSource>();
 		sword.SetActive(battle);
 		attack2Projector.SetActive(false);

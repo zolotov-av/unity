@@ -11,14 +11,10 @@ namespace Nanosoft
  * Данный класс предоставляет абстрактный интерфейс через который игровой
  * мир может воздействовать на персонажа.
  */
-public class PlayerBehaviour: MonoBehaviour
+public class PlayerBehaviour: Character
 {
 	
 	protected IAction action;
-	
-	protected bool dead = false;
-	protected int currentHealth = 0;
-	public int maxHealth = 100;
 	
 	/**
 	 *
@@ -70,11 +66,10 @@ public class PlayerBehaviour: MonoBehaviour
 	/**
 	 * Инициализация внутренних структур
 	 */
-	protected void Init()
+	protected new void Init()
 	{
+		base.Init();
 		if ( enemies == null ) enemies = new Collider[32];
-		currentHealth = maxHealth;
-		dead = false;
 	}
 	
 	/**

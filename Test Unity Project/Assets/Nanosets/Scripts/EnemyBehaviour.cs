@@ -6,12 +6,11 @@ using UnityEngine.AI;
 namespace Nanosoft
 {
 
-public class EnemyBehaviour: DamageBehaviour
+public class EnemyBehaviour: Character
 {
 	
 	enum State {Idle, Follow, Attack, Rage, Return};
 	
-	private Animator animator;
 	private AudioSource sound;
 	
 	/**
@@ -57,18 +56,12 @@ public class EnemyBehaviour: DamageBehaviour
 	 */
 	private bool navigate = false;
 	
-	/**
-	 * Ссылка на NavMeshAgent
-	 */
-	private NavMeshAgent navAgent = null;
 	private float navAgentCD = 0f;
 	private float attackCD = 0f;
 	private float aggroCD = 0f;
 	private bool busy = false;
 	private bool follow = false;
 	private float followCD = 0f;
-	
-	private bool dead = false;
 	
 	private float rage = 0f;
 	private float rageExpire = 0f;
@@ -356,9 +349,8 @@ public class EnemyBehaviour: DamageBehaviour
 	
 	void Awake()
 	{
-		animator = GetComponent<Animator>();
+		base.Init();
 		sound = GetComponent<AudioSource>();
-		navAgent = GetComponent<NavMeshAgent>();
 		
 		packObject = transform.parent;
 		if ( packObject != null )
@@ -371,8 +363,6 @@ public class EnemyBehaviour: DamageBehaviour
 		currentHealth = maxHealth;
 		
 		cache = new Collider[16];
-		
-		ResetSuperArmor();
 	}
 	
 	void OnTriggerEnter(Collider other)
