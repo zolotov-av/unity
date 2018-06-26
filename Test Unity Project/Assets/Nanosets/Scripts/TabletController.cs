@@ -148,21 +148,6 @@ public class TabletController: MonoBehaviour
 	 */
 	private Vector3 localVelocity = new Vector3(0f, 0f, 0f);
 	
-	/**
-	 * Состояние прыжка
-	 */
-	private bool jumping = false;
-	
-	/**
-	 * Состояние падения
-	 */
-	private bool falling = false;
-	
-	/**
-	 * Стоит ли персонаж на земле?
-	 */
-	private bool grounded = false;
-	
 	public static bool bigJump = false;
 	
 	/**
@@ -211,11 +196,6 @@ public class TabletController: MonoBehaviour
 	 * Ссылка на аниматор персонажа
 	 */
 	private Animator animator;
-	
-	/**
-	 * Ссылка на Rigidbody (твердое тело)
-	 */
-	private Rigidbody rb;
 	
 	/**
 	 * Ссылка на коллайдер персонажа
@@ -360,8 +340,6 @@ public class TabletController: MonoBehaviour
 		}
 		
 		animator = obj.GetComponent<Animator>();
-		rb = obj.GetComponent<Rigidbody>();
-		//rb.isKinematic = true;
 		rotation = player.transform.rotation;
 		
 		capsule = obj.GetComponent<CapsuleCollider>();
@@ -549,7 +527,7 @@ public class TabletController: MonoBehaviour
 		{
 			loading = false;
 			StopNavigation();
-			rb.Sleep();
+			player.ResetMovement();
 			menuCtl.EndLoading();
 			var entry = GameObject.FindWithTag("EntryPoint");
 			if ( entry != null )
@@ -573,7 +551,7 @@ public class TabletController: MonoBehaviour
 				Debug.LogError("EntryPoint not found");
 			}
 		}
-		GroundCheck();
+		player.GroundCheck();
 		
 		if ( gameActive )
 		{
@@ -618,7 +596,7 @@ public class TabletController: MonoBehaviour
 	 */
 	protected void handleMovement()
 	{
-		if ( falling || jumping ) return;
+		if ( player.falling || player.jumping ) return;
 		
 		// прочитаем ввод направления движения
 		var inputV = Input.GetAxis(verticallInput);
@@ -682,19 +660,10 @@ public class TabletController: MonoBehaviour
 		}
 	}
 	
-	public void Jump()
-	{
-		Debug.Log("Jump!");
-		StopNavigation();
-		rb.AddForce(0f, 13.72f, 0f, ForceMode.VelocityChange);
-	}
-	
 	public void JumpHeight(float height)
 	{
-		Debug.Log("Jump! (height)");
 		StopNavigation();
-		float v = Mathf.Sqrt(2f * height * Physics.gravity.magnitude);
-		rb.AddForce(0f, v, 0f, ForceMode.VelocityChange);
+		player.JumpHeight(height);
 	}
 	
 	/**
@@ -702,7 +671,7 @@ public class TabletController: MonoBehaviour
 	 */
 	protected void HandleKeyboard()
 	{
-		if ( grounded )
+		if ( player.grounded )
 		{
 			if ( Input.GetKeyDown("space") )
 			{
@@ -1093,48 +1062,6 @@ public class TabletController: MonoBehaviour
 		}
 	}
 	
-	/**
-	 * Проверка стоит ли персонаж на земле
-	 */
-	protected void GroundCheck()
-	{
-		dbg.text = "rb.velocity = " + rb.velocity.ToString();
-		
-		bool PreviouslyGrounded = grounded;
-		grounded = ControllerUtils.GroundCheck(capsule);
-		
-		if ( PreviouslyGrounded )
-		{
-			if ( !grounded )
-			{
-				Debug.Log("falling/jumping");
-				animator.SetBool("grounded", false);
-			}
-		}
-		else
-		{
-			if ( grounded )
-			{
-				Debug.Log("grounded");
-				falling = false;
-				jumping = false;
-				animator.SetBool("grounded", true);
-				animator.SetBool("jumping", false);
-				animator.SetBool("falling", false);
-			}
-		}
-		
-		if ( ! grounded )
-		{
-			jumping = rb.velocity.y > 0f;
-			falling = !jumping;
-			
-			animator.SetBool("jumping", jumping);
-			animator.SetBool("falling", falling);
-		}
-		
-	}
-	
 	public static void UpdateLabel(Vector3 position, Transform label)
 	{
 		label.position = instance.pCamera.WorldToScreenPoint(position);
@@ -1152,7 +1079,7 @@ public class TabletController: MonoBehaviour
 	
 	void FixedUpdate()
 	{
-		GroundCheck();
+		player.GroundCheck();
 		
 		if ( syncCamera )
 		{
@@ -1181,17 +1108,16 @@ public class TabletController: MonoBehaviour
 			
 			if ( battleMode )
 			{
-				rb.rotation = Quaternion.RotateTowards(rb.rotation, rotation, maxRotationSpeed * Time.deltaTime);
+				player.RotateTowards(rotation, maxRotationSpeed);
 			}
 			else
 			{
-				rb.rotation = Quaternion.RotateTowards(rb.rotation, q, maxRotationSpeed * Time.deltaTime);
+				player.RotateTowards(q, maxRotationSpeed);
 			}
 			
-			if ( grounded )
+			if ( player.grounded )
 			{
-				cameraVelocity.y = rb.velocity.y;
-				rb.velocity = cameraVelocity;
+				player.MoveVelocity(cameraVelocity);
 			}
 		}
 		else
@@ -1200,7 +1126,7 @@ public class TabletController: MonoBehaviour
 			
 			if ( rotatePlayer && !navMoving )
 			{
-				rb.rotation = Quaternion.RotateTowards(rb.rotation, rotation, maxRotationSpeed * Time.deltaTime);
+				player.RotateTowards(rotation, maxRotationSpeed);
 			}
 		}
 	}

@@ -46,6 +46,27 @@ public class Character: MonoBehaviour
 	public int maxHealth = 100;
 	
 	/**
+	 * Стоит ли персонаж на земле?
+	 * TODO решить вопрос с видимостью (public/protected/private?)
+	 */
+	[HideInInspector]
+	public bool grounded = false;
+	
+	/**
+	 * Состояние прыжка (летит вверх)
+	 * TODO решить вопрос с видимостью (public/protected/private?)
+	 */
+	[HideInInspector]
+	public bool jumping = false;
+	
+	/**
+	 * Состояние падения (падает вниз)
+	 * TODO решить вопрос с видимостью (public/protected/private?)
+	 */
+	[HideInInspector]
+	public bool falling = false;
+	
+	/**
 	 * Инициализация
 	 */
 	protected void Init()
@@ -58,6 +79,15 @@ public class Character: MonoBehaviour
 		
 		dead = false;
 		currentHealth = maxHealth;
+	}
+	
+	/**
+	 * Сброс состояния персонажа при перезагрузке сцены
+	 */
+	public void ResetMovement()
+	{
+		StopNavigation();
+		rb.Sleep();
 	}
 	
 	/**
@@ -112,6 +142,83 @@ public class Character: MonoBehaviour
 	public Vector3 NavVelocity
 	{
 		get { return navAgent.velocity; }
+	}
+	
+	public void Jump()
+	{
+		StopNavigation();
+		rb.AddForce(0f, 13.72f, 0f, ForceMode.VelocityChange);
+	}
+	
+	public void JumpHeight(float height)
+	{
+		StopNavigation();
+		float v = Mathf.Sqrt(2f * height * Physics.gravity.magnitude);
+		rb.AddForce(0f, v, 0f, ForceMode.VelocityChange);
+	}
+	
+	/**
+	 * Разворачивать персонажа в указанное направление
+	 * Предполагается что функция будет вызываться в FixedUpdate, чтобы
+	 * непрерывно, с ограниченной скорость поворачивать персонажа
+	 */
+	public void RotateTowards(Quaternion target, float rotationSpeed)
+	{
+		rb.rotation = Quaternion.RotateTowards(rb.rotation, target, rotationSpeed * Time.deltaTime);
+	}
+	
+	/**
+	 * Двигать персонажа в указанном направлении
+	 * Предполагается что функция будет вызываться в FixedUpdate, чтобы
+	 * непрерывно двигать персонажа
+	 * Y-составляющая скорости (вертикальная) игнорируется
+	 */
+	public void MoveVelocity(Vector3 velocity)
+	{
+		velocity.y = rb.velocity.y;
+		rb.velocity = velocity;
+	}
+	
+	/**
+	 * Проверка стоит ли персонаж на земле
+	 * TODO решить вопрос с областью видимости (public/protected/private)
+	 * TODO решить вопрос кто и когда будет вызывать
+	 */
+	public void GroundCheck()
+	{
+		bool PreviouslyGrounded = grounded;
+		grounded = ControllerUtils.GroundCheck(capsule);
+		
+		if ( PreviouslyGrounded )
+		{
+			if ( !grounded )
+			{
+				Debug.Log("falling/jumping");
+				animator.SetBool("grounded", false);
+			}
+		}
+		else
+		{
+			if ( grounded )
+			{
+				Debug.Log("grounded");
+				falling = false;
+				jumping = false;
+				animator.SetBool("grounded", true);
+				animator.SetBool("jumping", false);
+				animator.SetBool("falling", false);
+			}
+		}
+		
+		if ( ! grounded )
+		{
+			jumping = rb.velocity.y > 0f;
+			falling = !jumping;
+			
+			animator.SetBool("jumping", jumping);
+			animator.SetBool("falling", falling);
+		}
+		
 	}
 	
 } // class Character
