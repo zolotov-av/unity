@@ -78,6 +78,11 @@ public class Character: MonoBehaviour
 	protected bool navMoving = false;
 	
 	/**
+	 * Флаг захвата управления
+	 */
+	protected bool grabbed = false;
+	
+	/**
 	 * Ссылка на контроллер персонажа
 	 */
 	protected ICharacterControl controller;
@@ -107,6 +112,7 @@ public class Character: MonoBehaviour
 	 */
 	public void Grab(ICharacterControl controller)
 	{
+		grabbed = true;
 		this.controller = controller;
 	}
 	
@@ -117,6 +123,7 @@ public class Character: MonoBehaviour
 	 */
 	public void Release()
 	{
+		grabbed = false;
 		controller = null;
 	}
 	
@@ -152,6 +159,7 @@ public class Character: MonoBehaviour
 		if ( navigation )
 		{
 			controller.OnNavigationStop();
+			navMoving = false;
 			navigation = false;
 			rb.isKinematic = false;
 			navAgent.enabled = false;
@@ -217,6 +225,16 @@ public class Character: MonoBehaviour
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Обновить информацию об управлении персонажем
+	 */
+	public void SetMoveControl(bool moving, Vector3 localVelocity)
+	{
+		animator.SetBool("walk", navMoving || moving);
+		animator.SetFloat("speedh", localVelocity.x);
+		animator.SetFloat("speedv", localVelocity.z);
 	}
 	
 	public void Jump()

@@ -132,10 +132,10 @@ public class TabletController: MonoBehaviour, ICharacterControl
 	public float speed = 2f;
 	
 	/**
-	 * Текущая скорость персонажа (с которой персонаж движется в данный момент)
+	 * Флаг движения персонажа (игрок пытается двигать персонажа)
 	 */
 	// TODO it right
-	public static float velocity = 0f;
+	public static bool moving = false;
 	
 	/**
 	 * Вектор скорости персонажа относительно ориентации камеры
@@ -185,11 +185,6 @@ public class TabletController: MonoBehaviour, ICharacterControl
 	 * используйте метод lockCursor()
 	 */
 	protected bool cursorLocked = false;
-	
-	/**
-	 * Ссылка на аниматор персонажа
-	 */
-	private Animator animator;
 	
 	/**
 	 * Ссылка на коллайдер персонажа
@@ -333,7 +328,6 @@ public class TabletController: MonoBehaviour, ICharacterControl
 			Debug.LogError("player haven't PlayerBehaviour");
 		}
 		
-		animator = obj.GetComponent<Animator>();
 		rotation = player.transform.rotation;
 		
 		capsule = obj.GetComponent<CapsuleCollider>();
@@ -591,8 +585,6 @@ public class TabletController: MonoBehaviour, ICharacterControl
 	 */
 	protected void handleMovement()
 	{
-		if ( player.falling || player.jumping ) return;
-		
 		// прочитаем ввод направления движения
 		var inputV = Input.GetAxis(verticallInput);
 		var inputH = Input.GetAxis(horizontalInput);
@@ -601,7 +593,8 @@ public class TabletController: MonoBehaviour, ICharacterControl
 		var length = Mathf.Sqrt( inputH * inputH + inputV * inputV );
 		if ( length > 0.01f )
 		{
-			velocity = speed * Mathf.Clamp(length, 0f, 1f);
+			moving = true;
+			var velocity = speed * Mathf.Clamp(length, 0f, 1f);
 			var scale = velocity / length;
 			localVelocity.x = inputH * scale;
 			localVelocity.y = 0f;
@@ -617,14 +610,14 @@ public class TabletController: MonoBehaviour, ICharacterControl
 		{
 			if ( run )
 			{
-				velocity = speed;
+				moving = true;
 				localVelocity.x = 0f;
 				localVelocity.y = 0f;
 				localVelocity.z = speed;
 			}
 			else
 			{
-				velocity = 0f;
+				moving = false;
 				localVelocity.x = 0f;
 				localVelocity.y = 0f;
 				localVelocity.z = 0f;
@@ -1072,10 +1065,9 @@ public class TabletController: MonoBehaviour, ICharacterControl
 			return;
 		}
 		
-		if ( velocity > 0f )
+		if ( moving )
 		{
 			Vector3 cameraVelocity = rotation * localVelocity;
-			Quaternion q = Quaternion.LookRotation(cameraVelocity, Vector3.up);
 			
 			capsule.material = movingFriction;
 			
@@ -1085,6 +1077,7 @@ public class TabletController: MonoBehaviour, ICharacterControl
 			}
 			else
 			{
+				Quaternion q = Quaternion.LookRotation(cameraVelocity, Vector3.up);
 				player.RotateTowards(q, maxRotationSpeed);
 			}
 			
@@ -1097,7 +1090,7 @@ public class TabletController: MonoBehaviour, ICharacterControl
 		{
 			capsule.material = idleFriction;
 			
-			// TODO убрать navMoving (см. также Update())
+			// TODO убрать navMoving
 			if ( rotatePlayer && !navMoving )
 			{
 				player.RotateTowards(rotation, maxRotationSpeed);
@@ -1118,11 +1111,7 @@ public class TabletController: MonoBehaviour, ICharacterControl
 		}
 		
 		player.CheckNavigationMoving();
-		
-		// TODO убрать navMoving
-		animator.SetBool("walk", navMoving || velocity > 0.01f);
-		animator.SetFloat("speedh", localVelocity.x);
-		animator.SetFloat("speedv", localVelocity.z);
+		player.SetMoveControl(moving, localVelocity);
 	}
 	
 	void LateUpdate()

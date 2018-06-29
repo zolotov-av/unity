@@ -129,7 +129,7 @@ public class DialogWindow: WindowBehaviour
 		
 		// TODO it right
 		TabletController.run = false;
-		TabletController.velocity = 0f;
+		TabletController.moving = false;
 		
 		messageText.text = dialog.message;
 		
