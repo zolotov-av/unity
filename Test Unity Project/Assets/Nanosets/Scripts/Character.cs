@@ -67,6 +67,22 @@ public class Character: MonoBehaviour
 	public bool falling = false;
 	
 	/**
+	 * Флаг навигации (движения по клику)
+	 */
+	[HideInInspector]
+	public bool navigation = false;
+	
+	/**
+	 *  Флаг фактического движения NavMeshAgent
+	 */
+	protected bool navMoving = false;
+	
+	/**
+	 * Ссылка на контроллер персонажа
+	 */
+	protected ICharacterControl controller;
+	
+	/**
 	 * Инициализация
 	 */
 	protected void Init()
@@ -77,8 +93,31 @@ public class Character: MonoBehaviour
 		navAgent = GetComponent<NavMeshAgent>();
 		//sound = GetComponent<AudioSource>();
 		
+		navigation = false;
+		navMoving = false;
+		
 		dead = false;
 		currentHealth = maxHealth;
+	}
+	
+	/**
+	 * Захват управления
+	 *
+	 * GameState вызывает эту функцию, когда берет управление контроллером
+	 */
+	public void Grab(ICharacterControl controller)
+	{
+		this.controller = controller;
+	}
+	
+	/**
+	 * Освобождение управления
+	 *
+	 * GameState вызывает эту функцию, когда освобождает контроллер
+	 */
+	public void Release()
+	{
+		controller = null;
 	}
 	
 	/**
@@ -101,6 +140,7 @@ public class Character: MonoBehaviour
 			navAgent.enabled = true;
 		}
 		
+		navigation = true;
 		navAgent.SetDestination(p);
 	}
 	
@@ -109,8 +149,10 @@ public class Character: MonoBehaviour
 	 */
 	public void StopNavigation()
 	{
-		if ( navAgent.enabled )
+		if ( navigation )
 		{
+			controller.OnNavigationStop();
+			navigation = false;
 			rb.isKinematic = false;
 			navAgent.enabled = false;
 		}
@@ -122,6 +164,9 @@ public class Character: MonoBehaviour
 	 */
 	public void ResetNavigation()
 	{
+		navigation = false;
+		rb.isKinematic = false;
+		
 		if ( navAgent != null )
 		{
 			navAgent.enabled = false;
@@ -142,6 +187,36 @@ public class Character: MonoBehaviour
 	public Vector3 NavVelocity
 	{
 		get { return navAgent.velocity; }
+	}
+	
+	/**
+	 * Проверка состояния NavMeshAgent (двигается или стоит)
+	 * Если контроллеру нужны события OnNavigationStartMoving() и
+	 * OnNavigationStopMoving(), то он должен регулярно вызывать этот метод
+	 */
+	public void CheckNavigationMoving()
+	{
+		if ( navigation )
+		{
+			if ( navMoving )
+			{
+				if ( navAgent.velocity == Vector3.zero )
+				{
+					navMoving = false;
+					controller.OnNavigationStopMoving();
+					return;
+				}
+			}
+			else
+			{
+				if ( navAgent.velocity != Vector3.zero )
+				{
+					navMoving = true;
+					controller.OnNavigationStartMoving();
+					return;
+				}
+			}
+		}
 	}
 	
 	public void Jump()

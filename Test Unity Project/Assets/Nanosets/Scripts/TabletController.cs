@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -15,7 +14,7 @@ namespace Nanosoft
  * Данный контроллер в одном классе управляет и персонажем и камерой и глобльным
  * состоянием игры.
  */
-public class TabletController: MonoBehaviour
+public class TabletController: MonoBehaviour, ICharacterControl
 {
 	
 	/**
@@ -109,11 +108,6 @@ public class TabletController: MonoBehaviour
 	 * false - персонаж в режиме исследования
 	 */
 	protected bool battleMode = false;
-	
-	/**
-	 * Флаг навигации (движения по клику)
-	 */
-	private bool navigate = false;
 	
 	/**
 	 * Флаг фактического движения NavMeshAgent
@@ -349,9 +343,10 @@ public class TabletController: MonoBehaviour
 			Debug.LogError("player haven't CapsuleCollider");
 		}
 		
+		player.Grab(this);
 		player.ResetNavigation();
-		navigate = false;
 		navMoving = false;
+		syncCamera = false;
 		
 		// присоединяем AudioListener к персонажу
 		if ( audioListener ) audioListener.SetParent(player.transform, false);
@@ -526,7 +521,7 @@ public class TabletController: MonoBehaviour
 		if ( loading )
 		{
 			loading = false;
-			StopNavigation();
+			player.StopNavigation();
 			player.ResetMovement();
 			menuCtl.EndLoading();
 			var entry = GameObject.FindWithTag("EntryPoint");
@@ -616,7 +611,7 @@ public class TabletController: MonoBehaviour
 			run = false;
 			
 			// и режим движения по клику
-			StopNavigation();
+			player.StopNavigation();
 		}
 		else
 		{
@@ -660,12 +655,6 @@ public class TabletController: MonoBehaviour
 		}
 	}
 	
-	public void JumpHeight(float height)
-	{
-		StopNavigation();
-		player.JumpHeight(height);
-	}
-	
 	/**
 	 * Обработка ввода с клавиатуры (действия)
 	 */
@@ -675,8 +664,7 @@ public class TabletController: MonoBehaviour
 		{
 			if ( Input.GetKeyDown("space") )
 			{
-				if ( bigJump ) JumpHeight(12f);
-				else JumpHeight(2.4f);
+				player.JumpHeight( bigJump ? 12f : 2.4f );
 			}
 		}
 		
@@ -791,7 +779,7 @@ public class TabletController: MonoBehaviour
 		if ( Input.GetButtonDown("Run") )
 		{
 			run = !run;
-			if ( run ) StopNavigation();
+			if ( run ) player.StopNavigation();
 		}
 		
 		// на случай если что-то заглючит Escape принудительно нас возвращает
@@ -802,7 +790,7 @@ public class TabletController: MonoBehaviour
 			rotateCamera = false;
 			rotatePlayer = false;
 			run = false;
-			StopNavigation();
+			player.StopNavigation();
 		}
 		
 		// разблокировать курсор если мы в режиме UI
@@ -995,8 +983,6 @@ public class TabletController: MonoBehaviour
 		if ( Physics.Raycast(ray, out hit, 1000, Physics.DefaultRaycastLayers & ~(1<<8), QueryTriggerInteraction.Ignore) )
 		{
 			run = false;
-			navigate = true;
-			if ( navMoving ) syncCamera = true;
 			if ( hit.collider.tag == "Interactable" )
 			{
 				var t = hit.collider.transform;
@@ -1021,45 +1007,32 @@ public class TabletController: MonoBehaviour
 	}
 	
 	/**
-	 * Остановить/отменить NavMeshAgent
+	 * Событие остановки навигации
 	 */
-	public void StopNavigation()
+	public void OnNavigationStop()
 	{
-		if ( navigate )
-		{
-			navigate = false;
-			navMoving = false;
-			syncCamera = false;
-			targetPoint.gameObject.SetActive(false);
-			targetCircle.gameObject.SetActive(false);
-			player.StopNavigation();
-		}
+		syncCamera = false;
+		navMoving = false;
+		targetPoint.gameObject.SetActive(false);
+		targetCircle.gameObject.SetActive(false);
 	}
+	
 	/**
-	 * Дополнительные проверки для исправления глюков NavMeshAgent
+	 * Начало фактического движения NavMeshAgent
 	 */
-	protected void HandleNavigation()
+	public void OnNavigationStartMoving()
 	{
-		if ( navigate )
-		{
-			if ( navMoving )
-			{
-				if ( player.NavVelocity == Vector3.zero )
-				{
-					navMoving = false;
-					syncCamera = false;
-					return;
-				}
-			}
-			else
-			{
-				if ( player.NavVelocity != Vector3.zero )
-				{
-					navMoving = true;
-					syncCamera = true;
-				}
-			}
-		}
+		syncCamera = true;
+		navMoving = true;
+	}
+	
+	/**
+	 * Конец фактического движения NavMeshAgent
+	 */
+	public void OnNavigationStopMoving()
+	{
+		syncCamera = false;
+		navMoving = false;
 	}
 	
 	public static void UpdateLabel(Vector3 position, Transform label)
@@ -1124,6 +1097,7 @@ public class TabletController: MonoBehaviour
 		{
 			capsule.material = idleFriction;
 			
+			// TODO убрать navMoving (см. также Update())
 			if ( rotatePlayer && !navMoving )
 			{
 				player.RotateTowards(rotation, maxRotationSpeed);
@@ -1143,8 +1117,9 @@ public class TabletController: MonoBehaviour
 			HandleMouseInput();
 		}
 		
-		HandleNavigation();
+		player.CheckNavigationMoving();
 		
+		// TODO убрать navMoving
 		animator.SetBool("walk", navMoving || velocity > 0.01f);
 		animator.SetFloat("speedh", localVelocity.x);
 		animator.SetFloat("speedv", localVelocity.z);
