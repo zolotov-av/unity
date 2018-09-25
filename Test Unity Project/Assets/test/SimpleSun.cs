@@ -15,6 +15,7 @@ public class SunLight: MonoBehaviour
 	
 	public float speed = 10f;
 	public Gradient gradient;
+	public SunData data;
 	
 	void Awake()
 	{
@@ -35,7 +36,14 @@ public class SunLight: MonoBehaviour
 		while ( diff < -180f ) diff += 360f;
 		
 		float len = (diff + 180f) / 360f;
-		light.color = gradient.Evaluate(len);
+		if ( data != null )
+		{
+			light.color = data.gradient.Evaluate(len);
+		}
+		else
+		{
+			light.color = gradient.Evaluate(len);
+		}
 	}
 	
 }
